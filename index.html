@@ -13,14 +13,14 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <style>
     :root {
-      --bg-color: #121212;
-      --card-bg: #1e1e1e;
-      --card-border: #2c2c2c;
-      --text-main: #e0e0e0;
-      --text-sub: #a0a0a0;
-      --accent-white: #ffffff;
-      --accent-gray: #333333;
-      --border-color: #333333;
+      --bg-color: #f7f4ee;
+      --card-bg: #ffffff;
+      --card-border: #e6e1d7;
+      --text-main: #33312e;
+      --text-sub: #7a7670;
+      --accent-dark: #232220;
+      --border-color: #e0dacb;
+      --input-bg: #faf8f5;
     }
 
     * {
@@ -51,7 +51,7 @@
       font-size: 2.0rem;
       font-weight: 700;
       margin: 0;
-      color: var(--accent-white);
+      color: var(--accent-dark);
       letter-spacing: -0.02em;
     }
     .title-group p {
@@ -61,7 +61,7 @@
     }
 
     .user-pill {
-      background: #2a2a2a;
+      background: #ede8df;
       padding: 6px 14px;
       border-radius: 20px;
       font-size: 0.85rem;
@@ -88,7 +88,7 @@
       white-space: nowrap;
     }
     .nav-tab.active {
-      color: var(--accent-white);
+      color: var(--accent-dark);
       font-weight: 700;
     }
     .nav-tab.active::after {
@@ -98,7 +98,7 @@
       left: 0;
       width: 100%;
       height: 2px;
-      background: var(--accent-white);
+      background: var(--accent-dark);
     }
 
     /* カードデザイン */
@@ -108,12 +108,13 @@
       padding: 20px;
       margin-bottom: 16px;
       border: 1px solid var(--card-border);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
 
     h2, h3, h4 {
       margin-top: 0;
       font-weight: 700;
-      color: var(--accent-white);
+      color: var(--accent-dark);
     }
 
     label {
@@ -131,29 +132,30 @@
       border-radius: 8px;
       border: 1px solid var(--border-color);
       font-size: 0.95rem;
-      background-color: #262626;
+      background-color: var(--input-bg);
       color: var(--text-main);
       outline: none;
     }
 
     input:focus, select:focus, textarea:focus {
-      border-color: #666666;
-      background-color: #2d2d2d;
+      border-color: #a89f91;
+      background-color: #ffffff;
     }
 
     button {
-      background-color: #333333;
-      color: var(--accent-white);
+      background-color: var(--accent-dark);
+      color: #ffffff;
       font-weight: 500;
-      border: 1px solid #444444;
+      border: none;
       cursor: pointer;
       margin-top: 18px;
       border-radius: 8px;
-      transition: background 0.2s;
+      transition: opacity 0.2s;
     }
-    button:hover { background-color: #444444; }
-    .btn-secondary { background-color: #2a2a2a; color: var(--text-sub); border-color: #3a3a3a; }
-    .btn-danger { background-color: #5a1e1e; color: #ff9999; border-color: #7a2e2e; }
+    button:hover { opacity: 0.85; }
+    .btn-secondary { background-color: #e5ded3; color: var(--text-main); border: 1px solid var(--border-color); }
+    .btn-secondary:hover { background-color: #dad2c5; }
+    .btn-danger { background-color: #c62828; color: #ffffff; }
     .btn-small { width: auto; padding: 6px 12px; font-size: 0.8rem; margin-top: 0; }
 
     /* チップ選択 */
@@ -162,7 +164,7 @@
       padding: 8px 16px;
       border-radius: 20px;
       border: 1px solid var(--border-color);
-      background: #262626;
+      background: var(--input-bg);
       color: var(--text-main);
       cursor: pointer;
       font-size: 0.9rem;
@@ -170,33 +172,33 @@
       transition: all 0.2s;
     }
     .chip.selected {
-      background: #ffffff;
-      color: #000000;
-      border-color: #ffffff;
+      background: var(--accent-dark);
+      color: #ffffff;
+      border-color: var(--accent-dark);
     }
 
     /* モーダル */
     .modal {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000;
+      background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; z-index: 1000;
     }
     .modal-content {
       background: var(--card-bg); padding: 28px; border-radius: 12px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; border: 1px solid var(--card-border);
     }
 
     .hidden { display: none !important; }
-    .chat-box { height: 250px; overflow-y: auto; border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; background: #161616; margin-bottom: 12px; }
-    .chat-msg { margin-bottom: 10px; padding: 10px; border-radius: 8px; background: #262626; border: 1px solid var(--border-color); }
+    .chat-box { height: 250px; overflow-y: auto; border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; background: var(--input-bg); margin-bottom: 12px; }
+    .chat-msg { margin-bottom: 10px; padding: 10px; border-radius: 8px; background: #ffffff; border: 1px solid var(--card-border); }
     .chat-msg .sender { font-weight: 700; font-size: 0.85rem; color: var(--text-sub); }
-    .admin-card { border: 1px solid #444444; background: #181818; }
+    .admin-card { border: 1px solid #d4cbbd; background: #fdfbf7; }
 
     /* 出欠表スタイル */
     .attendance-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     .attendance-table th, .attendance-table td { border-bottom: 1px solid var(--border-color); padding: 10px; text-align: left; }
     .status-btn-group { display: flex; gap: 6px; }
     .status-btn { width: auto; margin: 0; padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; }
-    .status-btn.active-yes { background: #1e4620; color: #81c784; border-color: #2e7d32; }
-    .status-btn.active-no { background: #4a1c1c; color: #e57373; border-color: #c62828; }
+    .status-btn.active-yes { background: #2e7d32; color: #ffffff; border: none; }
+    .status-btn.active-no { background: #c62828; color: #ffffff; border: none; }
   </style>
 </head>
 <body>
@@ -227,7 +229,7 @@
 
   <!-- 1. 枠表（部室予約）タブ -->
   <div id="tab-reservation" class="tab-content">
-    <div class="card" style="background:#181818;">
+    <div class="card" style="background:#efebe4;">
       <h3 style="margin-bottom:8px;">全体イベント・お知らせ</h3>
       <div id="event-list">読み込み中...</div>
     </div>
@@ -597,7 +599,6 @@
     const container = document.getElementById('attendance-shifts-container');
     container.innerHTML = '読み込み中...';
 
-    // 選択された日付の予約（シフト）を取得
     db.collection('reservations').where('date', '==', date).get().then(snapshot => {
       if (snapshot.empty) {
         container.innerHTML = '<p style="color:var(--text-sub);">指定した日付に登録されているシフトはありません。</p>';
@@ -610,7 +611,6 @@
         shifts.push({ id: doc.id, ...d });
       });
 
-      // 各シフトごとの出欠状況を非同期取得して表示
       db.collection('attendance').where('date', '==', date).get().then(attSnap => {
         let attMap = {};
         attSnap.forEach(attDoc => {
@@ -623,7 +623,6 @@
           const docId = `${date}_${shift.id}_${currentUser.id}`;
           const currentStatus = attMap[docId] ? attMap[docId].status : null;
 
-          // 当該シフトの参加者集計
           let yesCount = 0, noCount = 0;
           let memberListHtml = '<ul style="margin:8px 0 0 0; padding-left:20px; font-size:0.85rem; color:var(--text-sub);">';
           Object.keys(attMap).forEach(k => {
@@ -637,8 +636,8 @@
           memberListHtml += '</ul>';
 
           html += `
-            <div style="background:#262626; padding:14px; border-radius:8px; margin-bottom:12px; border:1px solid var(--border-color);">
-              <strong style="color:var(--accent-white); font-size:1rem;">${shiftTitle}</strong>
+            <div style="background:var(--input-bg); padding:14px; border-radius:8px; margin-bottom:12px; border:1px solid var(--border-color);">
+              <strong style="color:var(--accent-dark); font-size:1rem;">${shiftTitle}</strong>
               
               <div style="margin-top:10px; display:flex; align-items:center; justify-content:space-between;">
                 <div>
@@ -719,7 +718,7 @@
             <strong>${b.name}</strong> <small style="color:var(--text-sub);">(リーダー: ${b.leaderName})</small>
           </div>
           <div>
-            ${isMember ? '<span style="font-size:0.85rem; color:#81c784;">加入中</span>' : `<button class="btn-small" onclick="joinBand('${doc.id}', '${b.name}')">参加する</button>`}
+            ${isMember ? '<span style="font-size:0.85rem; color:#2e7d32; font-weight:500;">加入中</span>' : `<button class="btn-small" onclick="joinBand('${doc.id}', '${b.name}')">参加する</button>`}
           </div>
         </div>`;
       });

@@ -32,7 +32,7 @@
       background-color: var(--bg-color);
       color: var(--text-main);
       margin: 0;
-      padding: 20px 16px;
+      padding: 24px 16px;
     }
 
     .container {
@@ -86,6 +86,7 @@
       padding-bottom: 8px;
       position: relative;
       white-space: nowrap;
+      transition: color 0.2s;
     }
     .nav-tab.active {
       color: var(--accent-dark);
@@ -105,10 +106,10 @@
     .card {
       background: var(--card-bg);
       border-radius: 12px;
-      padding: 20px;
+      padding: 24px;
       margin-bottom: 16px;
       border: 1px solid var(--card-border);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
     }
 
     h2, h3, h4 {
@@ -135,6 +136,7 @@
       background-color: var(--input-bg);
       color: var(--text-main);
       outline: none;
+      transition: all 0.2s;
     }
 
     input:focus, select:focus, textarea:focus {

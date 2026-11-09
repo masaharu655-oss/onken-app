@@ -513,35 +513,35 @@
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  // Excel記載の全27バンドリスト
+  // Excel記載の全27バンドリスト（名前のみ定義）
   const DEFAULT_BANDS = [
-    { name: "キリカ", defaultMembers: "江藤慧, 村田柾陽, 米村煌嘉, 高木丈翔, 岩﨑一樹" },
-    { name: "少年少女", defaultMembers: "宗心詩汰, 榊原ゆめ, 宗心日和多, 畠山優衣" },
-    { name: "Aster Stellar", defaultMembers: "江藤慧, 板坂陽斗, 岩﨑一樹, 内山蓮, 渡辺真生" },
-    { name: "ROCK man", defaultMembers: "今村真翔, 松本心, 米村煌嘉, 松枝蒼平" },
-    { name: "オトナ未満", defaultMembers: "木野遥, 西美咲希, 園田隼也, 北田陽菜, 松永展明" },
-    { name: "41mA", defaultMembers: "吉住優希, 盛高雄寛, 大西輝, 上村大河, 髙松龍希" },
-    { name: "ちりめんもんすたー", defaultMembers: "森天使, 山崎佑琉, 岡野碧花, 宮下惺空" },
-    { name: "オセロり", defaultMembers: "森天使, 吉良和佳, 伊藤陽香里" },
-    { name: "長女不安定", defaultMembers: "畠山優衣, 佐藤愛歌, 榊原ゆめ, 澤村結奏" },
-    { name: "あまあまいちごショートケーキ", defaultMembers: "小川翼聖, 村田柾陽, 迫田将大, 山本芹奈" },
-    { name: "ぷかぷかマヨネーズ", defaultMembers: "橋本彩良, 加藤潤一, 吉里彩心, 松枝蒼平" },
-    { name: "ビギナーズラッカー", defaultMembers: "小川翼聖, 渡辺悠斗, 迫田将大, 山口隼人, 迎田心輝" },
-    { name: "きゅーそくストリート", defaultMembers: "加藤潤一, 吉里彩心, 山口隼人, 松本心" },
-    { name: "こびと", defaultMembers: "徳永湖子, 中村栞梨, 田尻紗矢佳, 岡野碧花, 宮崎瞬" },
-    { name: "りんごジャム", defaultMembers: "宮崎瞬, 櫻井冨稀, 田尻紗矢佳, 永広晃太郎" },
-    { name: "Honey Holic", defaultMembers: "中嶋環, 本田月人, 福田綾, 山本芹奈, 森川愛子" },
-    { name: "The men's", defaultMembers: "泉保颯汰, 植木翔太, 中山大夢" },
-    { name: "アブレカブレ", defaultMembers: "荒田創輝, 松本颯, 福田綾" },
-    { name: "鮮脳", defaultMembers: "吉田優志, 下本海斗, 上村大河, 松本颯" },
-    { name: "TAIMS", defaultMembers: "廣田あい, 澤村唯愛, 髙栁桃子, 宮下惺空, 上村大河" },
-    { name: "猫速96m", defaultMembers: "松本夏輝, 辰己竜之進, 荒田創輝, 家吉かみ理, 山田聡太" },
-    { name: "真・人類", defaultMembers: "冨吉紫百合, 相原優紀, 星七海, 家吉かみ理" },
-    { name: "めっとめっと", defaultMembers: "宍戸心胡, 嶋中ゆめ, 辻󠄀山和樹, 村田隆晟, 髙岡海斗, 加藤幸志郎" },
-    { name: "君と黄身", defaultMembers: "江口夏帆, 舟木絢音, 岩﨑乙葉, 宗心日和多" },
-    { name: "カカオ80%", defaultMembers: "櫻井冨稀, 山下七海, 阪田芽生" },
-    { name: "私利私欲", defaultMembers: "木野遥, 下本海斗, 迫田将大, 渡辺真生, 山本芹奈" },
-    { name: "予備バンド", defaultMembers: "宮崎瞬, 村田柾陽, 髙松龍希" }
+    { name: "キリカ" },
+    { name: "少年少女" },
+    { name: "Aster Stellar" },
+    { name: "ROCK man" },
+    { name: "オトナ未満" },
+    { name: "41mA" },
+    { name: "ちりめんもんすたー" },
+    { name: "オセロり" },
+    { name: "長女不安定" },
+    { name: "あまあまいちごショートケーキ" },
+    { name: "ぷかぷかマヨネーズ" },
+    { name: "ビギナーズラッカー" },
+    { name: "きゅーそくストリート" },
+    { name: "こびと" },
+    { name: "りんごジャム" },
+    { name: "Honey Holic" },
+    { name: "The men's" },
+    { name: "アブレカブレ" },
+    { name: "鮮脳" },
+    { name: "TAIMS" },
+    { name: "猫速96m" },
+    { name: "真・人類" },
+    { name: "めっとめっと" },
+    { name: "君と黄身" },
+    { name: "カカオ80%" },
+    { name: "私利私欲" },
+    { name: "予備バンド" }
   ];
 
   let currentUser = null;
@@ -853,7 +853,7 @@
     });
   }
 
-  // バンド一覧の表示（全員の画面に登録・加入者の名前をリアルタイム反映）
+  // バンド一覧の表示（実際にアプリで加入した人の名前のみを表示）
   function loadBands() {
     const container = document.getElementById('band-list');
     const postBandSelect = document.getElementById('post-band-select');
@@ -913,7 +913,7 @@
             memberDisplay += `【サポート】${supportNames.join(', ')}`;
           }
           if (!memberDisplay) {
-            memberDisplay = b.defaultMembers ? `(名簿記載: ${b.defaultMembers})` : 'メンバー登録待ち';
+            memberDisplay = 'メンバー未登録';
           }
 
           html += `<div style="border-bottom:1px solid var(--border-color); padding:12px 0; display:flex; justify-content:space-between; align-items:center;">

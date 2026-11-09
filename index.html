@@ -513,35 +513,35 @@
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  // Excelファイル記載のデフォルト27バンドの定義
+  // Excel記載の全27バンドリスト
   const DEFAULT_BANDS = [
-    { name: "キリカ", membersText: "江藤慧, 村田柾陽, 米村煌嘉, 高木丈翔, 岩﨑一樹" },
-    { name: "少年少女", membersText: "宗心詩汰, 榊原ゆめ, 宗心日和多, 畠山優衣" },
-    { name: "Aster Stellar", membersText: "江藤慧, 板坂陽斗, 岩﨑一樹, 内山蓮, 渡辺真生" },
-    { name: "ROCK man", membersText: "今村真翔, 松本心, 米村煌嘉, 松枝蒼平" },
-    { name: "オトナ未満", membersText: "木野遥, 西美咲希, 園田隼也, 北田陽菜, 松永展明" },
-    { name: "41mA", membersText: "吉住優希, 盛高雄寛, 大西輝, 上村大河, 髙松龍希" },
-    { name: "ちりめんもんすたー", membersText: "森天使, 山崎佑琉, 岡野碧花, 宮下惺空" },
-    { name: "オセロり", membersText: "森天使, 吉良和佳, 伊藤陽香里" },
-    { name: "長女不安定", membersText: "畠山優衣, 佐藤愛歌, 榊原ゆめ, 澤村結奏" },
-    { name: "あまあまいちごショートケーキ", membersText: "小川翼聖, 村田柾陽, 迫田将大, 山本芹奈" },
-    { name: "ぷかぷかマヨネーズ", membersText: "橋本彩良, 加藤潤一, 吉里彩心, 松枝蒼平" },
-    { name: "ビギナーズラッカー", membersText: "小川翼聖, 渡辺悠斗, 迫田将大, 山口隼人, 迎田心輝" },
-    { name: "きゅーそくストリート", membersText: "加藤潤一, 吉里彩心, 山口隼人, 松本心" },
-    { name: "こびと", membersText: "徳永湖子, 中村栞梨, 田尻紗矢佳, 岡野碧花, 宮崎瞬" },
-    { name: "りんごジャム", membersText: "宮崎瞬, 櫻井冨稀, 田尻紗矢佳, 永広晃太郎" },
-    { name: "Honey Holic", membersText: "中嶋環, 本田月人, 福田綾, 山本芹奈, 森川愛子" },
-    { name: "The men's", membersText: "泉保颯汰, 植木翔太, 中山大夢" },
-    { name: "アブレカブレ", membersText: "荒田創輝, 松本颯, 福田綾" },
-    { name: "鮮脳", membersText: "吉田優志, 下本海斗, 上村大河, 松本颯" },
-    { name: "TAIMS", membersText: "廣田あい, 澤村唯愛, 髙栁桃子, 宮下惺空, 上村大河" },
-    { name: "猫速96m", membersText: "松本夏輝, 辰己竜之進, 荒田創輝, 家吉かみ理, 山田聡太" },
-    { name: "真・人類", membersText: "冨吉紫百合, 相原優紀, 星七海, 家吉かみ理" },
-    { name: "めっとめっと", membersText: "宍戸心胡, 嶋中ゆめ, 辻󠄀山和樹, 村田隆晟, 髙岡海斗, 加藤幸志郎" },
-    { name: "君と黄身", membersText: "江口夏帆, 舟木絢音, 岩﨑乙葉, 宗心日和多" },
-    { name: "カカオ80%", membersText: "櫻井冨稀, 山下七海, 阪田芽生" },
-    { name: "私利私欲", membersText: "木野遥, 下本海斗, 迫田将大, 渡辺真生, 山本芹奈" },
-    { name: "予備バンド", membersText: "宮崎瞬, 村田柾陽, 髙松龍希" }
+    { name: "キリカ", defaultMembers: "江藤慧, 村田柾陽, 米村煌嘉, 高木丈翔, 岩﨑一樹" },
+    { name: "少年少女", defaultMembers: "宗心詩汰, 榊原ゆめ, 宗心日和多, 畠山優衣" },
+    { name: "Aster Stellar", defaultMembers: "江藤慧, 板坂陽斗, 岩﨑一樹, 内山蓮, 渡辺真生" },
+    { name: "ROCK man", defaultMembers: "今村真翔, 松本心, 米村煌嘉, 松枝蒼平" },
+    { name: "オトナ未満", defaultMembers: "木野遥, 西美咲希, 園田隼也, 北田陽菜, 松永展明" },
+    { name: "41mA", defaultMembers: "吉住優希, 盛高雄寛, 大西輝, 上村大河, 髙松龍希" },
+    { name: "ちりめんもんすたー", defaultMembers: "森天使, 山崎佑琉, 岡野碧花, 宮下惺空" },
+    { name: "オセロり", defaultMembers: "森天使, 吉良和佳, 伊藤陽香里" },
+    { name: "長女不安定", defaultMembers: "畠山優衣, 佐藤愛歌, 榊原ゆめ, 澤村結奏" },
+    { name: "あまあまいちごショートケーキ", defaultMembers: "小川翼聖, 村田柾陽, 迫田将大, 山本芹奈" },
+    { name: "ぷかぷかマヨネーズ", defaultMembers: "橋本彩良, 加藤潤一, 吉里彩心, 松枝蒼平" },
+    { name: "ビギナーズラッカー", defaultMembers: "小川翼聖, 渡辺悠斗, 迫田将大, 山口隼人, 迎田心輝" },
+    { name: "きゅーそくストリート", defaultMembers: "加藤潤一, 吉里彩心, 山口隼人, 松本心" },
+    { name: "こびと", defaultMembers: "徳永湖子, 中村栞梨, 田尻紗矢佳, 岡野碧花, 宮崎瞬" },
+    { name: "りんごジャム", defaultMembers: "宮崎瞬, 櫻井冨稀, 田尻紗矢佳, 永広晃太郎" },
+    { name: "Honey Holic", defaultMembers: "中嶋環, 本田月人, 福田綾, 山本芹奈, 森川愛子" },
+    { name: "The men's", defaultMembers: "泉保颯汰, 植木翔太, 中山大夢" },
+    { name: "アブレカブレ", defaultMembers: "荒田創輝, 松本颯, 福田綾" },
+    { name: "鮮脳", defaultMembers: "吉田優志, 下本海斗, 上村大河, 松本颯" },
+    { name: "TAIMS", defaultMembers: "廣田あい, 澤村唯愛, 髙栁桃子, 宮下惺空, 上村大河" },
+    { name: "猫速96m", defaultMembers: "松本夏輝, 辰己竜之進, 荒田創輝, 家吉かみ理, 山田聡太" },
+    { name: "真・人類", defaultMembers: "冨吉紫百合, 相原優紀, 星七海, 家吉かみ理" },
+    { name: "めっとめっと", defaultMembers: "宍戸心胡, 嶋中ゆめ, 辻󠄀山和樹, 村田隆晟, 髙岡海斗, 加藤幸志郎" },
+    { name: "君と黄身", defaultMembers: "江口夏帆, 舟木絢音, 岩﨑乙葉, 宗心日和多" },
+    { name: "カカオ80%", defaultMembers: "櫻井冨稀, 山下七海, 阪田芽生" },
+    { name: "私利私欲", defaultMembers: "木野遥, 下本海斗, 迫田将大, 渡辺真生, 山本芹奈" },
+    { name: "予備バンド", defaultMembers: "宮崎瞬, 村田柾陽, 髙松龍希" }
   ];
 
   let currentUser = null;
@@ -853,69 +853,92 @@
     });
   }
 
-  // アプリ内でのバンド一覧全件表示（Excel掲載27バンドをベースに自動生成/結合）
+  // バンド一覧の表示（全員の画面に登録・加入者の名前をリアルタイム反映）
   function loadBands() {
     const container = document.getElementById('band-list');
     const postBandSelect = document.getElementById('post-band-select');
     const chatBandSelect = document.getElementById('chat-band-select');
 
-    db.collection('bands').get().then(snapshot => {
-      let dbBands = [];
-      snapshot.forEach(doc => dbBands.push({ id: doc.id, ...doc.data() }));
-
-      let allBands = [...DEFAULT_BANDS];
-
-      // DBにある新規バンドを追加統合
-      dbBands.forEach(dbB => {
-        const found = allBands.find(b => b.name === dbB.name);
-        if (found) {
-          found.id = dbB.id;
-          found.members = dbB.members || [];
-          found.supportMembers = dbB.supportMembers || [];
-        } else {
-          allBands.push({
-            id: dbB.id,
-            name: dbB.name,
-            membersText: dbB.leaderName ? `リーダー: ${dbB.leaderName}` : '',
-            members: dbB.members || [],
-            supportMembers: dbB.supportMembers || []
-          });
-        }
+    db.collection('users').get().then(usersSnap => {
+      let userMap = {};
+      usersSnap.forEach(uDoc => {
+        const uData = uDoc.data();
+        userMap[uData.id] = uData.name || uData.lineName || '無名';
       });
 
-      let html = '';
-      let myBandsOptions = '';
-      let allBandsOptions = '';
+      db.collection('bands').get().then(snapshot => {
+        let dbBands = [];
+        snapshot.forEach(doc => dbBands.push({ id: doc.id, ...doc.data() }));
 
-      allBands.forEach(b => {
-        const isMember = currentUser && ((b.members || []).includes(currentUser.id) || (currentUser.bands || []).includes(b.name));
-        const isSupport = currentUser && ((b.supportMembers || []).includes(currentUser.id) || (currentUser.supportBands || []).includes(b.name));
+        let allBands = [...DEFAULT_BANDS];
 
-        allBandsOptions += `<option value="${b.name}">${b.name}</option>`;
-        if (isMember || isSupport) {
-          myBandsOptions += `<option value="${b.name}">${b.name} ${isSupport ? '(サポート)' : ''}</option>`;
-        }
+        dbBands.forEach(dbB => {
+          const found = allBands.find(b => b.name === dbB.name);
+          if (found) {
+            found.id = dbB.id;
+            found.members = dbB.members || [];
+            found.supportMembers = dbB.supportMembers || [];
+          } else {
+            allBands.push({
+              id: dbB.id,
+              name: dbB.name,
+              members: dbB.members || [],
+              supportMembers: dbB.supportMembers || []
+            });
+          }
+        });
 
-        html += `<div style="border-bottom:1px solid var(--border-color); padding:12px 0; display:flex; justify-content:space-between; align-items:center;">
-          <div>
-            <strong>${b.name}</strong>
-            <div style="font-size:0.8rem; color:var(--text-sub); margin-top:2px;">メンバー: ${b.membersText || '部員登録待ち'}</div>
-          </div>
-          <div style="display:flex; gap:6px;">
-            ${isMember 
-              ? '<span style="font-size:0.85rem; color:#2e7d32; font-weight:500;">正式加入中</span>' 
-              : `<button class="btn-small" onclick="joinBandByName('${b.id || ''}', '${b.name}', 'regular')">正式加入</button>`}
-            
-            ${isSupport 
-              ? '<span style="font-size:0.85rem; color:#1976d2; font-weight:500;">サポート中</span>' 
-              : (isMember ? '' : `<button class="btn-small btn-secondary" onclick="joinBandByName('${b.id || ''}', '${b.name}', 'support')">サポート加入</button>`)}
-          </div>
-        </div>`;
+        let html = '';
+        let myBandsOptions = '';
+        let allBandsOptions = '';
+
+        allBands.forEach(b => {
+          const isMember = currentUser && ((b.members || []).includes(currentUser.id) || (currentUser.bands || []).includes(b.name));
+          const isSupport = currentUser && ((b.supportMembers || []).includes(currentUser.id) || (currentUser.supportBands || []).includes(b.name));
+
+          allBandsOptions += `<option value="${b.name}">${b.name}</option>`;
+          if (isMember || isSupport) {
+            myBandsOptions += `<option value="${b.name}">${b.name} ${isSupport ? '(サポート)' : ''}</option>`;
+          }
+
+          let joinedNames = (b.members || []).map(id => userMap[id]).filter(n => n);
+          let supportNames = (b.supportMembers || []).map(id => userMap[id]).filter(n => n);
+
+          let memberDisplay = '';
+          if (joinedNames.length > 0) {
+            memberDisplay += `【正式】${joinedNames.join(', ')}`;
+          }
+          if (supportNames.length > 0) {
+            if (memberDisplay) memberDisplay += ' / ';
+            memberDisplay += `【サポート】${supportNames.join(', ')}`;
+          }
+          if (!memberDisplay) {
+            memberDisplay = b.defaultMembers ? `(名簿記載: ${b.defaultMembers})` : 'メンバー登録待ち';
+          }
+
+          html += `<div style="border-bottom:1px solid var(--border-color); padding:12px 0; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <strong>${b.name}</strong>
+              <div style="font-size:0.8rem; color:var(--text-sub); margin-top:3px;">
+                加入者: ${memberDisplay}
+              </div>
+            </div>
+            <div style="display:flex; gap:6px;">
+              ${isMember 
+                ? '<span style="font-size:0.85rem; color:#2e7d32; font-weight:500;">正式加入中</span>' 
+                : `<button class="btn-small" onclick="joinBandByName('${b.id || ''}', '${b.name}', 'regular')">正式加入</button>`}
+              
+              ${isSupport 
+                ? '<span style="font-size:0.85rem; color:#1976d2; font-weight:500;">サポート中</span>' 
+                : (isMember ? '' : `<button class="btn-small btn-secondary" onclick="joinBandByName('${b.id || ''}', '${b.name}', 'support')">サポート加入</button>`)}
+            </div>
+          </div>`;
+        });
+
+        container.innerHTML = html || 'バンドの読み込みに失敗しました。';
+        if (postBandSelect) postBandSelect.innerHTML = allBandsOptions || '<option value="">バンドがありません</option>';
+        if (chatBandSelect) chatBandSelect.innerHTML = myBandsOptions || '<option value="">参加中のバンドがありません</option>';
       });
-
-      container.innerHTML = html || 'バンドの読み込みに失敗しました。';
-      if (postBandSelect) postBandSelect.innerHTML = allBandsOptions || '<option value="">バンドがありません</option>';
-      if (chatBandSelect) chatBandSelect.innerHTML = myBandsOptions || '<option value="">参加中のバンドがありません</option>';
     });
   }
 

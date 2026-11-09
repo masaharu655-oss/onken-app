@@ -168,7 +168,7 @@ async function initApp() {
 
   // ユーザー情報取得
   const doc = await db.collection("members").doc(uid).get();
-  if (!doc.exists()) {
+  if (!doc.exists) {
     document.getElementById("gate").style.display = "flex";
   } else {
     currentUser = doc.data();

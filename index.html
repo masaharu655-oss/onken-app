@@ -7,19 +7,20 @@
   <!-- Google Fonts: Noto Sans JP -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <style>
     :root {
-      --bg-color: #f2efe9;
-      --card-bg: #ffffff;
-      --text-main: #2b2b2b;
-      --text-sub: #757575;
-      --accent-black: #1a1a1a;
-      --border-color: #e5e2dc;
-      --badge-bg: #e8e5df;
+      --bg-color: #121212;
+      --card-bg: #1e1e1e;
+      --card-border: #2c2c2c;
+      --text-main: #e0e0e0;
+      --text-sub: #a0a0a0;
+      --accent-white: #ffffff;
+      --accent-gray: #333333;
+      --border-color: #333333;
     }
 
     * {
@@ -47,11 +48,11 @@
       margin-bottom: 24px;
     }
     .title-group h1 {
-      font-size: 2.2rem;
-      font-weight: 900;
+      font-size: 2.0rem;
+      font-weight: 700;
       margin: 0;
+      color: var(--accent-white);
       letter-spacing: -0.02em;
-      color: var(--accent-black);
     }
     .title-group p {
       margin: 4px 0 0 0;
@@ -60,27 +61,25 @@
     }
 
     .user-pill {
-      background: #e6e2da;
+      background: #2a2a2a;
       padding: 6px 14px;
       border-radius: 20px;
       font-size: 0.85rem;
       color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      border: 1px solid var(--border-color);
     }
 
     /* メニュータブ */
     .nav-tabs {
       display: flex;
-      gap: 28px;
+      gap: 24px;
       border-bottom: 1px solid var(--border-color);
       margin-bottom: 24px;
       padding-bottom: 8px;
       overflow-x: auto;
     }
     .nav-tab {
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 500;
       color: var(--text-sub);
       cursor: pointer;
@@ -89,7 +88,7 @@
       white-space: nowrap;
     }
     .nav-tab.active {
-      color: var(--accent-black);
+      color: var(--accent-white);
       font-weight: 700;
     }
     .nav-tab.active::after {
@@ -98,31 +97,29 @@
       bottom: -9px;
       left: 0;
       width: 100%;
-      height: 3px;
-      background: var(--accent-black);
-      border-radius: 2px;
+      height: 2px;
+      background: var(--accent-white);
     }
 
     /* カードデザイン */
     .card {
       background: var(--card-bg);
-      border-radius: 16px;
-      padding: 20px 24px;
+      border-radius: 12px;
+      padding: 20px;
       margin-bottom: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-      border: 1px solid rgba(0,0,0,0.03);
+      border: 1px solid var(--card-border);
     }
 
     h2, h3, h4 {
       margin-top: 0;
       font-weight: 700;
-      color: var(--accent-black);
+      color: var(--accent-white);
     }
 
     label {
       display: block;
       margin-top: 14px;
-      font-weight: 700;
+      font-weight: 500;
       font-size: 0.85rem;
       color: var(--text-sub);
     }
@@ -131,32 +128,32 @@
       width: 100%;
       padding: 12px 14px;
       margin-top: 6px;
-      border-radius: 10px;
+      border-radius: 8px;
       border: 1px solid var(--border-color);
       font-size: 0.95rem;
-      background-color: #faf9f6;
+      background-color: #262626;
       color: var(--text-main);
       outline: none;
     }
 
     input:focus, select:focus, textarea:focus {
-      border-color: var(--accent-black);
-      background-color: #ffffff;
+      border-color: #666666;
+      background-color: #2d2d2d;
     }
 
     button {
-      background-color: var(--accent-black);
-      color: white;
-      font-weight: 700;
-      border: none;
+      background-color: #333333;
+      color: var(--accent-white);
+      font-weight: 500;
+      border: 1px solid #444444;
       cursor: pointer;
       margin-top: 18px;
-      border-radius: 10px;
-      transition: opacity 0.2s;
+      border-radius: 8px;
+      transition: background 0.2s;
     }
-    button:hover { opacity: 0.85; }
-    .btn-secondary { background-color: #757575; }
-    .btn-danger { background-color: #d32f2f; }
+    button:hover { background-color: #444444; }
+    .btn-secondary { background-color: #2a2a2a; color: var(--text-sub); border-color: #3a3a3a; }
+    .btn-danger { background-color: #5a1e1e; color: #ff9999; border-color: #7a2e2e; }
     .btn-small { width: auto; padding: 6px 12px; font-size: 0.8rem; margin-top: 0; }
 
     /* チップ選択 */
@@ -165,7 +162,7 @@
       padding: 8px 16px;
       border-radius: 20px;
       border: 1px solid var(--border-color);
-      background: #faf9f6;
+      background: #262626;
       color: var(--text-main);
       cursor: pointer;
       font-size: 0.9rem;
@@ -173,34 +170,33 @@
       transition: all 0.2s;
     }
     .chip.selected {
-      background: var(--accent-black);
-      color: white;
-      border-color: var(--accent-black);
+      background: #ffffff;
+      color: #000000;
+      border-color: #ffffff;
     }
 
     /* モーダル */
     .modal {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000;
-      backdrop-filter: blur(2px);
+      background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000;
     }
     .modal-content {
-      background: var(--card-bg); padding: 28px; border-radius: 20px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;
+      background: var(--card-bg); padding: 28px; border-radius: 12px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; border: 1px solid var(--card-border);
     }
 
     .hidden { display: none !important; }
-    .chat-box { height: 250px; overflow-y: auto; border: 1px solid var(--border-color); padding: 12px; border-radius: 10px; background: #faf9f6; margin-bottom: 12px; }
-    .chat-msg { margin-bottom: 10px; padding: 10px; border-radius: 10px; background: white; border: 1px solid var(--border-color); }
+    .chat-box { height: 250px; overflow-y: auto; border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; background: #161616; margin-bottom: 12px; }
+    .chat-msg { margin-bottom: 10px; padding: 10px; border-radius: 8px; background: #262626; border: 1px solid var(--border-color); }
     .chat-msg .sender { font-weight: 700; font-size: 0.85rem; color: var(--text-sub); }
-    .admin-card { border: 2px solid var(--accent-black); background: #fdfbf7; }
+    .admin-card { border: 1px solid #444444; background: #181818; }
 
     /* 出欠表スタイル */
     .attendance-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     .attendance-table th, .attendance-table td { border-bottom: 1px solid var(--border-color); padding: 10px; text-align: left; }
     .status-btn-group { display: flex; gap: 6px; }
     .status-btn { width: auto; margin: 0; padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; }
-    .status-btn.active-yes { background: #2e7d32; color: white; }
-    .status-btn.active-no { background: #c62828; color: white; }
+    .status-btn.active-yes { background: #1e4620; color: #81c784; border-color: #2e7d32; }
+    .status-btn.active-no { background: #4a1c1c; color: #e57373; border-color: #c62828; }
   </style>
 </head>
 <body>
@@ -226,24 +222,24 @@
     <div class="nav-tab" onclick="switchTab('tab-roster')">名簿</div>
     <div class="nav-tab" onclick="switchTab('tab-chat')">チャット</div>
     <div class="nav-tab" onclick="switchTab('tab-shift-req')">シフト希望</div>
-    <div class="nav-tab hidden" id="admin-tab-btn" onclick="switchTab('tab-admin')">👑 幹部</div>
+    <div class="nav-tab hidden" id="admin-tab-btn" onclick="switchTab('tab-admin')">三役</div>
   </div>
 
   <!-- 1. 枠表（部室予約）タブ -->
   <div id="tab-reservation" class="tab-content">
-    <div class="card" style="background:#efebe9;">
-      <h3 style="margin-bottom:8px;">📅 全体イベント・お知らせ</h3>
+    <div class="card" style="background:#181818;">
+      <h3 style="margin-bottom:8px;">全体イベント・お知らせ</h3>
       <div id="event-list">読み込み中...</div>
     </div>
 
     <div class="card">
-      <h3>📅 本日のシフト・予約状況</h3>
+      <h3>本日のシフト・予約状況</h3>
       <input type="date" id="view-date" onchange="loadReservations()">
       <div id="reservation-list" style="margin-top:10px;"></div>
     </div>
 
     <div class="card">
-      <h3>⏰ 新規部室予約（最大1週間先まで）</h3>
+      <h3>新規部室予約（最大1週間先まで）</h3>
       <form id="form-reservation" onsubmit="handleReservation(event)">
         <label>予約日</label>
         <input type="date" id="res-date" required>
@@ -271,27 +267,20 @@
   <!-- 2. 出欠タブ -->
   <div id="tab-attendance" class="tab-content hidden">
     <div class="card">
-      <h3>📋 練習の出欠確認</h3>
+      <h3>バンドシフト別 出欠確認</h3>
       <label>対象日を選択</label>
       <input type="date" id="attendance-date" onchange="loadAttendance()">
       
-      <div style="margin-top: 16px; padding: 12px; background: #faf9f6; border-radius: 10px; border: 1px solid var(--border-color);">
-        <strong>あなたの出欠回答:</strong>
-        <div class="status-btn-group" style="margin-top: 8px;">
-          <button class="status-btn btn-secondary" id="btn-att-yes" onclick="submitAttendance('参加')">⭕ 参加</button>
-          <button class="status-btn btn-secondary" id="btn-att-no" onclick="submitAttendance('欠席')">❌ 欠席</button>
-        </div>
+      <div id="attendance-shifts-container" style="margin-top: 16px;">
+        読み込み中...
       </div>
-
-      <h4 style="margin-top: 20px;">出欠状況一覧</h4>
-      <div id="attendance-list">読み込み中...</div>
     </div>
   </div>
 
   <!-- 3. バンド作成・参加タブ -->
   <div id="tab-bands" class="tab-content hidden">
     <div class="card">
-      <h3>➕ 新しいバンドを作成する</h3>
+      <h3>新しいバンドを作成する</h3>
       <form onsubmit="handleCreateBand(event)">
         <label>バンド名</label>
         <input type="text" id="new-band-name" placeholder="バンド名を入力" required>
@@ -300,7 +289,7 @@
     </div>
 
     <div class="card">
-      <h3>🎸 バンド一覧と参加</h3>
+      <h3>バンド一覧と参加</h3>
       <div id="band-list">読み込み中...</div>
     </div>
   </div>
@@ -308,7 +297,7 @@
   <!-- 4. 募集掲示板 -->
   <div id="tab-bbs" class="tab-content hidden">
     <div class="card">
-      <h3>🔍 バンドメンバー募集掲示板</h3>
+      <h3>バンドメンバー募集掲示板</h3>
       <label>募集パートで絞り込み</label>
       <select id="bbs-filter" onchange="loadBBS()">
         <option value="ALL">すべてのパート</option>
@@ -320,7 +309,7 @@
       </select>
     </div>
     <div class="card">
-      <h3>✍️ 募集を投稿する</h3>
+      <h3>募集を投稿する</h3>
       <form id="form-bbs" onsubmit="handlePostBBS(event)">
         <label>対象バンド（選択）</label>
         <select id="post-band-select" required></select>
@@ -343,7 +332,7 @@
   <!-- 5. 部員名簿 -->
   <div id="tab-roster" class="tab-content hidden">
     <div class="card">
-      <h3>👥 部員名簿</h3>
+      <h3>部員名簿</h3>
       <div style="display:flex; gap:10px;">
         <button class="btn-secondary" onclick="loadRoster('grade')">学年順で並び替え</button>
         <button class="btn-secondary" onclick="loadRoster('dept')">学科順で並び替え</button>
@@ -355,7 +344,7 @@
   <!-- 6. バンドチャット -->
   <div id="tab-chat" class="tab-content hidden">
     <div class="card">
-      <h3>💬 バンド内専用チャット</h3>
+      <h3>バンド内専用チャット</h3>
       <label>対象バンド選択（所属バンドのみ）</label>
       <select id="chat-band-select" onchange="loadChat()"></select>
       <div class="chat-box" id="chat-messages" style="margin-top:10px;"></div>
@@ -369,7 +358,7 @@
   <!-- 7. シフト希望 -->
   <div id="tab-shift-req" class="tab-content hidden">
     <div class="card">
-      <h3>📝 バンドシフト希望申請（バンドリーダー専用）</h3>
+      <h3>バンドシフト希望申請（バンドリーダー専用）</h3>
       <form id="form-shift-req" onsubmit="handleShiftRequest(event)">
         <label>バンド名</label>
         <input type="text" id="req-band-name" required placeholder="バンド名を入力">
@@ -384,10 +373,10 @@
     </div>
   </div>
 
-  <!-- 8. 幹部専用メニュー -->
+  <!-- 8. 三役専用メニュー -->
   <div id="tab-admin" class="tab-content hidden">
     <div class="card admin-card">
-      <h3>👑 幹部専用管理メニュー</h3>
+      <h3>三役専用管理メニュー</h3>
       
       <h4>1. 全体イベント・お知らせ編集</h4>
       <form id="form-event" onsubmit="handleAddEvent(event)">
@@ -396,7 +385,7 @@
         <button type="submit">お知らせを追加投稿する</button>
       </form>
 
-      <hr style="margin:20px 0;">
+      <hr style="margin:20px 0; border-color: var(--border-color);">
 
       <h4>2. 部室の使用不可期間設定</h4>
       <label>開始日</label>
@@ -407,7 +396,7 @@
       <input type="text" id="block-reason" placeholder="理由を入力">
       <button onclick="setBlockPeriod()">指定期間を使用不可にする</button>
 
-      <hr style="margin:20px 0;">
+      <hr style="margin:20px 0; border-color: var(--border-color);">
 
       <h4>3. 部員管理（部費納入・アカウント削除）</h4>
       <div id="fee-management-list"></div>
@@ -418,7 +407,7 @@
 <!-- プロフィール登録/編集 モーダル -->
 <div id="profile-modal" class="modal hidden">
   <div class="modal-content">
-    <h2>📝 プロフィール登録</h2>
+    <h2>プロフィール登録</h2>
     <form id="form-profile" onsubmit="handleSaveProfile(event)">
       <label>名前（例: 村田柾陽）</label>
       <input type="text" id="prof-name" placeholder="村田柾陽" required>
@@ -602,48 +591,82 @@
     if (tabId === 'tab-bands') loadBands();
   }
 
-  // 出欠機能（参加 / 欠席）
+  // バンドシフト別 出欠機能
   function loadAttendance() {
     const date = document.getElementById('attendance-date').value;
-    const container = document.getElementById('attendance-list');
+    const container = document.getElementById('attendance-shifts-container');
     container.innerHTML = '読み込み中...';
 
-    document.getElementById('btn-att-yes').className = 'status-btn btn-secondary';
-    document.getElementById('btn-att-no').className = 'status-btn btn-secondary';
+    // 選択された日付の予約（シフト）を取得
+    db.collection('reservations').where('date', '==', date).get().then(snapshot => {
+      if (snapshot.empty) {
+        container.innerHTML = '<p style="color:var(--text-sub);">指定した日付に登録されているシフトはありません。</p>';
+        return;
+      }
 
-    db.collection('attendance').where('date', '==', date).get().then(snapshot => {
-      let html = '<table class="attendance-table"><tr><th>名前</th><th>学年</th><th>出欠</th></tr>';
-      let countYes = 0, countNo = 0;
-
+      let shifts = [];
       snapshot.forEach(doc => {
         const d = doc.data();
-        if (d.userId === currentUser.id) {
-          if (d.status === '参加') document.getElementById('btn-att-yes').className = 'status-btn active-yes';
-          if (d.status === '欠席') document.getElementById('btn-att-no').className = 'status-btn active-no';
-        }
-        if (d.status === '参加') countYes++;
-        if (d.status === '欠席') countNo++;
-
-        html += `<tr>
-          <td>${d.userName}</td>
-          <td>${d.userGrade}</td>
-          <td>${d.status === '参加' ? '⭕ 参加' : '❌ 欠席'}</td>
-        </tr>`;
+        shifts.push({ id: doc.id, ...d });
       });
-      html += '</table>';
-      container.innerHTML = `<p style="margin:0 0 10px 0;"><strong>参加: ${countYes}名 / 欠席: ${countNo}名</strong></p>` + html;
+
+      // 各シフトごとの出欠状況を非同期取得して表示
+      db.collection('attendance').where('date', '==', date).get().then(attSnap => {
+        let attMap = {};
+        attSnap.forEach(attDoc => {
+          attMap[attDoc.id] = attDoc.data();
+        });
+
+        let html = '';
+        shifts.forEach(shift => {
+          const shiftTitle = `${shift.date} ${shift.purpose} のシフト (${shift.time})`;
+          const docId = `${date}_${shift.id}_${currentUser.id}`;
+          const currentStatus = attMap[docId] ? attMap[docId].status : null;
+
+          // 当該シフトの参加者集計
+          let yesCount = 0, noCount = 0;
+          let memberListHtml = '<ul style="margin:8px 0 0 0; padding-left:20px; font-size:0.85rem; color:var(--text-sub);">';
+          Object.keys(attMap).forEach(k => {
+            if (k.startsWith(`${date}_${shift.id}_`)) {
+              const att = attMap[k];
+              if (att.status === '参加') yesCount++;
+              if (att.status === '欠席') noCount++;
+              memberListHtml += `<li>${att.userName}: ${att.status === '参加' ? '⭕ 参加' : '❌ 欠席'}</li>`;
+            }
+          });
+          memberListHtml += '</ul>';
+
+          html += `
+            <div style="background:#262626; padding:14px; border-radius:8px; margin-bottom:12px; border:1px solid var(--border-color);">
+              <strong style="color:var(--accent-white); font-size:1rem;">${shiftTitle}</strong>
+              
+              <div style="margin-top:10px; display:flex; align-items:center; justify-content:space-between;">
+                <div>
+                  <small style="color:var(--text-sub);">回答: </small>
+                  <button class="status-btn ${currentStatus === '参加' ? 'active-yes' : 'btn-secondary'}" onclick="submitShiftAttendance('${shift.id}', '${date}', '参加')">⭕ 参加</button>
+                  <button class="status-btn ${currentStatus === '欠席' ? 'active-no' : 'btn-secondary'}" onclick="submitShiftAttendance('${shift.id}', '${date}', '欠席')">❌ 欠席</button>
+                </div>
+                <div style="font-size:0.85rem; color:var(--text-sub);">
+                  参加: ${yesCount}名 / 欠席: ${noCount}名
+                </div>
+              </div>
+              ${memberListHtml}
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
+      });
     });
   }
 
-  function submitAttendance(status) {
-    const date = document.getElementById('attendance-date').value;
-    const docId = `${date}_${currentUser.id}`;
-
+  function submitShiftAttendance(shiftId, date, status) {
+    const docId = `${date}_${shiftId}_${currentUser.id}`;
     db.collection('attendance').doc(docId).set({
+      shiftId: shiftId,
       date: date,
       userId: currentUser.id,
       userName: currentUser.name,
-      userGrade: currentUser.grade,
       status: status,
       updatedAt: new Date()
     }).then(() => {
@@ -696,7 +719,7 @@
             <strong>${b.name}</strong> <small style="color:var(--text-sub);">(リーダー: ${b.leaderName})</small>
           </div>
           <div>
-            ${isMember ? '<span style="font-size:0.85rem; color:#2e7d32;">加入中</span>' : `<button class="btn-small" onclick="joinBand('${doc.id}', '${b.name}')">参加する</button>`}
+            ${isMember ? '<span style="font-size:0.85rem; color:#81c784;">加入中</span>' : `<button class="btn-small" onclick="joinBand('${doc.id}', '${b.name}')">参加する</button>`}
           </div>
         </div>`;
       });
@@ -724,7 +747,7 @@
     const container = document.getElementById('event-list');
     db.collection('events').orderBy('createdAt', 'desc').get().then(snapshot => {
       if (snapshot.empty) {
-        container.innerHTML = '<p style="margin:0;">現在新しいお知らせはありません。</p>';
+        container.innerHTML = '<p style="margin:0; color:var(--text-sub);">現在新しいお知らせはありません。</p>';
         return;
       }
       const isExec = ['部長', '副部長', '会計'].includes(currentUser.role);
@@ -760,11 +783,11 @@
   function loadReservations() {
     const date = document.getElementById('view-date').value;
     const container = document.getElementById('reservation-list');
-    container.innerHTML = '<p>読み込み中...</p>';
+    container.innerHTML = '<p style="color:var(--text-sub);">読み込み中...</p>';
 
     db.collection('reservations').where('date', '==', date).get().then(snapshot => {
       if (snapshot.empty) {
-        container.innerHTML = '<p>この日の予約はありません。</p>';
+        container.innerHTML = '<p style="color:var(--text-sub);">この日の予約はありません。</p>';
         return;
       }
       let html = '<ul>';
@@ -775,7 +798,7 @@
       html += '</ul>';
       container.innerHTML = html;
     }).catch(() => {
-      container.innerHTML = '<p>予約データの読み込みに失敗しました。</p>';
+      container.innerHTML = '<p style="color:var(--text-sub);">予約データの読み込みに失敗しました。</p>';
     });
   }
 
@@ -799,7 +822,7 @@
   function loadBBS() {
     const filter = document.getElementById('bbs-filter').value;
     const container = document.getElementById('bbs-posts');
-    container.innerHTML = '<p>読み込み中...</p>';
+    container.innerHTML = '<p style="color:var(--text-sub);">読み込み中...</p>';
 
     db.collection('bbs').orderBy('createdAt', 'desc').get().then(snapshot => {
       let html = '';
@@ -810,12 +833,12 @@
             <div class="card">
               <h4>【${data.bandName || 'バンド'}】募集パート: ${data.part}</h4>
               <p>${data.text}</p>
-              <small>投稿者: ${data.userName} (${data.userLine})</small>
+              <small style="color:var(--text-sub);">投稿者: ${data.userName} (${data.userLine})</small>
             </div>
           `;
         }
       });
-      container.innerHTML = html || '<p>該当する募集はありません。</p>';
+      container.innerHTML = html || '<p style="color:var(--text-sub);">該当する募集はありません。</p>';
     });
   }
 
@@ -845,7 +868,7 @@
       let html = '<table style="width:100%; text-align:left; border-collapse:collapse;"><tr><th>学年/学科</th><th>名前 (LINE)</th><th>パート</th><th>役職</th></tr>';
       users.forEach(u => {
         html += `<tr style="border-bottom:1px solid var(--border-color);">
-          <td>${u.grade} ${u.dept}</td>
+          <td style="padding:10px 0;">${u.grade} ${u.dept}</td>
           <td>${u.name} (${u.lineName})</td>
           <td>${u.parts ? u.parts.join(',') : ''}</td>
           <td>${u.role}</td>
@@ -860,7 +883,7 @@
     const band = document.getElementById('chat-band-select').value;
     const container = document.getElementById('chat-messages');
     if (!band) {
-      container.innerHTML = '<p>参加中のバンドを選択してください。</p>';
+      container.innerHTML = '<p style="color:var(--text-sub);">参加中のバンドを選択してください。</p>';
       return;
     }
     db.collection('chats').doc(band).collection('messages').orderBy('createdAt', 'asc').onSnapshot(snapshot => {

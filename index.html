@@ -4,129 +4,235 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>音楽研究部</title>
+  <!-- Google Fonts: Noto Sans JP -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <style>
     :root {
-      --primary: #8d6e63;
-      --primary-dark: #5d4037;
-      --accent: #d7ccc8;
-      --bg: #f5f2eb;
-      --card-bg: #fffdfa;
-      --text: #4e342e;
+      --bg-color: #f2efe9;
+      --card-bg: #ffffff;
+      --text-main: #2b2b2b;
+      --text-sub: #757575;
+      --accent-black: #1a1a1a;
+      --border-color: #e5e2dc;
+      --badge-bg: #e8e5df;
     }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
+      background-color: var(--bg-color);
+      color: var(--text-main);
       margin: 0;
-      padding: 12px;
+      padding: 20px 16px;
     }
+
     .container {
-      max-width: 800px;
+      max-width: 900px;
       margin: 0 auto;
     }
+
+    /* ヘッダーデザイン */
+    .header-area {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+    .title-group h1 {
+      font-size: 2.2rem;
+      font-weight: 900;
+      margin: 0;
+      letter-spacing: -0.02em;
+      color: var(--accent-black);
+    }
+    .title-group p {
+      margin: 4px 0 0 0;
+      font-size: 0.85rem;
+      color: var(--text-sub);
+    }
+
+    .user-pill {
+      background: #e6e2da;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* メニュータブ */
+    .nav-tabs {
+      display: flex;
+      gap: 28px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 24px;
+      padding-bottom: 8px;
+      overflow-x: auto;
+    }
+    .nav-tab {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-sub);
+      cursor: pointer;
+      padding-bottom: 8px;
+      position: relative;
+      white-space: nowrap;
+    }
+    .nav-tab.active {
+      color: var(--accent-black);
+      font-weight: 700;
+    }
+    .nav-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -9px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--accent-black);
+      border-radius: 2px;
+    }
+
+    /* カードデザイン */
     .card {
       background: var(--card-bg);
-      border-radius: 12px;
-      padding: 18px;
+      border-radius: 16px;
+      padding: 20px 24px;
       margin-bottom: 16px;
-      box-shadow: 0 3px 6px rgba(93, 64, 55, 0.08);
-      border: 1px solid #e0d7d1;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      border: 1px solid rgba(0,0,0,0.03);
     }
-    h1, h2, h3, h4 { margin-top: 0; color: var(--primary-dark); }
-    label { display: block; margin-top: 12px; font-weight: bold; font-size: 0.9em; color: var(--primary-dark); }
+
+    h2, h3, h4 {
+      margin-top: 0;
+      font-weight: 700;
+      color: var(--accent-black);
+    }
+
+    label {
+      display: block;
+      margin-top: 14px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--text-sub);
+    }
+
     input, select, textarea, button {
       width: 100%;
-      padding: 10px;
+      padding: 12px 14px;
       margin-top: 6px;
-      border-radius: 8px;
-      border: 1px solid #d7ccc8;
-      box-sizing: border-box;
-      font-size: 1rem;
-      background-color: #fff;
-      color: var(--text);
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      font-size: 0.95rem;
+      background-color: #faf9f6;
+      color: var(--text-main);
+      outline: none;
     }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent-black);
+      background-color: #ffffff;
+    }
+
     button {
-      background-color: var(--primary);
+      background-color: var(--accent-black);
       color: white;
-      font-weight: bold;
+      font-weight: 700;
       border: none;
       cursor: pointer;
-      margin-top: 16px;
-      transition: background 0.2s;
+      margin-top: 18px;
+      border-radius: 10px;
+      transition: opacity 0.2s;
     }
-    button:hover { background-color: var(--primary-dark); }
-    .btn-secondary { background-color: #a1887f; }
-    .btn-danger { background-color: #c0392b; }
-    .btn-danger:hover { background-color: #962d22; }
-    .btn-small { width: auto; padding: 4px 10px; font-size: 0.85em; margin-top: 0; }
-    
+    button:hover { opacity: 0.85; }
+    .btn-secondary { background-color: #757575; }
+    .btn-danger { background-color: #d32f2f; }
+    .btn-small { width: auto; padding: 6px 12px; font-size: 0.8rem; margin-top: 0; }
+
+    /* チップ選択 */
     .chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
     .chip {
       padding: 8px 16px;
       border-radius: 20px;
-      border: 2px solid #bcaaa4;
-      background: white;
-      color: var(--primary-dark);
+      border: 1px solid var(--border-color);
+      background: #faf9f6;
+      color: var(--text-main);
       cursor: pointer;
-      font-weight: bold;
-      user-select: none;
+      font-size: 0.9rem;
+      font-weight: 500;
       transition: all 0.2s;
     }
     .chip.selected {
-      background: var(--primary);
+      background: var(--accent-black);
       color: white;
-      border-color: var(--primary-dark);
+      border-color: var(--accent-black);
     }
 
+    /* モーダル */
     .modal {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(62, 39, 35, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1000;
+      background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000;
+      backdrop-filter: blur(2px);
     }
     .modal-content {
-      background: var(--card-bg); padding: 24px; border-radius: 14px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;
-      border: 2px solid var(--primary);
+      background: var(--card-bg); padding: 28px; border-radius: 20px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;
     }
-    .nav-tabs { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 16px; border-bottom: 2px solid #d7ccc8; }
-    .nav-tab { padding: 10px 16px; cursor: pointer; white-space: nowrap; font-weight: bold; border-radius: 8px 8px 0 0; background: #efebe9; color: var(--primary-dark); }
-    .nav-tab.active { background: var(--primary); color: white; }
+
     .hidden { display: none !important; }
-    .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 0.8em; background: #efebe9; margin-right: 5px; }
-    .badge-exec { background: #5d4037; color: white; }
-    .badge-leader { background: #8d6e63; color: white; }
-    .chat-box { height: 250px; overflow-y: auto; border: 1px solid #d7ccc8; padding: 10px; border-radius: 8px; background: #faf8f5; margin-bottom: 10px; }
-    .chat-msg { margin-bottom: 10px; padding: 8px; border-radius: 8px; background: white; border: 1px solid #e0d7d1; }
-    .chat-msg .sender { font-weight: bold; font-size: 0.85em; color: var(--primary-dark); }
-    .admin-card { border: 2px solid var(--primary-dark); background: #fbe9e7; }
+    .chat-box { height: 250px; overflow-y: auto; border: 1px solid var(--border-color); padding: 12px; border-radius: 10px; background: #faf9f6; margin-bottom: 12px; }
+    .chat-msg { margin-bottom: 10px; padding: 10px; border-radius: 10px; background: white; border: 1px solid var(--border-color); }
+    .chat-msg .sender { font-weight: 700; font-size: 0.85rem; color: var(--text-sub); }
+    .admin-card { border: 2px solid var(--accent-black); background: #fdfbf7; }
+
+    /* 出欠表スタイル */
+    .attendance-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .attendance-table th, .attendance-table td { border-bottom: 1px solid var(--border-color); padding: 10px; text-align: left; }
+    .status-btn-group { display: flex; gap: 6px; }
+    .status-btn { width: auto; margin: 0; padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; }
+    .status-btn.active-yes { background: #2e7d32; color: white; }
+    .status-btn.active-no { background: #c62828; color: white; }
   </style>
 </head>
 <body>
 <div class="container">
   <!-- ヘッダー -->
-  <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-    <div>
-      <h1 style="margin:0;">🎵 音楽研究部</h1>
-      <div id="user-info" style="margin-top: 5px; font-size:0.9em; color:#6d4c41;">読み込み中...</div>
+  <div class="header-area">
+    <div class="title-group">
+      <h1>音楽研究部</h1>
+      <p>音楽研究部 練習枠予約</p>
     </div>
-    <button class="btn-secondary btn-small" onclick="openProfileModal()">プロフィール編集</button>
+    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+      <div class="user-pill" id="user-info">● 読み込み中...</div>
+      <button class="btn-secondary btn-small" onclick="openProfileModal()">プロフィール編集</button>
+    </div>
   </div>
 
   <!-- ナビゲーションタブ -->
   <div class="nav-tabs" id="tab-menu">
-    <div class="nav-tab active" onclick="switchTab('tab-reservation')">部室予約</div>
-    <div class="nav-tab" onclick="switchTab('tab-bbs')">メンバー募集掲示板</div>
-    <div class="nav-tab" onclick="switchTab('tab-roster')">部員名簿</div>
-    <div class="nav-tab" onclick="switchTab('tab-chat')">バンドチャット</div>
+    <div class="nav-tab active" onclick="switchTab('tab-reservation')">枠表</div>
+    <div class="nav-tab" onclick="switchTab('tab-attendance')">出欠</div>
+    <div class="nav-tab" onclick="switchTab('tab-bands')">バンド</div>
+    <div class="nav-tab" onclick="switchTab('tab-bbs')">募集</div>
+    <div class="nav-tab" onclick="switchTab('tab-roster')">名簿</div>
+    <div class="nav-tab" onclick="switchTab('tab-chat')">チャット</div>
     <div class="nav-tab" onclick="switchTab('tab-shift-req')">シフト希望</div>
-    <div class="nav-tab hidden" id="admin-tab-btn" onclick="switchTab('tab-admin')">👑 幹部専用</div>
+    <div class="nav-tab hidden" id="admin-tab-btn" onclick="switchTab('tab-admin')">👑 幹部</div>
   </div>
 
-  <!-- 1. 部室予約タブ -->
+  <!-- 1. 枠表（部室予約）タブ -->
   <div id="tab-reservation" class="tab-content">
-    <div class="card" style="background:#efebe9; border-color:#bcaaa4;">
-      <h3 style="color:#4e342e;">📅 全体イベント・お知らせ</h3>
+    <div class="card" style="background:#efebe9;">
+      <h3 style="margin-bottom:8px;">📅 全体イベント・お知らせ</h3>
       <div id="event-list">読み込み中...</div>
     </div>
 
@@ -147,21 +253,59 @@
           <option value="10:00-11:00">10:00 - 11:00</option>
           <option value="11:00-12:00">11:00 - 12:00</option>
           <option value="12:00-13:00">12:00 - 13:00</option>
-          <option value="13:00-14:00">14:00 - 15:00</option>
-          <option value="14:00-15:00">15:00 - 16:00</option>
+          <option value="13:00-14:00">13:00 - 14:00</option>
+          <option value="14:00-15:00">14:00 - 15:00</option>
+          <option value="15:00-16:00">15:00 - 16:00</option>
           <option value="16:00-17:00">16:00 - 17:00</option>
           <option value="17:00-18:00">17:00 - 18:00</option>
           <option value="18:00-19:00">18:00 - 19:00</option>
           <option value="19:00-20:00">19:00 - 20:00</option>
         </select>
         <label>使用目的 / バンド名</label>
-        <input type="text" id="res-purpose" placeholder="例: 個人練習 / りんごジャム" required>
+        <input type="text" id="res-purpose" placeholder="バンド名または目的を入力" required>
         <button type="submit">予約を完了する</button>
       </form>
     </div>
   </div>
 
-  <!-- 2. メンバー募集掲示板 -->
+  <!-- 2. 出欠タブ -->
+  <div id="tab-attendance" class="tab-content hidden">
+    <div class="card">
+      <h3>📋 練習の出欠確認</h3>
+      <label>対象日を選択</label>
+      <input type="date" id="attendance-date" onchange="loadAttendance()">
+      
+      <div style="margin-top: 16px; padding: 12px; background: #faf9f6; border-radius: 10px; border: 1px solid var(--border-color);">
+        <strong>あなたの出欠回答:</strong>
+        <div class="status-btn-group" style="margin-top: 8px;">
+          <button class="status-btn btn-secondary" id="btn-att-yes" onclick="submitAttendance('参加')">⭕ 参加</button>
+          <button class="status-btn btn-secondary" id="btn-att-no" onclick="submitAttendance('欠席')">❌ 欠席</button>
+        </div>
+      </div>
+
+      <h4 style="margin-top: 20px;">出欠状況一覧</h4>
+      <div id="attendance-list">読み込み中...</div>
+    </div>
+  </div>
+
+  <!-- 3. バンド作成・参加タブ -->
+  <div id="tab-bands" class="tab-content hidden">
+    <div class="card">
+      <h3>➕ 新しいバンドを作成する</h3>
+      <form onsubmit="handleCreateBand(event)">
+        <label>バンド名</label>
+        <input type="text" id="new-band-name" placeholder="バンド名を入力" required>
+        <button type="submit">バンドを結成する</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3>🎸 バンド一覧と参加</h3>
+      <div id="band-list">読み込み中...</div>
+    </div>
+  </div>
+
+  <!-- 4. 募集掲示板 -->
   <div id="tab-bbs" class="tab-content hidden">
     <div class="card">
       <h3>🔍 バンドメンバー募集掲示板</h3>
@@ -178,6 +322,8 @@
     <div class="card">
       <h3>✍️ 募集を投稿する</h3>
       <form id="form-bbs" onsubmit="handlePostBBS(event)">
+        <label>対象バンド（選択）</label>
+        <select id="post-band-select" required></select>
         <label>募集パート</label>
         <select id="post-part" required>
           <option value="Gt">Gt (ギター)</option>
@@ -187,14 +333,14 @@
           <option value="Key">Key (キーボード)</option>
         </select>
         <label>募集内容・詳細</label>
-        <textarea id="post-text" rows="3" placeholder="コピーバンドのDrを探しています！" required></textarea>
+        <textarea id="post-text" rows="3" placeholder="募集詳細を入力" required></textarea>
         <button type="submit">投稿する</button>
       </form>
     </div>
     <div id="bbs-posts"></div>
   </div>
 
-  <!-- 3. 部員名簿 -->
+  <!-- 5. 部員名簿 -->
   <div id="tab-roster" class="tab-content hidden">
     <div class="card">
       <h3>👥 部員名簿</h3>
@@ -206,13 +352,13 @@
     </div>
   </div>
 
-  <!-- 4. バンドチャット -->
+  <!-- 6. バンドチャット -->
   <div id="tab-chat" class="tab-content hidden">
     <div class="card">
       <h3>💬 バンド内専用チャット</h3>
-      <label>対象バンド選択</label>
+      <label>対象バンド選択（所属バンドのみ）</label>
       <select id="chat-band-select" onchange="loadChat()"></select>
-      <div class="chat-box" id="chat-messages"></div>
+      <div class="chat-box" id="chat-messages" style="margin-top:10px;"></div>
       <form id="form-chat" onsubmit="handleSendChat(event)">
         <input type="text" id="chat-input" placeholder="メッセージを入力..." required>
         <button type="submit">送信</button>
@@ -220,25 +366,25 @@
     </div>
   </div>
 
-  <!-- 5. シフト希望 -->
+  <!-- 7. シフト希望 -->
   <div id="tab-shift-req" class="tab-content hidden">
     <div class="card">
       <h3>📝 バンドシフト希望申請（バンドリーダー専用）</h3>
       <form id="form-shift-req" onsubmit="handleShiftRequest(event)">
         <label>バンド名</label>
-        <input type="text" id="req-band-name" required placeholder="例: キリカ">
+        <input type="text" id="req-band-name" required placeholder="バンド名を入力">
         <label>第1希望（日時・時間帯）</label>
-        <input type="text" id="req-choice1" required placeholder="月曜 16:00-17:00">
+        <input type="text" id="req-choice1" required placeholder="日時・時間帯を入力">
         <label>第2希望</label>
-        <input type="text" id="req-choice2" placeholder="水曜 17:00-18:00">
+        <input type="text" id="req-choice2" placeholder="日時・時間帯を入力">
         <label>第3希望</label>
-        <input type="text" id="req-choice3" placeholder="金曜 15:00-16:00">
+        <input type="text" id="req-choice3" placeholder="日時・時間帯を入力">
         <button type="submit">希望を提出する</button>
       </form>
     </div>
   </div>
 
-  <!-- 6. 幹部専用メニュー -->
+  <!-- 8. 幹部専用メニュー -->
   <div id="tab-admin" class="tab-content hidden">
     <div class="card admin-card">
       <h3>👑 幹部専用管理メニュー</h3>
@@ -246,7 +392,7 @@
       <h4>1. 全体イベント・お知らせ編集</h4>
       <form id="form-event" onsubmit="handleAddEvent(event)">
         <label>イベント内容・お知らせ</label>
-        <input type="text" id="event-title" placeholder="例: 11月20日(金) 部活全体ライブ！" required>
+        <input type="text" id="event-title" placeholder="お知らせ内容を入力" required>
         <button type="submit">お知らせを追加投稿する</button>
       </form>
 
@@ -258,7 +404,7 @@
       <label>終了日</label>
       <input type="date" id="block-end-date">
       <label>理由</label>
-      <input type="text" id="block-reason" placeholder="例: 定期テスト期間のため">
+      <input type="text" id="block-reason" placeholder="理由を入力">
       <button onclick="setBlockPeriod()">指定期間を使用不可にする</button>
 
       <hr style="margin:20px 0;">
@@ -317,14 +463,6 @@
         <option value="会計">会計</option>
       </select>
 
-      <label>所属バンド（カンマ区切り）</label>
-      <input type="text" id="prof-bands" placeholder="例: キリカ, りんごジャム">
-
-      <label>バンドリーダー設定</label>
-      <div class="chip-group">
-        <div class="chip" id="chip-leader" onclick="toggleChip(this)">所属バンドのリーダーを務めている</div>
-      </div>
-
       <label>一言コメント</label>
       <textarea id="prof-comment" rows="2" placeholder="よろしくお願いします！"></textarea>
 
@@ -334,7 +472,6 @@
 </div>
 
 <script>
-  // Firebase Initialization
   const firebaseConfig = {
     apiKey: "AIzaSyDummyKeyForDeploymentStandard",
     authDomain: "onken-app.firebaseapp.com",
@@ -353,6 +490,7 @@
     document.getElementById('view-date').value = today;
     document.getElementById('res-date').value = today;
     document.getElementById('res-date').min = today;
+    document.getElementById('attendance-date').value = today;
 
     const maxDate = new Date();
     maxDate.setDate(maxDate.getDate() + 7);
@@ -382,7 +520,6 @@
       document.getElementById('prof-grade').value = currentUser.grade || '1年';
       document.getElementById('prof-dept').value = currentUser.dept || 'AC';
       document.getElementById('prof-role').value = currentUser.role || '部員';
-      document.getElementById('prof-bands').value = (currentUser.bands || []).join(', ');
       document.getElementById('prof-comment').value = currentUser.comment || '';
 
       document.querySelectorAll('#part-chips .chip').forEach(chip => {
@@ -392,12 +529,6 @@
           chip.classList.remove('selected');
         }
       });
-
-      if (currentUser.isLeader) {
-        document.getElementById('chip-leader').classList.add('selected');
-      } else {
-        document.getElementById('chip-leader').classList.remove('selected');
-      }
       toggleDeptSelect();
     }
     document.getElementById('profile-modal').classList.remove('hidden');
@@ -418,7 +549,6 @@
     const parts = Array.from(document.querySelectorAll('#part-chips .chip.selected')).map(c => c.dataset.part);
     const grade = document.getElementById('prof-grade').value;
     const dept = grade.includes('専攻科') ? '-' : document.getElementById('prof-dept').value;
-    const isLeader = document.getElementById('chip-leader').classList.contains('selected');
 
     currentUser = {
       id: currentUser ? currentUser.id : 'user_' + Date.now(),
@@ -428,10 +558,9 @@
       dept: dept,
       parts: parts,
       role: document.getElementById('prof-role').value,
-      bands: document.getElementById('prof-bands').value.split(',').map(b => b.trim()).filter(b => b),
-      isLeader: isLeader,
       comment: document.getElementById('prof-comment').value,
-      feePaid: currentUser ? currentUser.feePaid : false
+      feePaid: currentUser ? currentUser.feePaid : false,
+      bands: currentUser ? (currentUser.bands || []) : []
     };
 
     localStorage.setItem('onken_user', JSON.stringify(currentUser));
@@ -442,10 +571,9 @@
 
   function renderUI() {
     const isExec = ['部長', '副部長', '会計'].includes(currentUser.role);
+    const partsText = (currentUser.parts || []).join('/');
     document.getElementById('user-info').innerHTML = `
-      <strong>${currentUser.name}</strong> (${currentUser.lineName}) - ${currentUser.grade} ${currentUser.dept} / ${(currentUser.parts || []).join(',')}
-      ${isExec ? '<span class="badge badge-exec">幹部</span>' : ''}
-      ${currentUser.isLeader ? '<span class="badge badge-leader">バンドリーダー</span>' : ''}
+      ● ${currentUser.name} ・ ${partsText || '未設定'}
     `;
 
     if (isExec) {
@@ -454,14 +582,13 @@
       document.getElementById('admin-tab-btn').classList.add('hidden');
     }
 
-    const bandSelect = document.getElementById('chat-band-select');
-    bandSelect.innerHTML = (currentUser.bands || []).map(b => `<option value="${b}">${b}</option>`).join('');
-
     loadEvents();
     loadReservations();
+    loadBands();
     loadBBS();
     loadRoster('grade');
     loadFeeManagement();
+    loadAttendance();
   }
 
   function switchTab(tabId) {
@@ -471,6 +598,125 @@
     event.target.classList.add('active');
 
     if (tabId === 'tab-chat') loadChat();
+    if (tabId === 'tab-attendance') loadAttendance();
+    if (tabId === 'tab-bands') loadBands();
+  }
+
+  // 出欠機能（参加 / 欠席）
+  function loadAttendance() {
+    const date = document.getElementById('attendance-date').value;
+    const container = document.getElementById('attendance-list');
+    container.innerHTML = '読み込み中...';
+
+    document.getElementById('btn-att-yes').className = 'status-btn btn-secondary';
+    document.getElementById('btn-att-no').className = 'status-btn btn-secondary';
+
+    db.collection('attendance').where('date', '==', date).get().then(snapshot => {
+      let html = '<table class="attendance-table"><tr><th>名前</th><th>学年</th><th>出欠</th></tr>';
+      let countYes = 0, countNo = 0;
+
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        if (d.userId === currentUser.id) {
+          if (d.status === '参加') document.getElementById('btn-att-yes').className = 'status-btn active-yes';
+          if (d.status === '欠席') document.getElementById('btn-att-no').className = 'status-btn active-no';
+        }
+        if (d.status === '参加') countYes++;
+        if (d.status === '欠席') countNo++;
+
+        html += `<tr>
+          <td>${d.userName}</td>
+          <td>${d.userGrade}</td>
+          <td>${d.status === '参加' ? '⭕ 参加' : '❌ 欠席'}</td>
+        </tr>`;
+      });
+      html += '</table>';
+      container.innerHTML = `<p style="margin:0 0 10px 0;"><strong>参加: ${countYes}名 / 欠席: ${countNo}名</strong></p>` + html;
+    });
+  }
+
+  function submitAttendance(status) {
+    const date = document.getElementById('attendance-date').value;
+    const docId = `${date}_${currentUser.id}`;
+
+    db.collection('attendance').doc(docId).set({
+      date: date,
+      userId: currentUser.id,
+      userName: currentUser.name,
+      userGrade: currentUser.grade,
+      status: status,
+      updatedAt: new Date()
+    }).then(() => {
+      loadAttendance();
+    });
+  }
+
+  // バンド管理機能
+  function handleCreateBand(e) {
+    e.preventDefault();
+    const name = document.getElementById('new-band-name').value.trim();
+    if (!name) return;
+
+    db.collection('bands').add({
+      name: name,
+      leaderId: currentUser.id,
+      leaderName: currentUser.name,
+      members: [currentUser.id],
+      createdAt: new Date()
+    }).then(() => {
+      if (!currentUser.bands) currentUser.bands = [];
+      currentUser.bands.push(name);
+      localStorage.setItem('onken_user', JSON.stringify(currentUser));
+      document.getElementById('new-band-name').value = '';
+      loadBands();
+      alert(`バンド「${name}」を作成しました！`);
+    });
+  }
+
+  function loadBands() {
+    const container = document.getElementById('band-list');
+    const postBandSelect = document.getElementById('post-band-select');
+    const chatBandSelect = document.getElementById('chat-band-select');
+
+    db.collection('bands').get().then(snapshot => {
+      let html = '';
+      let myBandsOptions = '';
+      let allBandsOptions = '';
+
+      snapshot.forEach(doc => {
+        const b = doc.data();
+        const isMember = (b.members || []).includes(currentUser.id);
+        allBandsOptions += `<option value="${b.name}">${b.name}</option>`;
+        if (isMember) {
+          myBandsOptions += `<option value="${b.name}">${b.name}</option>`;
+        }
+
+        html += `<div style="border-bottom:1px solid var(--border-color); padding:10px 0; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <strong>${b.name}</strong> <small style="color:var(--text-sub);">(リーダー: ${b.leaderName})</small>
+          </div>
+          <div>
+            ${isMember ? '<span style="font-size:0.85rem; color:#2e7d32;">加入中</span>' : `<button class="btn-small" onclick="joinBand('${doc.id}', '${b.name}')">参加する</button>`}
+          </div>
+        </div>`;
+      });
+
+      container.innerHTML = html || 'まだバンドがありません。';
+      if (postBandSelect) postBandSelect.innerHTML = allBandsOptions || '<option value="">バンドがありません</option>';
+      if (chatBandSelect) chatBandSelect.innerHTML = myBandsOptions || '<option value="">参加中のバンドがありません</option>';
+    });
+  }
+
+  function joinBand(bandId, bandName) {
+    db.collection('bands').doc(bandId).update({
+      members: firebase.firestore.FieldValue.arrayUnion(currentUser.id)
+    }).then(() => {
+      if (!currentUser.bands) currentUser.bands = [];
+      if (!currentUser.bands.includes(bandName)) currentUser.bands.push(bandName);
+      localStorage.setItem('onken_user', JSON.stringify(currentUser));
+      loadBands();
+      alert(`「${bandName}」に参加しました！`);
+    });
   }
 
   // お知らせ読み込み・追加
@@ -562,7 +808,7 @@
         if (filter === 'ALL' || data.part === filter) {
           html += `
             <div class="card">
-              <h4>【募集パート: ${data.part}】</h4>
+              <h4>【${data.bandName || 'バンド'}】募集パート: ${data.part}</h4>
               <p>${data.text}</p>
               <small>投稿者: ${data.userName} (${data.userLine})</small>
             </div>
@@ -576,6 +822,7 @@
   function handlePostBBS(e) {
     e.preventDefault();
     db.collection('bbs').add({
+      bandName: document.getElementById('post-band-select').value,
       part: document.getElementById('post-part').value,
       text: document.getElementById('post-text').value,
       userName: currentUser.name,
@@ -597,9 +844,9 @@
 
       let html = '<table style="width:100%; text-align:left; border-collapse:collapse;"><tr><th>学年/学科</th><th>名前 (LINE)</th><th>パート</th><th>役職</th></tr>';
       users.forEach(u => {
-        html += `<tr style="border-bottom:1px solid #d7ccc8;">
+        html += `<tr style="border-bottom:1px solid var(--border-color);">
           <td>${u.grade} ${u.dept}</td>
-          <td>${u.name} (${u.lineName}) ${u.isLeader ? '👑' : ''}</td>
+          <td>${u.name} (${u.lineName})</td>
           <td>${u.parts ? u.parts.join(',') : ''}</td>
           <td>${u.role}</td>
         </tr>`;
@@ -613,7 +860,7 @@
     const band = document.getElementById('chat-band-select').value;
     const container = document.getElementById('chat-messages');
     if (!band) {
-      container.innerHTML = '<p>所属バンドが設定されていません。</p>';
+      container.innerHTML = '<p>参加中のバンドを選択してください。</p>';
       return;
     }
     db.collection('chats').doc(band).collection('messages').orderBy('createdAt', 'asc').onSnapshot(snapshot => {
@@ -652,18 +899,17 @@
     }).then(() => alert('シフト希望を提出しました！'));
   }
 
-  // 部員管理・削除
   function loadFeeManagement() {
     const container = document.getElementById('fee-management-list');
     db.collection('users').get().then(snapshot => {
       let html = '<ul style="list-style:none; padding:0;">';
       snapshot.forEach(doc => {
         const u = doc.data();
-        html += `<li style="margin-bottom:8px; display:flex; justify-style:space-between; align-items:center; border-bottom:1px solid #d7ccc8; padding-bottom:5px;">
+        html += `<li style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:5px;">
           <span>${u.name} (${u.grade} ${u.dept}): ${u.feePaid ? '✅ 納入済み' : '❌ 未納'}</span>
           <div>
-            <button class="btn-small btn-secondary" style="margin:0 4px;" onclick="toggleFee('${doc.id}', ${!u.feePaid})">納入状態切替</button>
-            <button class="btn-small btn-danger" style="margin:0;" onclick="deleteMember('${doc.id}', '${u.name}')">部員削除</button>
+            <button class="btn-small btn-secondary" style="margin:0 4px;" onclick="toggleFee('${doc.id}', ${!u.feePaid})">切替</button>
+            <button class="btn-small btn-danger" style="margin:0;" onclick="deleteMember('${doc.id}', '${u.name}')">削除</button>
           </div>
         </li>`;
       });
@@ -679,7 +925,7 @@
   function deleteMember(id, name) {
     if (confirm(`本当に ${name} さんの部員アカウントを削除しますか？`)) {
       db.collection('users').doc(id).delete().then(() => {
-        alert(`${name} さんを名簿から削除しました。`);
+        alert(`${name} さんを削除しました。`);
         loadFeeManagement();
         loadRoster('grade');
       });

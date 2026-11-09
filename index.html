@@ -45,7 +45,7 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
     .title-group h1 {
       font-size: 2.0rem;
@@ -67,6 +67,17 @@
       font-size: 0.85rem;
       color: var(--text-main);
       border: 1px solid var(--border-color);
+    }
+
+    /* リマインドバー */
+    .remind-bar {
+      background: #fff8e7;
+      border: 1px solid #ffe0b2;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      color: #8c6d1f;
     }
 
     /* メニュータブ */
@@ -217,6 +228,9 @@
     </div>
   </div>
 
+  <!-- リマインドバー -->
+  <div id="remind-area" class="remind-bar hidden"></div>
+
   <!-- ナビゲーションタブ -->
   <div class="nav-tabs" id="tab-menu">
     <div class="nav-tab active" onclick="switchTab('tab-reservation')">枠表</div>
@@ -231,6 +245,11 @@
 
   <!-- 1. 枠表（部室予約）タブ -->
   <div id="tab-reservation" class="tab-content">
+    <div class="card" style="background:#f2ede4; border-color:#dcd4c5;">
+      <h3 style="margin-bottom:8px;">📌 MYスケジュール（自分の予定）</h3>
+      <div id="my-schedule-list">読み込み中...</div>
+    </div>
+
     <div class="card" style="background:#efebe4;">
       <h3 style="margin-bottom:8px;">全体イベント・お知らせ</h3>
       <div id="event-list">読み込み中...</div>
@@ -382,7 +401,22 @@
     <div class="card admin-card">
       <h3>三役専用管理メニュー</h3>
       
-      <h4>1. 全体イベント・お知らせ編集</h4>
+      <h4>1. バンドメンバー自動照合・割当</h4>
+      <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:6px;">
+        ファイルやメモのテキスト（バンド名とメンバー名一覧）をそのまま貼り付けて割当を実行してください。
+      </p>
+      <textarea id="band-import-text" rows="4" placeholder="【入力例】&#10;バンドA: 村田柾陽, 山田太郎&#10;バンドB: まさはる, 佐藤花子"></textarea>
+      <button onclick="handleBatchAssignBands()">テキストからバンドメンバーを一括割り当てる</button>
+
+      <hr style="margin:20px 0; border-color: var(--border-color);">
+
+      <h4>2. 提出されたシフト希望の確認・集計</h4>
+      <button class="btn-secondary btn-small" onclick="downloadShiftRequestsCSV()">希望一覧をCSVダウンロード</button>
+      <div id="admin-shift-requests" style="margin-top:10px;"></div>
+
+      <hr style="margin:20px 0; border-color: var(--border-color);">
+
+      <h4>3. 全体イベント・お知らせ編集</h4>
       <form id="form-event" onsubmit="handleAddEvent(event)">
         <label>イベント内容・お知らせ</label>
         <input type="text" id="event-title" placeholder="お知らせ内容を入力" required>
@@ -391,7 +425,7 @@
 
       <hr style="margin:20px 0; border-color: var(--border-color);">
 
-      <h4>2. 部室の使用不可期間設定</h4>
+      <h4>4. 部室の使用不可期間設定</h4>
       <label>開始日</label>
       <input type="date" id="block-start-date">
       <label>終了日</label>
@@ -402,7 +436,11 @@
 
       <hr style="margin:20px 0; border-color: var(--border-color);">
 
-      <h4>3. 部員管理（部費納入・アカウント削除）</h4>
+      <h4>5. 部員管理（部費納入・アカウント削除）</h4>
+      <div style="display:flex; gap:10px; margin-bottom:12px;">
+        <button class="btn-secondary btn-small" onclick="toggleAllFee(true)">全員「納入済み」にする</button>
+        <button class="btn-secondary btn-small" onclick="toggleAllFee(false)">全員「未納」にする</button>
+      </div>
       <div id="fee-management-list"></div>
     </div>
   </div>
@@ -571,10 +609,13 @@
 
     if (isExec) {
       document.getElementById('admin-tab-btn').classList.remove('hidden');
+      loadAdminShiftRequests();
     } else {
       document.getElementById('admin-tab-btn').classList.add('hidden');
     }
 
+    loadReminders();
+    loadMySchedule();
     loadEvents();
     loadReservations();
     loadBands();
@@ -593,6 +634,93 @@
     if (tabId === 'tab-chat') loadChat();
     if (tabId === 'tab-attendance') loadAttendance();
     if (tabId === 'tab-bands') loadBands();
+  }
+
+  // 4. リマインド表示機能
+  function loadReminders() {
+    const remindBox = document.getElementById('remind-area');
+    let messages = [];
+
+    if (!currentUser.feePaid) {
+      messages.push('⚠️ 部費が未納となっています。会計までお支払いをお願いします。');
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    db.collection('reservations').where('date', '==', today).get().then(snapshot => {
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        if (d.userId === currentUser.id) {
+          messages.push(`🔔 本日 【${d.time}】 に部室予約があります (${d.purpose})`);
+        }
+      });
+
+      if (messages.length > 0) {
+        remindBox.innerHTML = messages.join('<br>');
+        remindBox.classList.remove('hidden');
+      } else {
+        remindBox.classList.add('hidden');
+      }
+    });
+  }
+
+  // 3. MYスケジュール表示機能
+  function loadMySchedule() {
+    const container = document.getElementById('my-schedule-list');
+    const today = new Date().toISOString().split('T')[0];
+
+    db.collection('reservations').where('userId', '==', currentUser.id).get().then(snapshot => {
+      let myRes = [];
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        if (d.date >= today) myRes.push(d);
+      });
+
+      myRes.sort((a, b) => (a.date > b.date ? 1 : -1));
+
+      if (myRes.length === 0) {
+        container.innerHTML = '<p style="margin:0; font-size:0.85rem; color:var(--text-sub);">今後の予約予定はありません。</p>';
+        return;
+      }
+
+      let html = '<ul style="margin:0; padding-left:20px; font-size:0.9rem;">';
+      myRes.forEach(r => {
+        html += `<li><strong>${r.date} ${r.time}:</strong> ${r.purpose}</li>`;
+      });
+      html += '</ul>';
+      container.innerHTML = html;
+    });
+  }
+
+  // 1. 重複予約防止つき予約
+  function handleReservation(e) {
+    e.preventDefault();
+    const date = document.getElementById('res-date').value;
+    const time = document.getElementById('res-time').value;
+    const purpose = document.getElementById('res-purpose').value;
+
+    // 重複チェック
+    db.collection('reservations')
+      .where('date', '==', date)
+      .where('time', '==', time)
+      .get()
+      .then(snapshot => {
+        if (!snapshot.empty) {
+          alert('❌ 指定された日時の部室はすでに予約されています。別の時間帯を選択してください。');
+          return;
+        }
+
+        db.collection('reservations').add({
+          date, time, purpose,
+          userId: currentUser.id,
+          userName: currentUser.name,
+          createdAt: new Date()
+        }).then(() => {
+          alert('予約が完了しました！');
+          loadReservations();
+          loadMySchedule();
+          loadReminders();
+        });
+      });
   }
 
   // バンドシフト別 出欠機能
@@ -803,23 +931,6 @@
     });
   }
 
-  function handleReservation(e) {
-    e.preventDefault();
-    const date = document.getElementById('res-date').value;
-    const time = document.getElementById('res-time').value;
-    const purpose = document.getElementById('res-purpose').value;
-
-    db.collection('reservations').add({
-      date, time, purpose,
-      userId: currentUser.id,
-      userName: currentUser.name,
-      createdAt: new Date()
-    }).then(() => {
-      alert('予約が完了しました！');
-      loadReservations();
-    });
-  }
-
   function loadBBS() {
     const filter = document.getElementById('bbs-filter').value;
     const container = document.getElementById('bbs-posts');
@@ -920,9 +1031,54 @@
       choice3: document.getElementById('req-choice3').value,
       submittedBy: currentUser.name,
       createdAt: new Date()
-    }).then(() => alert('シフト希望を提出しました！'));
+    }).then(() => {
+      alert('シフト希望を提出しました！');
+      if (['部長', '副部長', '会計'].includes(currentUser.role)) loadAdminShiftRequests();
+    });
   }
 
+  // 2. シフト希望集計・CSV表示（三役専用）
+  let globalShiftRequests = [];
+  function loadAdminShiftRequests() {
+    const container = document.getElementById('admin-shift-requests');
+    db.collection('shift_requests').orderBy('createdAt', 'desc').get().then(snapshot => {
+      if (snapshot.empty) {
+        container.innerHTML = '<p style="color:var(--text-sub);">提出されたシフト希望はありません。</p>';
+        return;
+      }
+      globalShiftRequests = [];
+      let html = '<table style="width:100%; border-collapse:collapse; font-size:0.85rem;"><tr><th>バンド</th><th>第1希望</th><th>第2希望</th><th>第3希望</th></tr>';
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        globalShiftRequests.push(d);
+        html += `<tr style="border-bottom:1px solid var(--border-color);">
+          <td style="padding:6px 0;"><strong>${d.bandName}</strong></td>
+          <td>${d.choice1}</td>
+          <td>${d.choice2 || '-'}</td>
+          <td>${d.choice3 || '-'}</td>
+        </tr>`;
+      });
+      html += '</table>';
+      container.innerHTML = html;
+    });
+  }
+
+  function downloadShiftRequestsCSV() {
+    if (globalShiftRequests.length === 0) return alert('ダウンロードするデータがありません。');
+    let csvContent = "data:text/csv;charset=utf-8,バンド名,第1希望,第2希望,第3希望,提出者\n";
+    globalShiftRequests.forEach(r => {
+      csvContent += `"${r.bandName}","${r.choice1}","${r.choice2 || ''}","${r.choice3 || ''}","${r.submittedBy}"\n`;
+    });
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "shift_requests.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  // 部費管理＆一括切替
   function loadFeeManagement() {
     const container = document.getElementById('fee-management-list');
     db.collection('users').get().then(snapshot => {
@@ -943,7 +1099,78 @@
   }
 
   function toggleFee(id, status) {
-    db.collection('users').doc(id).update({ feePaid: status }).then(() => loadFeeManagement());
+    db.collection('users').doc(id).update({ feePaid: status }).then(() => {
+      loadFeeManagement();
+      loadReminders();
+    });
+  }
+
+  function toggleAllFee(status) {
+    const actionText = status ? '全員「納入済み」' : '全員「未納」';
+    if (!confirm(`本当に${actionText}に変更しますか？`)) return;
+
+    db.collection('users').get().then(snapshot => {
+      const batch = db.batch();
+      snapshot.forEach(doc => {
+        batch.update(doc.ref, { feePaid: status });
+      });
+      return batch.commit();
+    }).then(() => {
+      alert(`${actionText}へ変更しました！`);
+      loadFeeManagement();
+      loadReminders();
+    });
+  }
+
+  // テキスト照合によるバンド一括割り当て
+  function handleBatchAssignBands() {
+    const rawText = document.getElementById('band-import-text').value.trim();
+    if (!rawText) return alert('テキストを入力してください');
+
+    db.collection('users').get().then(usersSnap => {
+      let users = [];
+      usersSnap.forEach(doc => users.push({ ref: doc.ref, ...doc.data() }));
+
+      const lines = rawText.split('\n');
+      let createdBandsCount = 0;
+
+      const promises = lines.map(line => {
+        if (!line.includes(':') && !line.includes('：')) return Promise.resolve();
+        const parts = line.split(/[:：]/);
+        const bandName = parts[0].trim();
+        const memberNames = parts[1].split(/[,、]/).map(n => n.trim()).filter(n => n);
+
+        if (!bandName || memberNames.length === 0) return Promise.resolve();
+
+        const matchedMemberIds = [];
+        memberNames.forEach(mName => {
+          const found = users.find(u => u.name === mName || u.lineName === mName);
+          if (found) matchedMemberIds.push(found.id);
+        });
+
+        return db.collection('bands').add({
+          name: bandName,
+          leaderName: memberNames[0] || '未定',
+          members: matchedMemberIds,
+          createdAt: new Date()
+        }).then(() => {
+          createdBandsCount++;
+          matchedMemberIds.forEach(mId => {
+            const uObj = users.find(u => u.id === mId);
+            if (uObj) {
+              const updatedBands = Array.from(new Set([...(uObj.bands || []), bandName]));
+              uObj.ref.update({ bands: updatedBands });
+            }
+          });
+        });
+      });
+
+      Promise.all(promises).then(() => {
+        alert(`処理完了: ${createdBandsCount} 件のバンドを照合・登録しました！`);
+        document.getElementById('band-import-text').value = '';
+        loadBands();
+      });
+    });
   }
 
   function deleteMember(id, name) {

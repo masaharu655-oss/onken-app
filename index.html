@@ -9,15 +9,17 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <style>
     :root {
-      --primary: #c0392b;
-      --secondary: #2c3e50;
-      --bg: #f8f9fa;
-      --card-bg: #ffffff;
+      --primary: #8d6e63;
+      --primary-dark: #5d4037;
+      --accent: #d7ccc8;
+      --bg: #f5f2eb;
+      --card-bg: #fffdfa;
+      --text: #4e342e;
     }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: var(--bg);
-      color: #333;
+      color: var(--text);
       margin: 0;
       padding: 12px;
     }
@@ -27,22 +29,24 @@
     }
     .card {
       background: var(--card-bg);
-      border-radius: 10px;
-      padding: 16px;
+      border-radius: 12px;
+      padding: 18px;
       margin-bottom: 16px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-      border: 1px solid #eee;
+      box-shadow: 0 3px 6px rgba(93, 64, 55, 0.08);
+      border: 1px solid #e0d7d1;
     }
-    h1, h2, h3 { margin-top: 0; color: var(--secondary); }
-    label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.9em; }
+    h1, h2, h3, h4 { margin-top: 0; color: var(--primary-dark); }
+    label { display: block; margin-top: 12px; font-weight: bold; font-size: 0.9em; color: var(--primary-dark); }
     input, select, textarea, button {
       width: 100%;
       padding: 10px;
-      margin-top: 5px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+      margin-top: 6px;
+      border-radius: 8px;
+      border: 1px solid #d7ccc8;
       box-sizing: border-box;
       font-size: 1rem;
+      background-color: #fff;
+      color: var(--text);
     }
     button {
       background-color: var(--primary);
@@ -50,38 +54,63 @@
       font-weight: bold;
       border: none;
       cursor: pointer;
-      margin-top: 15px;
+      margin-top: 16px;
+      transition: background 0.2s;
     }
-    button:hover { opacity: 0.9; }
-    .btn-secondary { background-color: var(--secondary); }
-    .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 5px; }
-    .checkbox-group label { font-weight: normal; margin-top: 0; }
+    button:hover { background-color: var(--primary-dark); }
+    .btn-secondary { background-color: #a1887f; }
+    .btn-danger { background-color: #c0392b; }
+    .btn-danger:hover { background-color: #962d22; }
+    .btn-small { width: auto; padding: 4px 10px; font-size: 0.85em; margin-top: 0; }
+    
+    .chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .chip {
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 2px solid #bcaaa4;
+      background: white;
+      color: var(--primary-dark);
+      cursor: pointer;
+      font-weight: bold;
+      user-select: none;
+      transition: all 0.2s;
+    }
+    .chip.selected {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary-dark);
+    }
+
     .modal {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000;
+      background: rgba(62, 39, 35, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1000;
     }
     .modal-content {
-      background: white; padding: 20px; border-radius: 12px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;
+      background: var(--card-bg); padding: 24px; border-radius: 14px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;
+      border: 2px solid var(--primary);
     }
-    .nav-tabs { display: flex; gap: 5px; overflow-x: auto; margin-bottom: 15px; border-bottom: 2px solid #ccc; }
-    .nav-tab { padding: 10px 15px; cursor: pointer; white-space: nowrap; font-weight: bold; border-radius: 6px 6px 0 0; }
+    .nav-tabs { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 16px; border-bottom: 2px solid #d7ccc8; }
+    .nav-tab { padding: 10px 16px; cursor: pointer; white-space: nowrap; font-weight: bold; border-radius: 8px 8px 0 0; background: #efebe9; color: var(--primary-dark); }
     .nav-tab.active { background: var(--primary); color: white; }
     .hidden { display: none !important; }
-    .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 0.8em; background: #eee; margin-right: 5px; }
-    .badge-exec { background: #e74c3c; color: white; }
-    .badge-leader { background: #f39c12; color: white; }
-    .chat-box { height: 250px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 6px; background: #fafafa; margin-bottom: 10px; }
-    .chat-msg { margin-bottom: 10px; padding: 8px; border-radius: 6px; background: white; border: 1px solid #eee; }
-    .chat-msg .sender { font-weight: bold; font-size: 0.85em; color: var(--secondary); }
-    .admin-card { border: 2px solid var(--primary); background: #fff5f5; }
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 0.8em; background: #efebe9; margin-right: 5px; }
+    .badge-exec { background: #5d4037; color: white; }
+    .badge-leader { background: #8d6e63; color: white; }
+    .chat-box { height: 250px; overflow-y: auto; border: 1px solid #d7ccc8; padding: 10px; border-radius: 8px; background: #faf8f5; margin-bottom: 10px; }
+    .chat-msg { margin-bottom: 10px; padding: 8px; border-radius: 8px; background: white; border: 1px solid #e0d7d1; }
+    .chat-msg .sender { font-weight: bold; font-size: 0.85em; color: var(--primary-dark); }
+    .admin-card { border: 2px solid var(--primary-dark); background: #fbe9e7; }
   </style>
 </head>
 <body>
 <div class="container">
   <!-- ヘッダー -->
-  <div class="card">
-    <h1 style="margin:0;">🎵 音楽研究部</h1>
-    <div id="user-info" style="margin-top: 5px; font-size:0.9em; color:#666;">読み込み中...</div>
+  <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+    <div>
+      <h1 style="margin:0;">🎵 音楽研究部</h1>
+      <div id="user-info" style="margin-top: 5px; font-size:0.9em; color:#6d4c41;">読み込み中...</div>
+    </div>
+    <button class="btn-secondary btn-small" onclick="openProfileModal()">プロフィール編集</button>
   </div>
 
   <!-- ナビゲーションタブ -->
@@ -96,22 +125,17 @@
 
   <!-- 1. 部室予約タブ -->
   <div id="tab-reservation" class="tab-content">
-    <!-- イベント案内 -->
-    <div class="card" style="background:#e8f4f8; border-color:#3498db;">
-      <h3 style="color:#2980b9;">📅 全体イベント・お知らせ</h3>
-      <ul id="event-list" style="margin:0; padding-left:20px;">
-        <li><strong>11月20日(金):</strong> 部活全体ライブ！ (部室終日使用不可)</li>
-      </ul>
+    <div class="card" style="background:#efebe9; border-color:#bcaaa4;">
+      <h3 style="color:#4e342e;">📅 全体イベント・お知らせ</h3>
+      <div id="event-list">読み込み中...</div>
     </div>
 
-    <!-- 本日のシフト -->
     <div class="card">
       <h3>📅 本日のシフト・予約状況</h3>
       <input type="date" id="view-date" onchange="loadReservations()">
       <div id="reservation-list" style="margin-top:10px;"></div>
     </div>
 
-    <!-- 新規予約フォーム -->
     <div class="card">
       <h3>⏰ 新規部室予約（最大1週間先まで）</h3>
       <form id="form-reservation" onsubmit="handleReservation(event)">
@@ -123,9 +147,8 @@
           <option value="10:00-11:00">10:00 - 11:00</option>
           <option value="11:00-12:00">11:00 - 12:00</option>
           <option value="12:00-13:00">12:00 - 13:00</option>
-          <option value="13:00-14:00">13:00 - 14:00</option>
-          <option value="14:00-15:00">14:00 - 15:00</option>
-          <option value="15:00-16:00">15:00 - 16:00</option>
+          <option value="13:00-14:00">14:00 - 15:00</option>
+          <option value="14:00-15:00">15:00 - 16:00</option>
           <option value="16:00-17:00">16:00 - 17:00</option>
           <option value="17:00-18:00">17:00 - 18:00</option>
           <option value="18:00-19:00">18:00 - 19:00</option>
@@ -188,9 +211,7 @@
     <div class="card">
       <h3>💬 バンド内専用チャット</h3>
       <label>対象バンド選択</label>
-      <select id="chat-band-select" onchange="loadChat()">
-        <!-- JSで動的生成 -->
-      </select>
+      <select id="chat-band-select" onchange="loadChat()"></select>
       <div class="chat-box" id="chat-messages"></div>
       <form id="form-chat" onsubmit="handleSendChat(event)">
         <input type="text" id="chat-input" placeholder="メッセージを入力..." required>
@@ -222,12 +243,12 @@
     <div class="card admin-card">
       <h3>👑 幹部専用管理メニュー</h3>
       
-      <h4>1. 確定シフト一括反映</h4>
-      <label>開始日</label>
-      <input type="date" id="admin-start-date">
-      <label>終了日</label>
-      <input type="date" id="admin-end-date">
-      <button onclick="applyBatchShifts()">確定シフトを期間適用する</button>
+      <h4>1. 全体イベント・お知らせ編集</h4>
+      <form id="form-event" onsubmit="handleAddEvent(event)">
+        <label>イベント内容・お知らせ</label>
+        <input type="text" id="event-title" placeholder="例: 11月20日(金) 部活全体ライブ！" required>
+        <button type="submit">お知らせを追加投稿する</button>
+      </form>
 
       <hr style="margin:20px 0;">
 
@@ -242,13 +263,13 @@
 
       <hr style="margin:20px 0;">
 
-      <h4>3. 部費納入管理</h4>
+      <h4>3. 部員管理（部費納入・アカウント削除）</h4>
       <div id="fee-management-list"></div>
     </div>
   </div>
 </div>
 
-<!-- プロフィール登録（入部届）モーダル -->
+<!-- プロフィール登録/編集 モーダル -->
 <div id="profile-modal" class="modal hidden">
   <div class="modal-content">
     <h2>📝 プロフィール登録</h2>
@@ -279,13 +300,13 @@
         </select>
       </div>
 
-      <label>担当パート（複数選択可）</label>
-      <div class="checkbox-group">
-        <label><input type="checkbox" class="part-cb" value="Gt"> Gt</label>
-        <label><input type="checkbox" class="part-cb" value="Ba"> Ba</label>
-        <label><input type="checkbox" class="part-cb" value="Dr"> Dr</label>
-        <label><input type="checkbox" class="part-cb" value="Vo"> Vo</label>
-        <label><input type="checkbox" class="part-cb" value="Key"> Key</label>
+      <label>担当パート（タップで複数選択）</label>
+      <div class="chip-group" id="part-chips">
+        <div class="chip" onclick="toggleChip(this)" data-part="Gt">Gt</div>
+        <div class="chip" onclick="toggleChip(this)" data-part="Ba">Ba</div>
+        <div class="chip" onclick="toggleChip(this)" data-part="Dr">Dr</div>
+        <div class="chip" onclick="toggleChip(this)" data-part="Vo">Vo</div>
+        <div class="chip" onclick="toggleChip(this)" data-part="Key">Key</div>
       </div>
 
       <label>役職</label>
@@ -296,14 +317,18 @@
         <option value="会計">会計</option>
       </select>
 
-      <label>所属バンド（カンマ区切り）& バンドリーダー設定</label>
+      <label>所属バンド（カンマ区切り）</label>
       <input type="text" id="prof-bands" placeholder="例: キリカ, りんごジャム">
-      <label><input type="checkbox" id="prof-is-leader"> 所属バンドのリーダーを務めている</label>
+
+      <label>バンドリーダー設定</label>
+      <div class="chip-group">
+        <div class="chip" id="chip-leader" onclick="toggleChip(this)">所属バンドのリーダーを務めている</div>
+      </div>
 
       <label>一言コメント</label>
       <textarea id="prof-comment" rows="2" placeholder="よろしくお願いします！"></textarea>
 
-      <button type="submit">登録して完了する</button>
+      <button type="submit">保存して更新する</button>
     </form>
   </div>
 </div>
@@ -314,7 +339,7 @@
     apiKey: "AIzaSyDummyKeyForDeploymentStandard",
     authDomain: "onken-app.firebaseapp.com",
     projectId: "onken-app",
-    storageBucket: "onken-app.app照感.com",
+    storageBucket: "onken-app.appspot.com",
     messagingSenderId: "123456789",
     appId: "1:123456789:web:abcdef"
   };
@@ -324,13 +349,11 @@
   let currentUser = null;
 
   window.addEventListener('DOMContentLoaded', () => {
-    // 予約日付の初期化（今日）
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('view-date').value = today;
     document.getElementById('res-date').value = today;
     document.getElementById('res-date').min = today;
 
-    // 1週間後の日付制限
     const maxDate = new Date();
     maxDate.setDate(maxDate.getDate() + 7);
     document.getElementById('res-date').max = maxDate.toISOString().split('T')[0];
@@ -341,11 +364,43 @@
   function initApp() {
     const saved = localStorage.getItem('onken_user');
     if (!saved) {
-      document.getElementById('profile-modal').classList.remove('hidden');
+      openProfileModal();
     } else {
       currentUser = JSON.parse(saved);
       renderUI();
     }
+  }
+
+  function toggleChip(el) {
+    el.classList.toggle('selected');
+  }
+
+  function openProfileModal() {
+    if (currentUser) {
+      document.getElementById('prof-name').value = currentUser.name || '';
+      document.getElementById('prof-line').value = currentUser.lineName || '';
+      document.getElementById('prof-grade').value = currentUser.grade || '1年';
+      document.getElementById('prof-dept').value = currentUser.dept || 'AC';
+      document.getElementById('prof-role').value = currentUser.role || '部員';
+      document.getElementById('prof-bands').value = (currentUser.bands || []).join(', ');
+      document.getElementById('prof-comment').value = currentUser.comment || '';
+
+      document.querySelectorAll('#part-chips .chip').forEach(chip => {
+        if ((currentUser.parts || []).includes(chip.dataset.part)) {
+          chip.classList.add('selected');
+        } else {
+          chip.classList.remove('selected');
+        }
+      });
+
+      if (currentUser.isLeader) {
+        document.getElementById('chip-leader').classList.add('selected');
+      } else {
+        document.getElementById('chip-leader').classList.remove('selected');
+      }
+      toggleDeptSelect();
+    }
+    document.getElementById('profile-modal').classList.remove('hidden');
   }
 
   function toggleDeptSelect() {
@@ -360,12 +415,13 @@
 
   function handleSaveProfile(e) {
     e.preventDefault();
-    const parts = Array.from(document.querySelectorAll('.part-cb:checked')).map(cb => cb.value);
+    const parts = Array.from(document.querySelectorAll('#part-chips .chip.selected')).map(c => c.dataset.part);
     const grade = document.getElementById('prof-grade').value;
     const dept = grade.includes('専攻科') ? '-' : document.getElementById('prof-dept').value;
+    const isLeader = document.getElementById('chip-leader').classList.contains('selected');
 
     currentUser = {
-      id: 'user_' + Date.now(),
+      id: currentUser ? currentUser.id : 'user_' + Date.now(),
       name: document.getElementById('prof-name').value,
       lineName: document.getElementById('prof-line').value,
       grade: grade,
@@ -373,9 +429,9 @@
       parts: parts,
       role: document.getElementById('prof-role').value,
       bands: document.getElementById('prof-bands').value.split(',').map(b => b.trim()).filter(b => b),
-      isLeader: document.getElementById('prof-is-leader').checked,
+      isLeader: isLeader,
       comment: document.getElementById('prof-comment').value,
-      feePaid: false
+      feePaid: currentUser ? currentUser.feePaid : false
     };
 
     localStorage.setItem('onken_user', JSON.stringify(currentUser));
@@ -385,23 +441,23 @@
   }
 
   function renderUI() {
-    // ヘッダー情報
     const isExec = ['部長', '副部長', '会計'].includes(currentUser.role);
     document.getElementById('user-info').innerHTML = `
-      <strong>${currentUser.name}</strong> (${currentUser.lineName}) - ${currentUser.grade} ${currentUser.dept} / ${currentUser.parts.join(',')}
+      <strong>${currentUser.name}</strong> (${currentUser.lineName}) - ${currentUser.grade} ${currentUser.dept} / ${(currentUser.parts || []).join(',')}
       ${isExec ? '<span class="badge badge-exec">幹部</span>' : ''}
       ${currentUser.isLeader ? '<span class="badge badge-leader">バンドリーダー</span>' : ''}
     `;
 
-    // 幹部タブ制御
     if (isExec) {
       document.getElementById('admin-tab-btn').classList.remove('hidden');
+    } else {
+      document.getElementById('admin-tab-btn').classList.add('hidden');
     }
 
-    // チャット用バンドリスト
     const bandSelect = document.getElementById('chat-band-select');
-    bandSelect.innerHTML = currentUser.bands.map(b => `<option value="${b}">${b}</option>`).join('');
+    bandSelect.innerHTML = (currentUser.bands || []).map(b => `<option value="${b}">${b}</option>`).join('');
 
+    loadEvents();
     loadReservations();
     loadBBS();
     loadRoster('grade');
@@ -417,7 +473,44 @@
     if (tabId === 'tab-chat') loadChat();
   }
 
-  // 予約ロード
+  // お知らせ読み込み・追加
+  function loadEvents() {
+    const container = document.getElementById('event-list');
+    db.collection('events').orderBy('createdAt', 'desc').get().then(snapshot => {
+      if (snapshot.empty) {
+        container.innerHTML = '<p style="margin:0;">現在新しいお知らせはありません。</p>';
+        return;
+      }
+      const isExec = ['部長', '副部長', '会計'].includes(currentUser.role);
+      let html = '<ul style="margin:0; padding-left:20px;">';
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        html += `<li>${d.title} ${isExec ? `<button class="btn-danger btn-small" style="padding:1px 6px;" onclick="deleteEvent('${doc.id}')">削除</button>` : ''}</li>`;
+      });
+      html += '</ul>';
+      container.innerHTML = html;
+    });
+  }
+
+  function handleAddEvent(e) {
+    e.preventDefault();
+    const title = document.getElementById('event-title').value;
+    db.collection('events').add({
+      title: title,
+      createdAt: new Date()
+    }).then(() => {
+      document.getElementById('event-title').value = '';
+      loadEvents();
+      alert('お知らせを追加しました！');
+    });
+  }
+
+  function deleteEvent(id) {
+    if (confirm('このお知らせを削除しますか？')) {
+      db.collection('events').doc(id).delete().then(() => loadEvents());
+    }
+  }
+
   function loadReservations() {
     const date = document.getElementById('view-date').value;
     const container = document.getElementById('reservation-list');
@@ -440,7 +533,6 @@
     });
   }
 
-  // 新規予約
   function handleReservation(e) {
     e.preventDefault();
     const date = document.getElementById('res-date').value;
@@ -458,7 +550,6 @@
     });
   }
 
-  // 掲示板ロード
   function loadBBS() {
     const filter = document.getElementById('bbs-filter').value;
     const container = document.getElementById('bbs-posts');
@@ -496,7 +587,6 @@
     });
   }
 
-  // 名簿ロード
   function loadRoster(sortBy) {
     const container = document.getElementById('roster-list');
     db.collection('users').get().then(snapshot => {
@@ -507,7 +597,7 @@
 
       let html = '<table style="width:100%; text-align:left; border-collapse:collapse;"><tr><th>学年/学科</th><th>名前 (LINE)</th><th>パート</th><th>役職</th></tr>';
       users.forEach(u => {
-        html += `<tr style="border-bottom:1px solid #ddd;">
+        html += `<tr style="border-bottom:1px solid #d7ccc8;">
           <td>${u.grade} ${u.dept}</td>
           <td>${u.name} (${u.lineName}) ${u.isLeader ? '👑' : ''}</td>
           <td>${u.parts ? u.parts.join(',') : ''}</td>
@@ -519,7 +609,6 @@
     });
   }
 
-  // チャット機能
   function loadChat() {
     const band = document.getElementById('chat-band-select').value;
     const container = document.getElementById('chat-messages');
@@ -551,7 +640,6 @@
     }).then(() => input.value = '');
   }
 
-  // シフト希望提出
   function handleShiftRequest(e) {
     e.preventDefault();
     db.collection('shift_requests').add({
@@ -564,15 +652,20 @@
     }).then(() => alert('シフト希望を提出しました！'));
   }
 
-  // 幹部用：部費納入
+  // 部員管理・削除
   function loadFeeManagement() {
     const container = document.getElementById('fee-management-list');
     db.collection('users').get().then(snapshot => {
-      let html = '<ul>';
+      let html = '<ul style="list-style:none; padding:0;">';
       snapshot.forEach(doc => {
         const u = doc.data();
-        html += `<li>${u.name} (${u.grade}): ${u.feePaid ? '✅ 納入済み' : '❌ 未納'} 
-        <button style="width:auto; padding:2px 8px; margin:0;" onclick="toggleFee('${doc.id}', ${!u.feePaid})">切替</button></li>`;
+        html += `<li style="margin-bottom:8px; display:flex; justify-style:space-between; align-items:center; border-bottom:1px solid #d7ccc8; padding-bottom:5px;">
+          <span>${u.name} (${u.grade} ${u.dept}): ${u.feePaid ? '✅ 納入済み' : '❌ 未納'}</span>
+          <div>
+            <button class="btn-small btn-secondary" style="margin:0 4px;" onclick="toggleFee('${doc.id}', ${!u.feePaid})">納入状態切替</button>
+            <button class="btn-small btn-danger" style="margin:0;" onclick="deleteMember('${doc.id}', '${u.name}')">部員削除</button>
+          </div>
+        </li>`;
       });
       html += '</ul>';
       container.innerHTML = html;
@@ -583,7 +676,16 @@
     db.collection('users').doc(id).update({ feePaid: status }).then(() => loadFeeManagement());
   }
 
-  // 幹部用：期間ブロック
+  function deleteMember(id, name) {
+    if (confirm(`本当に ${name} さんの部員アカウントを削除しますか？`)) {
+      db.collection('users').doc(id).delete().then(() => {
+        alert(`${name} さんを名簿から削除しました。`);
+        loadFeeManagement();
+        loadRoster('grade');
+      });
+    }
+  }
+
   function setBlockPeriod() {
     const start = document.getElementById('block-start-date').value;
     const end = document.getElementById('block-end-date').value;

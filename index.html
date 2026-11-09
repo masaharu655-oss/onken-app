@@ -235,7 +235,7 @@
     <div class="nav-tab active" onclick="switchTab('tab-reservation')">枠表</div>
     <div class="nav-tab" onclick="switchTab('tab-attendance')">出欠</div>
     <div class="nav-tab" onclick="switchTab('tab-bands')">バンド</div>
-    <div class="nav-tab" onclick="switchTab('tab-bbs')">募集</div>
+    <div class="nav-tab" onclick="switchTab('tab-part-search')">メンバー検索</div>
     <div class="nav-tab" onclick="switchTab('tab-roster')">名簿</div>
     <div class="nav-tab" onclick="switchTab('tab-chat')">チャット</div>
     <div class="nav-tab" onclick="switchTab('tab-shift-req')">シフト希望</div>
@@ -316,13 +316,12 @@
     </div>
   </div>
 
-  <!-- 4. 募集掲示板 -->
-  <div id="tab-bbs" class="tab-content hidden">
+  <!-- 4. パート別メンバー検索タブ -->
+  <div id="tab-part-search" class="tab-content hidden">
     <div class="card">
-      <h3>バンドメンバー募集掲示板</h3>
-      <label>募集パートで絞り込み</label>
-      <select id="bbs-filter" onchange="loadBBS()">
-        <option value="ALL">すべてのパート</option>
+      <h3>パート別 メンバー検索</h3>
+      <label>表示したいパートを選択してください</label>
+      <select id="part-search-select" onchange="loadPartMembers()">
         <option value="Gt">Gt (ギター)</option>
         <option value="Ba">Ba (ベース)</option>
         <option value="Dr">Dr (ドラム)</option>
@@ -331,24 +330,9 @@
       </select>
     </div>
     <div class="card">
-      <h3>募集を投稿する</h3>
-      <form id="form-bbs" onsubmit="handlePostBBS(event)">
-        <label>対象バンド（選択）</label>
-        <select id="post-band-select" required></select>
-        <label>募集パート</label>
-        <select id="post-part" required>
-          <option value="Gt">Gt (ギター)</option>
-          <option value="Ba">Ba (ベース)</option>
-          <option value="Dr">Dr (ドラム)</option>
-          <option value="Vo">Vo (ボーカル)</option>
-          <option value="Key">Key (キーボード)</option>
-        </select>
-        <label>募集内容・詳細</label>
-        <textarea id="post-text" rows="3" placeholder="募集詳細を入力" required></textarea>
-        <button type="submit">投稿する</button>
-      </form>
+      <h3 id="part-search-title">Gt 担当メンバー一覧</h3>
+      <div id="part-members-list">読み込み中...</div>
     </div>
-    <div id="bbs-posts"></div>
   </div>
 
   <!-- 5. 部員名簿 -->
@@ -513,7 +497,7 @@
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  // Excel記載の全27バンドリスト（名前のみ定義）
+  // Excel記載の全27バンドリスト
   const DEFAULT_BANDS = [
     { name: "キリカ" },
     { name: "少年少女" },
@@ -547,6 +531,15 @@
   let currentUser = null;
 
   window.addEventListener('DOMContentLoaded', () => {
+    // 初回・更新時はローカルストレージを直接読まず未登録状態で開始（必要に応じて保存読み込み）
+    const saved = localStorage.getItem('onken_user');
+    if (!saved) {
+      openProfileModal();
+    } else {
+      currentUser = JSON.parse(saved);
+      renderUI();
+    }
+
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('view-date').value = today;
     document.getElementById('res-date').value = today;
@@ -556,19 +549,7 @@
     const maxDate = new Date();
     maxDate.setDate(maxDate.getDate() + 7);
     document.getElementById('res-date').max = maxDate.toISOString().split('T')[0];
-
-    initApp();
   });
-
-  function initApp() {
-    const saved = localStorage.getItem('onken_user');
-    if (!saved) {
-      openProfileModal();
-    } else {
-      currentUser = JSON.parse(saved);
-      renderUI();
-    }
-  }
 
   function toggleChip(el) {
     el.classList.toggle('selected');
@@ -651,7 +632,7 @@
     loadEvents();
     loadReservations();
     loadBands();
-    loadBBS();
+    loadPartMembers();
     loadRoster('grade');
     loadFeeManagement();
     loadAttendance();
@@ -666,6 +647,7 @@
     if (tabId === 'tab-chat') loadChat();
     if (tabId === 'tab-attendance') loadAttendance();
     if (tabId === 'tab-bands') loadBands();
+    if (tabId === 'tab-part-search') loadPartMembers();
   }
 
   function loadReminders() {
@@ -853,10 +835,9 @@
     });
   }
 
-  // バンド一覧の表示（実際にアプリで加入した人の名前のみを表示）
+  // バンド一覧の表示（加入者リアルタイム反映）
   function loadBands() {
     const container = document.getElementById('band-list');
-    const postBandSelect = document.getElementById('post-band-select');
     const chatBandSelect = document.getElementById('chat-band-select');
 
     db.collection('users').get().then(usersSnap => {
@@ -890,13 +871,11 @@
 
         let html = '';
         let myBandsOptions = '';
-        let allBandsOptions = '';
 
         allBands.forEach(b => {
           const isMember = currentUser && ((b.members || []).includes(currentUser.id) || (currentUser.bands || []).includes(b.name));
           const isSupport = currentUser && ((b.supportMembers || []).includes(currentUser.id) || (currentUser.supportBands || []).includes(b.name));
 
-          allBandsOptions += `<option value="${b.name}">${b.name}</option>`;
           if (isMember || isSupport) {
             myBandsOptions += `<option value="${b.name}">${b.name} ${isSupport ? '(サポート)' : ''}</option>`;
           }
@@ -936,7 +915,6 @@
         });
 
         container.innerHTML = html || 'バンドの読み込みに失敗しました。';
-        if (postBandSelect) postBandSelect.innerHTML = allBandsOptions || '<option value="">バンドがありません</option>';
         if (chatBandSelect) chatBandSelect.innerHTML = myBandsOptions || '<option value="">参加中のバンドがありません</option>';
       });
     });
@@ -972,6 +950,48 @@
     localStorage.setItem('onken_user', JSON.stringify(currentUser));
     loadBands();
     alert(`「${bandName}」に${type === 'regular' ? '正式メンバー' : 'サポートメンバー'}として加入しました！`);
+  }
+
+  // パート別 メンバー検索機能
+  function loadPartMembers() {
+    const part = document.getElementById('part-search-select').value;
+    const title = document.getElementById('part-search-title');
+    const container = document.getElementById('part-members-list');
+    
+    title.innerText = `${part} 担当メンバー一覧`;
+    container.innerHTML = '<p style="color:var(--text-sub);">読み込み中...</p>';
+
+    db.collection('users').get().then(snapshot => {
+      let matchedUsers = [];
+      snapshot.forEach(doc => {
+        const u = doc.data();
+        if (u.parts && u.parts.includes(part)) {
+          matchedUsers.push(u);
+        }
+      });
+
+      if (matchedUsers.length === 0) {
+        container.innerHTML = `<p style="color:var(--text-sub);">${part} 担当として登録されている部員はまだいません。</p>`;
+        return;
+      }
+
+      let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
+      matchedUsers.forEach(u => {
+        html += `
+          <div style="background:var(--input-bg); padding:12px 14px; border-radius:8px; border:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <strong>${u.name}</strong> <small style="color:var(--text-sub);">(${u.grade} ${u.dept})</small>
+              <div style="font-size:0.8rem; color:var(--text-sub); margin-top:2px;">
+                LINE名: ${u.lineName || '-'} / 他パート: ${(u.parts || []).join(', ')}
+              </div>
+              ${u.comment ? `<div style="font-size:0.85rem; color:var(--text-main); margin-top:4px;">「${u.comment}」</div>` : ''}
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      container.innerHTML = html;
+    });
   }
 
   function loadEvents() {
@@ -1030,45 +1050,6 @@
       container.innerHTML = html;
     }).catch(() => {
       container.innerHTML = '<p style="color:var(--text-sub);">予約データの読み込みに失敗しました。</p>';
-    });
-  }
-
-  function loadBBS() {
-    const filter = document.getElementById('bbs-filter').value;
-    const container = document.getElementById('bbs-posts');
-    container.innerHTML = '<p style="color:var(--text-sub);">読み込み中...</p>';
-
-    db.collection('bbs').orderBy('createdAt', 'desc').get().then(snapshot => {
-      let html = '';
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        if (filter === 'ALL' || data.part === filter) {
-          html += `
-            <div class="card">
-              <h4>【${data.bandName || 'バンド'}】募集パート: ${data.part}</h4>
-              <p>${data.text}</p>
-              <small style="color:var(--text-sub);">投稿者: ${data.userName} (${data.userLine})</small>
-            </div>
-          `;
-        }
-      });
-      container.innerHTML = html || '<p style="color:var(--text-sub);">該当する募集はありません。</p>';
-    });
-  }
-
-  function handlePostBBS(e) {
-    e.preventDefault();
-    if (!currentUser) return alert('先にプロフィールを登録してください');
-    db.collection('bbs').add({
-      bandName: document.getElementById('post-band-select').value,
-      part: document.getElementById('post-part').value,
-      text: document.getElementById('post-text').value,
-      userName: currentUser.name,
-      userLine: currentUser.lineName,
-      createdAt: new Date()
-    }).then(() => {
-      document.getElementById('post-text').value = '';
-      loadBBS();
     });
   }
 

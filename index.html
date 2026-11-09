@@ -1,0 +1,1468 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>音楽研究部</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap">
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+<script>
+  // Firebaseの初期化設定（設定済み）
+  const firebaseConfig = {
+    apiKey: "AIzaSyAzpfBLXD0IhYFWo40fQyzkt9iCKIpC_04",
+    authDomain: "onken-app.firebaseapp.com",
+    projectId: "onken-app",
+    storageBucket: "onken-app.appspot.com",
+    messagingSenderId: "1098670494493",
+    appId: "1:1098670494493:web:7f6d4e84b8a21390458872"
+  };
+
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+  const db = firebase.firestore();
+
+  // アプリ側でクラウドDBとして認識させるための設定
+  window.claude = {
+    use: async function(type) {
+      if (type === "db") {
+        return db;
+      }
+      if (type === "user") {
+        let uid = localStorage.getItem("kon.uid");
+        if (!uid) {
+          uid = "u_" + Math.random().toString(36).substring(2, 10);
+          localStorage.setItem("kon.uid", uid);
+        }
+        return {
+          id: async () => uid,
+          canEdit: async () => true,
+          can: async (action) => true
+        };
+      }
+    }
+  };
+</script>
+
+<style>
+:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+:root {
+  --paper: #F1EFE6; --card: #FAF8F1; --ink: #1F1D18; --mute: #6B675A; --line: #D9D5C6;
+  --amp: #C23B2B; --amp-ink: #FFFFFF; --mine: #1D5A55; --mine-bg: #DCEAE5; --taken-bg: #E7E3D4;
+  --scrim: rgba(31, 29, 24, .45); --yel: #FCCB0A;
+  --font-ui: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #16150F; --card: #201E16; --ink: #EEEADB; --mute: #A29D89; --line: #38352B;
+    --amp: #E5604F; --amp-ink: #1C0C08; --mine: #86CBC2; --mine-bg: #1D3330; --taken-bg: #27251C;
+    --scrim: rgba(0, 0, 0, .6); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #16150F; --card: #201E16; --ink: #EEEADB; --mute: #A29D89; --line: #38352B;
+  --amp: #E5604F; --amp-ink: #1C0C08; --mine: #86CBC2; --mine-bg: #1D3330; --taken-bg: #27251C;
+  --scrim: rgba(0, 0, 0, .6); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink); font-family: var(--font-ui); font-size: 15px; line-height: 1.5;
+  padding-block: 20px 120px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.app { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--amp); outline-offset: 2px; }
+
+header { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.brand h1 { margin: 0; font-weight: 900; font-size: 34px; letter-spacing: .06em; line-height: 1; }
+.brand p { margin: 6px 0 0; color: var(--mute); font-size: 13px; letter-spacing: .08em; }
+.sync { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--mute); white-space: nowrap; padding-bottom: 2px; }
+.sync i { width: 8px; height: 8px; border-radius: 50%; background: var(--mute); display: inline-block; }
+.sync[data-s="live"] i { background: var(--mine); }
+.sync[data-s="error"] i { background: var(--amp); }
+
+.dates { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 10px; margin: 0 -2px; scrollbar-width: thin; }
+.date {
+  flex: 0 0 auto; width: 54px; padding: 8px 0 7px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--card); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 1px;
+}
+.date .wd { font-size: 12px; color: var(--mute); }
+.date .dn { font-family: var(--font-mono); font-size: 20px; font-weight: 500; line-height: 1.2; }
+.date .mo { font-size: 10px; color: var(--mute); height: 14px; }
+.date .fill { width: 28px; height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; margin-top: 3px; }
+.date .fill b { display: block; height: 100%; background: var(--amp); }
+.date.sat .wd { color: var(--mine); }
+.date.sun .wd { color: var(--amp); }
+.date[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.date[aria-pressed="true"] .wd, .date[aria-pressed="true"] .mo { color: var(--paper); opacity: .8; }
+.date[aria-pressed="true"] .fill { background: color-mix(in srgb, var(--paper) 30%, transparent); }
+.date[aria-pressed="true"] .fill b { background: var(--paper); }
+
+.rooms { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--card); }
+.room { border: 0; background: transparent; padding: 10px 8px; display: flex; flex-direction: column; align-items: center; gap: 0; }
+.room + .room { border-left: 1px solid var(--line); }
+.room .rn { font-weight: 700; }
+.room .rc { font-family: var(--font-mono); font-size: 12px; color: var(--mute); }
+.room[aria-pressed="true"] { background: var(--amp); color: var(--amp-ink); }
+.room[aria-pressed="true"] .rc { color: var(--amp-ink); opacity: .85; }
+
+.dayhead { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.dayhead h2 { margin: 0; font-size: 18px; font-weight: 700; }
+.dayhead span { font-size: 12px; color: var(--mute); }
+
+.slots { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.slot {
+  display: grid; grid-template-columns: 74px minmax(0, 1fr) auto; align-items: center; gap: 12px;
+  min-height: 58px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--card);
+}
+.slot .t { font-family: var(--font-mono); font-size: 14px; line-height: 1.25; }
+.slot .t small { display: block; color: var(--mute); font-size: 11px; }
+.slot .who { min-width: 0; }
+.slot .who b { display: block; font-weight: 700; overflow-wrap: anywhere; }
+.slot .who span { display: block; font-size: 12px; color: var(--mute); overflow-wrap: anywhere; }
+.slot .free { color: var(--mute); font-size: 13px; }
+.slot.taken { background: var(--taken-bg); }
+.slot.mine { background: var(--mine-bg); border-color: var(--mine); }
+.slot.mine .who b { color: var(--mine); }
+.slot.past { opacity: .45; }
+.btn {
+  border: 1px solid transparent; border-radius: 8px; padding: 8px 16px; min-height: 40px; font-weight: 700; font-size: 14px; white-space: nowrap;
+}
+.btn.primary { background: var(--amp); color: var(--amp-ink); }
+.btn.ghost { background: transparent; border-color: var(--line); color: var(--ink); }
+.btn.danger { background: var(--ink); color: var(--paper); }
+.btn[disabled] { opacity: .5; cursor: default; }
+
+.mine-list h3 { margin: 4px 0 8px; font-size: 14px; font-weight: 700; color: var(--mute); letter-spacing: .06em; }
+.mine-list ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.mine-list button {
+  width: 100%; text-align: left; border: 1px solid var(--line); background: var(--card); border-radius: 10px;
+  padding: 10px 12px; display: flex; justify-content: space-between; gap: 10px; align-items: baseline;
+}
+.mine-list .mt { font-family: var(--font-mono); font-size: 13px; }
+.mine-list .mr { color: var(--mute); font-size: 12px; white-space: nowrap; }
+.note { font-size: 12px; color: var(--mute); margin: 0; }
+
+#sheet-wrap, .wrap { position: fixed; inset: 0; z-index: 20; display: flex; align-items: flex-end; justify-content: center; background: var(--scrim); }
+#sheet, .sheet {
+  width: 100%; max-width: 560px; background: var(--paper); border-radius: 16px 16px 0 0; border: 1px solid var(--line); border-bottom: 0;
+  padding: 18px max(16px, env(safe-area-inset-left, 0px)) calc(18px + env(safe-area-inset-bottom, 0px));
+  display: flex; flex-direction: column; gap: 12px;
+}
+#sheet h2, .sheet h2 { margin: 0; font-size: 18px; }
+#sheet .when, .sheet .when { font-family: var(--font-mono); font-size: 13px; color: var(--mute); margin: -6px 0 0; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 13px; font-weight: 700; }
+.field input, .field textarea, .field select {
+  font: inherit; font-size: 16px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); width: 100%;
+}
+.actions { display: flex; gap: 8px; justify-content: flex-end; }
+.actions .btn { flex: 1; }
+#toast {
+  position: fixed; left: 50%; transform: translateX(-50%); z-index: 30; bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  background: var(--ink); color: var(--paper); padding: 10px 16px; border-radius: 10px; font-size: 14px; max-width: calc(100% - 32px);
+}
+.sheet { max-height: 92%; overflow-y: auto; }
+.field textarea { resize: vertical; min-height: 84px; }
+.hright { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; min-width: 0; }
+.me {
+  max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 5px 12px; font-size: 12px; min-height: 32px;
+}
+.tabs { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--line); }
+.tabs button {
+  border: 0; background: transparent; padding: 10px 0; font-weight: 700; color: var(--mute);
+  border-bottom: 3px solid transparent; margin-bottom: -1px;
+}
+.tabs button[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--amp); }
+.view { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 4px 14px; font-size: 13px; min-height: 36px; }
+button.chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+span.chip { min-height: 0; padding: 1px 10px; font-size: 12px; color: var(--mute); }
+span.chip.hit { background: var(--mine-bg); border-color: var(--mine); color: var(--mine); font-weight: 700; }
+.banner {
+  border: 1px dashed var(--mute); border-radius: 10px; padding: 12px; background: var(--card);
+  display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap;
+}
+.banner p { margin: 0; font-size: 13px; flex: 1 1 200px; }
+.posts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.post { border: 1px solid var(--line); border-radius: 10px; background: var(--card); padding: 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.post h3 { margin: 0; font-size: 16px; overflow-wrap: anywhere; }
+.post .body { margin: 0; font-size: 14px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.post .contact { margin: 0; font-size: 13px; color: var(--mine); overflow-wrap: anywhere; }
+.post-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.post-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.by { font-size: 12px; color: var(--mute); min-width: 0; overflow-wrap: anywhere; }
+.post.closed { opacity: .55; }
+.closed-tag { font-size: 12px; color: var(--mute); border: 1px solid var(--line); border-radius: 6px; padding: 0 6px; white-space: nowrap; }
+.acts { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.acts .btn { min-height: 34px; padding: 4px 12px; font-size: 13px; }
+.empty { color: var(--mute); font-size: 13px; margin: 8px 0; list-style: none; }
+select {
+  font: inherit; font-size: 14px; padding: 8px; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--card); color: var(--ink); max-width: 100%;
+}
+.sub { margin: 0; font-size: 14px; font-weight: 700; color: var(--mute); letter-spacing: .06em; }
+.report { margin: 0; font-size: 13px; color: var(--mute); white-space: pre-wrap; overflow-wrap: anywhere; }
+.grid-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--card); }
+.grid { border-collapse: collapse; width: 100%; min-width: 440px; font-size: 13px; }
+.grid th, .grid td { padding: 8px 6px; border-bottom: 1px solid var(--line); text-align: center; vertical-align: middle; }
+.grid thead th { font-weight: 700; color: var(--mute); font-size: 12px; }
+.grid tbody th { text-align: left; font-weight: 700; white-space: nowrap; padding-left: 10px; }
+.grid tbody th small { display: block; font-family: var(--font-mono); color: var(--mute); font-size: 11px; font-weight: 400; }
+.grid tr:last-child th, .grid tr:last-child td { border-bottom: 0; }
+.grid td { font-weight: 700; overflow-wrap: anywhere; }
+.grid td select { width: 100%; max-width: 112px; padding: 6px 4px; font-size: 13px; }
+.pref-sel { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.pref-sel select { width: 100%; }
+@media (max-width: 460px) { .pref-sel { grid-template-columns: 1fr; } }
+.wrap.gate { align-items: stretch; background: var(--paper); overflow-y: auto; }
+.wrap.gate .sheet {
+  max-height: none; min-height: 100%; border: 0; border-radius: 0; background: transparent;
+  padding-top: calc(28px + env(safe-area-inset-top, 0px));
+}
+.gatehead { display: none; flex-direction: column; align-items: center; gap: 8px; text-align: center; padding-bottom: 6px; }
+.wrap.gate .gatehead { display: flex; }
+.gatehead img { width: 132px; height: 132px; border-radius: 30px; display: block; }
+.gatehead h1 { margin: 4px 0 0; font-size: 34px; font-weight: 900; letter-spacing: .04em; line-height: 1; }
+.gatehead .tag { font-size: 12px; font-weight: 700; letter-spacing: .32em; color: var(--mute); padding-left: .32em; }
+.gicons { display: flex; gap: 12px; margin: 10px 0 4px; }
+.gicons span { width: 48px; height: 48px; border-radius: 50%; background: var(--card); border: 1px solid var(--line); display: grid; place-items: center; }
+.gicons svg { width: 26px; height: 26px; }
+.gnote { margin: 4px 0 0; font-size: 13px; color: var(--mute); max-width: 32em; }
+.chatbox { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.msgs { display: flex; flex-direction: column; gap: 10px; min-height: 220px; max-height: 58vh; overflow-y: auto; padding: 4px 2px; }
+.msg { max-width: 82%; display: flex; flex-direction: column; gap: 2px; align-self: flex-start; min-width: 0; }
+.msg.me { align-self: flex-end; align-items: flex-end; }
+.msg .who2 { font-size: 11px; color: var(--mute); }
+.msg .bub {
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px 14px 14px 4px; padding: 8px 12px;
+  overflow-wrap: anywhere; white-space: pre-wrap;
+}
+.msg.me .bub { background: var(--mine-bg); border-color: var(--mine); border-radius: 14px 14px 4px 14px; }
+.msg .meta { font-size: 11px; color: var(--mute); display: flex; gap: 8px; align-items: center; }
+.msg .del { border: 0; background: transparent; color: var(--mute); font-size: 11px; padding: 0; text-decoration: underline; }
+.composer { display: flex; gap: 8px; }
+.composer input {
+  flex: 1; min-width: 0; font: inherit; font-size: 16px; padding: 10px 12px; border: 1px solid var(--line);
+  border-radius: 10px; background: var(--card); color: var(--ink);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .slot, .date, .room { transition: background-color .15s, border-color .15s; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <div class="brand">
+      <h1>音楽研究部</h1>
+      <p>音楽研究部 練習枠予約</p>
+    </div>
+    <div class="hright">
+      <div class="sync" id="sync" data-s="load" role="status"><i></i><span id="sync-t">同期中…</span></div>
+      <button type="button" class="me" id="me-btn">プロフィール登録</button>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="画面">
+    <button type="button" data-tab="book" aria-pressed="true">枠表</button>
+    <button type="button" data-tab="shift" aria-pressed="false">シフト</button>
+    <button type="button" data-tab="board" aria-pressed="false">募集</button>
+    <button type="button" data-tab="chat" aria-pressed="false">チャット</button>
+  </nav>
+
+  <div class="view" id="view-book">
+    <div class="dates" id="dates" role="group" aria-label="日付"></div>
+    <div class="rooms" id="rooms" role="group" aria-label="練習場所"></div>
+
+    <section aria-live="polite">
+      <div class="dayhead"><h2 id="day-title"></h2><span id="day-hours"></span></div>
+      <ul class="slots" id="slots" style="margin-top:10px"></ul>
+    </section>
+
+    <section class="mine-list" id="mine" hidden>
+      <h3>自分の予約</h3>
+      <ul id="mine-ul"></ul>
+    </section>
+
+    <p class="note" id="foot"></p>
+  </div>
+
+  <div class="view" id="view-shift" hidden>
+    <div class="banner" id="shift-local" hidden><p>共有の設定が使えないため、シフトの機能は使えません。</p></div>
+    <div class="view" id="shift-main">
+      <div class="dayhead">
+        <h2>平日のシフト</h2>
+        <div class="acts">
+          <select id="q-select" aria-label="クォーター"></select>
+          <button type="button" class="btn ghost" id="q-new" hidden>クォーターを作る</button>
+        </div>
+      </div>
+      <p class="note" id="q-info"></p>
+      <div class="grid-wrap" id="grid-wrap" hidden><table class="grid" id="shift-grid"></table></div>
+      <p class="note" id="grid-note"></p>
+
+      <section class="view" id="admin-panel" hidden>
+        <h3 class="sub">幹部メニュー</h3>
+        <div class="acts" id="admin-actions"></div>
+        <p class="report" id="admin-report"></p>
+      </section>
+
+      <section class="view">
+        <h3 class="sub">自分のバンドの希望(第三希望まで)</h3>
+        <div class="view" id="pref-list"></div>
+      </section>
+
+      <section class="view">
+        <div class="dayhead"><h3 class="sub">バンド一覧</h3><button type="button" class="btn ghost" id="band-new">バンドを作る</button></div>
+        <ul class="posts" id="band-list"></ul>
+        <p class="note">同じ枠に希望が重なったときは、バンドのメンバーでいちばん高い学年を優先し、同じ学年なら抽選で決めます。</p>
+      </section>
+    </div>
+  </div>
+
+  <div class="view" id="view-chat" hidden>
+    <div class="banner" id="chat-local" hidden><p>共有の設定が使えないため、チャットは使えません。</p></div>
+    <div class="view" id="chat-main">
+      <div class="dayhead">
+        <h2 id="chat-title">バンドのチャット</h2>
+        <select id="chat-band" aria-label="バンド"></select>
+      </div>
+      <p class="empty" id="chat-empty" hidden></p>
+      <p class="note" id="chat-note" hidden></p>
+      <div class="chatbox" id="chat-box" hidden>
+        <div class="msgs" id="chat-msgs" aria-live="polite"></div>
+        <form class="composer" id="chat-form" autocomplete="off">
+          <input id="chat-input" maxlength="300" placeholder="メッセージを書く" aria-label="メッセージ">
+          <button type="submit" class="btn primary" id="chat-send">送信</button>
+        </form>
+      </div>
+      <p class="note">メッセージは暗号化され、所属バンドのメンバー以外には読めません。バンドから外された人は、外される前の会話を読めたままになります。</p>
+    </div>
+  </div>
+
+  <div class="view" id="view-board" hidden>
+    <div class="banner" id="board-banner" hidden>
+      <p>プロフィールにパートを登録すると、自分のパート向けの募集だけを表示できます。</p>
+      <button type="button" class="btn primary" id="banner-btn">パートを登録</button>
+    </div>
+    <div class="rooms" role="group" aria-label="表示する募集">
+      <button class="room" type="button" id="flt-mine" aria-pressed="true"><span class="rn">自分のパート向け</span></button>
+      <button class="room" type="button" id="flt-all" aria-pressed="false"><span class="rn">すべて</span></button>
+    </div>
+    <div class="dayhead"><h2>メンバー募集</h2><button type="button" class="btn primary" id="post-btn">募集する</button></div>
+    <ul class="posts" id="board-list" aria-live="polite"></ul>
+    <p class="note">連絡先(LINE名など)を書くと、部員全員に見えます。パートの絞り込みは表示の切り替えで、投稿そのものは「すべて」で誰でも見られます。</p>
+  </div>
+</div>
+
+<div id="sheet-wrap" hidden>
+  <form id="sheet" autocomplete="off">
+    <h2 id="sheet-title">練習枠を予約</h2>
+    <p class="when" id="sheet-when"></p>
+    <div class="field"><label for="band">バンド名 / 名前</label><input id="band" maxlength="24" required placeholder="例: ハチミツ・ガレージ"></div>
+    <div class="field"><label for="memo">メモ(任意)</label><input id="memo" maxlength="40" placeholder="例: 4人 / ドラム使います"></div>
+    <div class="actions">
+      <button type="button" class="btn ghost" id="sheet-cancel">やめる</button>
+      <button type="submit" class="btn primary" id="sheet-ok">予約する</button>
+    </div>
+  </form>
+</div>
+
+<div class="wrap" id="prof-wrap" hidden>
+  <form class="sheet" id="prof-form" autocomplete="off">
+    <div class="gatehead">
+      <h1>音楽研究部</h1>
+      <div class="tag">STUDIO BOOKING</div>
+      <p class="gnote">はじめに、あなたのことを教えてください。入力した内容は部員のみんなに見えます。</p>
+    </div>
+    <h2 id="prof-title">プロフィール</h2>
+    <div class="field"><label for="nick">名前</label><input id="nick" maxlength="30" required placeholder="例: 村田柾陽"></div>
+    <div class="field"><label for="line">LINE名（表示名）</label><input id="line" maxlength="24" required placeholder="例: まさはる"></div>
+    <div class="field">
+      <label for="grade">学年</label>
+      <select id="grade" required>
+        <option value="">選んでください</option>
+        <option value="1">1年</option>
+        <option value="2">2年</option>
+        <option value="3">3年</option>
+        <option value="4">4年</option>
+        <option value="5">5年</option>
+        <option value="6">専攻科1年</option>
+        <option value="7">専攻科2年</option>
+      </select>
+    </div>
+    <div class="field"><label>担当パート(複数選べます)</label><div class="chips" id="prof-parts"></div></div>
+    <div class="field"><label for="bio">ひとこと(任意)</label><textarea id="bio" maxlength="60" rows="2" placeholder="例: ギターやってます！"></textarea></div>
+    <div class="actions">
+      <button type="button" class="btn ghost" id="prof-cancel">やめる</button>
+      <button type="button" class="btn primary" id="prof-save">保存する</button>
+    </div>
+  </form>
+</div>
+
+<div class="wrap" id="post-wrap" hidden>
+  <form class="sheet" id="post-form" autocomplete="off">
+    <h2>メンバーを募集</h2>
+    <div class="field"><label for="p-title">タイトル</label><input id="p-title" maxlength="30" required placeholder="例: 学祭ライブのキーボード募集"></div>
+    <div class="field"><label for="p-body">内容</label><textarea id="p-body" maxlength="200" rows="3" placeholder="ジャンル、練習日、レベルなど"></textarea></div>
+    <div class="field">
+      <label>募集するパート</label>
+      <div class="chips" id="post-parts"></div>
+      <span class="note">選んだパートの人に表示されます。選ばないと全パートに表示されます。</span>
+    </div>
+    <div class="field"><label for="p-contact">連絡先(任意)</label><input id="p-contact" maxlength="40" placeholder="例: LINE ○○"></div>
+    <div class="actions">
+      <button type="button" class="btn ghost" id="post-cancel">やめる</button>
+      <button type="submit" class="btn primary">投稿する</button>
+    </div>
+  </form>
+</div>
+
+<div class="wrap" id="q-wrap" hidden>
+  <form class="sheet" id="q-form" autocomplete="off">
+    <h2>クォーターを作る</h2>
+    <div class="field"><label for="q-name">名前</label><input id="q-name" maxlength="24" required placeholder="例: 2026年 第4クォーター"></div>
+    <div class="field"><label for="q-start">開始日</label><input id="q-start" type="date" required></div>
+    <div class="field"><label for="q-end">終了日</label><input id="q-end" type="date" required></div>
+    <div class="actions">
+      <button type="button" class="btn ghost" id="q-cancel">やめる</button>
+      <button type="submit" class="btn primary">作して受付を始める</button>
+    </div>
+  </form>
+</div>
+
+<div class="wrap" id="band-wrap" hidden>
+  <form class="sheet" id="band-form" autocomplete="off">
+    <h2 id="band-title">バンドを作る</h2>
+    <div class="field"><label for="band-name">バンド名</label><input id="band-name" maxlength="24" required placeholder="例: ハチミツ・ガレージ"></div>
+    <div class="field">
+      <label>メンバー</label>
+      <div class="chips" id="band-members"></div>
+      <span class="note">プロフィールを登録した人から選べます。</span>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn ghost" id="band-cancel">やめる</button>
+      <button type="submit" class="btn primary">保存する</button>
+    </div>
+  </form>
+</div>
+
+<div id="toast" role="status" hidden></div>
+
+<script>
+(function () {
+  var ROOMS = [{ id: "bushitsu", name: "部室" }];
+  var WD = ["日", "月", "火", "水", "木", "金", "土"];
+  var DAYS = 14;
+  var pad = function (n) { return String(n).padStart(2, "0"); };
+  var dkey = function (d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); };
+  var parse = function (k) { var p = k.split("-").map(Number); return new Date(p[0], p[1] - 1, p[2]); };
+  function range(a, b) { var r = []; for (var i = a; i < b; i++) r.push(i); return r; }
+  function hoursFor(d) { return range(9, 20); }
+  function h(tag, props) {
+    var e = document.createElement(tag);
+    props = props || {};
+    Object.keys(props).forEach(function (k) {
+      var v = props[k];
+      if (k === "class") e.className = v;
+      else if (k.indexOf("on") === 0) e.addEventListener(k.slice(2), v);
+      else if (v === true) e.setAttribute(k, "");
+      else if (v !== false && v != null) e.setAttribute(k, v);
+    });
+    for (var i = 2; i < arguments.length; i++) {
+      var kids = [].concat(arguments[i]);
+      kids.forEach(function (c) { if (c == null || c === false) return; e.append(c.nodeType ? c : document.createTextNode(c)); });
+    }
+    return e;
+  }
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+  var days = range(0, DAYS).map(function (i) { var d = new Date(today); d.setDate(d.getDate() + i); return d; });
+
+  var state = {
+    date: dkey(today), room: ROOMS[0].id, bookings: new Map(),
+    mode: "load", uid: null, admin: false, canWrite: true, db: null, pending: null, armed: null,
+    tab: "book", posts: new Map(), members: new Map(), onlyMine: true,
+    bands: new Map(), quarters: new Map(), prefs: new Map(), qid: null, editBand: null, autoNote: null, membersReady: false, gate: false,
+    chatBand: null, chatFor: null, chatUnsub: null, chatMsgs: [], chatRaw: [],
+    pair: null, pairP: null, keyCache: new Map(), keySig: "", keyRun: false
+  };
+
+  function slotId(date, room, hour) { return date + "_" + room + "_" + pad(hour); }
+  function booked(date, room) {
+    var out = {};
+    state.bookings.forEach(function (b) { if (b.date === date && b.room === room) out[b.hour] = b; });
+    return out;
+  }
+  function countFor(date, room) { return Object.keys(booked(date, room)).length; }
+  function ended(date, hour) {
+    var now = new Date();
+    var d = parse(date); d.setHours(hour + 1, 0, 0, 0);
+    return d <= now;
+  }
+
+  function setSync(s, t) { var el = $("sync"); el.dataset.s = s; $("sync-t").textContent = t; }
+
+  async function init() {
+    var db = null, user = null;
+    try { if (window.claude && claude.use) db = await claude.use("db"); } catch (e) {}
+    try { if (window.claude && claude.use) user = await claude.use("user"); } catch (e) {}
+    var uid = null;
+    try { uid = user ? await user.id() : null; } catch (e) {}
+    try { state.admin = user ? await user.canEdit() : false; } catch (e) {}
+    var cw = null;
+    try { cw = user ? await user.can("data.write") : null; } catch (e) {}
+    if (db && uid) {
+      state.mode = "shared"; state.uid = uid; state.db = db; state.canWrite = cw !== false;
+      setSync("load", "同期中…");
+      var timer = setTimeout(function () { setSync("error", "接続を確認中"); }, 10000);
+      try {
+        db.collection("bookings").where("date", ">=", dkey(today)).onSnapshot(function (snap) {
+          clearTimeout(timer);
+          var m = new Map();
+          snap.docs.forEach(function (d) { var v = d.data(); if (v && v.band) m.set(d.id, v); });
+          state.bookings = m;
+          if (!snap.metadata || !snap.metadata.fromCache) setSync("live", "みんなと共有中");
+          render();
+        }, function () { clearTimeout(timer); setSync("error", "つながりません"); render(); });
+        db.collection("members").onSnapshot(function (snap) {
+          var m = new Map();
+          snap.docs.forEach(function (d) { var v = d.data(); if (v && v.name) m.set(d.id, v); });
+          state.members = m;
+          if (!snap.metadata || !snap.metadata.fromCache || profileComplete(m.get(state.uid))) state.membersReady = true;
+          render();
+        }, function () {});
+        db.collection("posts").onSnapshot(function (snap) {
+          var m = new Map();
+          snap.docs.forEach(function (d) { var v = d.data(); if (v && v.title) m.set(d.id, v); });
+          state.posts = m; render();
+        }, function () {});
+        var sub = function (col, test, key) {
+          db.collection(col).onSnapshot(function (snap) {
+            var m = new Map();
+            snap.docs.forEach(function (d) { var v = d.data(); if (v && test(v)) m.set(d.id, v); });
+            state[key] = m; render();
+          }, function () {});
+        };
+        sub("bands", function (v) { return v.name; }, "bands");
+        sub("quarters", function (v) { return v.name && v.start && v.end; }, "quarters");
+        sub("prefs", function (v) { return v.bandId; }, "prefs");
+      } catch (e) { clearTimeout(timer); setSync("error", "つながりません"); }
+    } else {
+      setSync("error", "データベース接続エラー");
+    }
+    render();
+  }
+
+  async function book(date, room, hour, band, memo) {
+    var id = slotId(date, room, hour);
+    var rec = { date: date, room: room, hour: hour, band: band, memo: memo, uid: state.uid, at: Date.now() };
+    var ref = state.db.collection("bookings").doc(id);
+    var cur = await ref.get();
+    var v = cur.exists ? cur.data() : null;
+    if (v && v.band) throw "taken";
+    await ref.set(rec);
+  }
+  async function cancel(id) {
+    await state.db.collection("bookings").doc(id).delete();
+  }
+
+  var toastTimer;
+  function toast(msg) {
+    var t = $("toast"); t.textContent = msg; t.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.hidden = true; }, 3200);
+  }
+
+  function render() {
+    renderDates(); renderRooms(); renderSlots(); renderMine();
+    renderTabs(); renderMe(); renderBoard(); renderShift(); renderChat(); renderGate(); maybeMaintain();
+    $("foot").textContent = state.canWrite ? "自分の予約は取消できます。時間は1枠1時間、先に取った人が優先です。" : "このページは閲覧専用です。";
+  }
+
+  function renderDates() {
+    var box = $("dates"), left = box.scrollLeft;
+    box.replaceChildren();
+    days.forEach(function (d, i) {
+      var k = dkey(d), total = hoursFor(d).length * ROOMS.length, used = 0;
+      ROOMS.forEach(function (r) { used += countFor(k, r.id); });
+      if (d.getDay() >= 1 && d.getDay() <= 5) { total = SLOTS.length; used = shiftUsed(k); }
+      var w = d.getDay();
+      var b = h("button", {
+        class: "date" + (w === 6 ? " sat" : "") + (w === 0 ? " sun" : ""), type: "button",
+        "aria-pressed": String(k === state.date),
+        onclick: function () { state.date = k; state.armed = null; render(); }
+      },
+        h("span", { class: "mo" }, (i === 0 || d.getDate() === 1) ? (d.getMonth() + 1) + "月" : ""),
+        h("span", { class: "wd" }, i === 0 ? "今日" : WD[w]),
+        h("span", { class: "dn" }, String(d.getDate())),
+        h("span", { class: "fill" }, h("b", { style: "width:" + Math.round(used / total * 100) + "%" }))
+      );
+      box.append(b);
+    });
+    box.scrollLeft = left;
+  }
+
+  function renderRooms() {
+    var box = $("rooms"), d = parse(state.date), total = hoursFor(d).length;
+    box.hidden = ROOMS.length < 2;
+    box.replaceChildren();
+    if (box.hidden) return;
+    ROOMS.forEach(function (r) {
+      box.append(h("button", {
+        class: "room", type: "button", "aria-pressed": String(r.id === state.room),
+        onclick: function () { state.room = r.id; state.armed = null; render(); }
+      }, h("span", { class: "rn" }, r.name), h("span", { class: "rc" }, countFor(state.date, r.id) + "/" + total + " 埋まり")));
+    });
+  }
+
+  function renderSlots() {
+    var d = parse(state.date), room = ROOMS.filter(function (r) { return r.id === state.room; })[0];
+    $("day-title").textContent = (d.getMonth() + 1) + "月" + d.getDate() + "日(" + WD[d.getDay()] + ") " + room.name;
+    $("day-hours").textContent = (d.getDay() === 0 || d.getDay() === 6) ? "土日 9:00–20:00" : "平日 9:00–20:00（シフト制）";
+    var map = booked(state.date, state.room), ul = $("slots");
+    ul.replaceChildren();
+    if (d.getDay() >= 1 && d.getDay() <= 5) { renderShiftDay(d, ul); return; }
+    hoursFor(d).forEach(function (hr) {
+      var sbid = d.getDay() === 6 ? shiftBandAt(state.date, hr) : null;
+      if (sbid) {
+        ul.append(h("li", { class: "slot taken" + (ended(state.date, hr) ? " past" : "") },
+          h("div", { class: "t" }, hr + ":00", h("small", null, "–" + (hr + 1) + ":00")),
+          h("div", { class: "who" }, h("b", null, bandName(sbid)), h("span", null, "シフト")),
+          h("span")));
+        return;
+      }
+      var id = slotId(state.date, state.room, hr), b = map[hr], past = ended(state.date, hr);
+      var isMine = b && b.uid === state.uid;
+      var t = h("div", { class: "t" }, hr + ":00", h("small", null, "–" + (hr + 1) + ":00"));
+      var mid, act = null;
+      if (b) {
+        mid = h("div", { class: "who" }, h("b", null, b.band), b.memo ? h("span", null, b.memo) : null);
+        if (!past && (isMine || state.admin) && state.canWrite) {
+          var armed = state.armed === id;
+          act = h("button", {
+            class: "btn " + (armed ? "danger" : "ghost"), type: "button",
+            onclick: function () {
+              if (state.armed !== id) {
+                state.armed = id; renderSlots();
+                setTimeout(function () { if (state.armed === id) { state.armed = null; renderSlots(); } }, 3500);
+                return;
+              }
+              state.armed = null;
+              cancel(id).then(function () { toast("予約を取り消しました"); }, function () { toast("取り消せませんでした。"); });
+            }
+          }, armed ? "本当に取消" : "取消");
+        }
+      } else {
+        mid = h("div", { class: "who" }, h("span", { class: "free" }, past ? "終了" : "空き"));
+        if (!past) {
+          act = h("button", {
+            class: "btn primary", type: "button", disabled: !state.canWrite,
+            onclick: function () { openSheet(state.date, state.room, hr); }
+          }, state.canWrite ? "予約" : "閲覧のみ");
+        }
+      }
+      ul.append(h("li", { class: "slot" + (b ? " taken" : "") + (isMine ? " mine" : "") + (past ? " past" : "") }, t, mid, act || h("span")));
+    });
+  }
+
+  function renderMine() {
+    var arr = [], now = dkey(today);
+    state.bookings.forEach(function (b, id) { if (b.uid === state.uid && b.date >= now && !ended(b.date, b.hour)) arr.push([id, b]); });
+    arr.sort(function (a, b) { return a[0] < b[0] ? -1 : 1; });
+    $("mine").hidden = arr.length === 0;
+    var ul = $("mine-ul"); ul.replaceChildren();
+    arr.forEach(function (p) {
+      var b = p[1], d = parse(b.date), r = ROOMS.filter(function (x) { return x.id === b.room; })[0];
+      ul.append(h("li", null, h("button", {
+        type: "button",
+        onclick: function () { state.date = b.date; state.room = b.room; render(); window.scrollTo({ top: 0, behavior: "smooth" }); }
+      },
+        h("span", { class: "mt" }, (d.getMonth() + 1) + "/" + d.getDate() + "(" + WD[d.getDay()] + ") " + b.hour + ":00–" + (b.hour + 1) + ":00"),
+        h("span", { class: "mr" }, (r ? r.name : "") + " ・ " + b.band))));
+    });
+  }
+
+  var PARTS = ["ボーカル", "ギター", "ベース", "ドラム", "キーボード", "その他"];
+  function myProfile() { return state.members.get(state.uid) || null; }
+  function fail() { toast("操作できませんでした。もう一度お試しください"); }
+  function ago(ts) {
+    var m = Math.floor((Date.now() - (ts || 0)) / 60000);
+    if (m < 1) return "たった今";
+    if (m < 60) return m + "分前";
+    var hr = Math.floor(m / 60);
+    if (hr < 24) return hr + "時間前";
+    return Math.floor(hr / 24) + "日前";
+  }
+  function renderTabs() {
+    $("view-book").hidden = state.tab !== "book";
+    $("view-board").hidden = state.tab !== "board";
+    $("view-shift").hidden = state.tab !== "shift";
+    $("view-chat").hidden = state.tab !== "chat";
+    [].forEach.call(document.querySelectorAll(".tabs button"), function (b) {
+      b.setAttribute("aria-pressed", String(b.dataset.tab === state.tab));
+    });
+  }
+  function renderMe() {
+    var p = myProfile();
+    $("me-btn").textContent = p ? p.name + (p.parts && p.parts.length ? " ・ " + p.parts.join("/") : "") : "プロフィール登録";
+  }
+  function renderBoard() {
+    var p = myProfile(), mine = (p && p.parts) || [];
+    var on = state.onlyMine && mine.length > 0;
+    $("board-banner").hidden = mine.length > 0;
+    $("flt-mine").setAttribute("aria-pressed", String(on));
+    $("flt-all").setAttribute("aria-pressed", String(!on));
+    $("post-btn").disabled = !state.canWrite;
+    var arr = [];
+    state.posts.forEach(function (v, id) { arr.push([id, v]); });
+    arr.sort(function (a, b) {
+      var ca = a[1].closed ? 1 : 0, cb = b[1].closed ? 1 : 0;
+      return ca - cb || (b[1].at || 0) - (a[1].at || 0);
+    });
+    var shown = arr.filter(function (e) {
+      if (!on) return true;
+      var v = e[1], w = v.parts || [];
+      return v.uid === state.uid || w.length === 0 || w.some(function (x) { return mine.indexOf(x) >= 0; });
+    });
+    var ul = $("board-list"); ul.replaceChildren();
+    if (!shown.length) {
+      ul.append(h("li", { class: "empty" }, on
+        ? "あなたのパート向けの募集はまだありません。「すべて」を押すと他のパートの募集も見られます。"
+        : "まだ募集がありません。「募集する」から最初の投稿をどうぞ。"));
+      return;
+    }
+    shown.forEach(function (e) {
+      var id = e[0], v = e[1], author = state.members.get(v.uid), wanted = v.parts || [];
+      var chips = wanted.length
+        ? wanted.map(function (x) { return h("span", { class: "chip" + (mine.indexOf(x) >= 0 ? " hit" : "") }, x); })
+        : [h("span", { class: "chip" }, "パート不問")];
+      var acts = null;
+      if ((v.uid === state.uid || state.admin) && state.canWrite) {
+        var key = "p:" + id, armed = state.armed === key;
+        acts = h("div", { class: "acts" },
+          h("button", {
+            class: "btn ghost", type: "button",
+            onclick: function () {
+              updatePost(id, { closed: !v.closed }).then(function () { toast(v.closed ? "募集を再開しました" : "募集を終了しました"); }, fail);
+            }
+          }, v.closed ? "再開" : "終了"),
+          h("button", {
+            class: "btn " + (armed ? "danger" : "ghost"), type: "button",
+            onclick: function () {
+              if (state.armed !== key) {
+                state.armed = key; renderBoard();
+                setTimeout(function () { if (state.armed === key) { state.armed = null; renderBoard(); } }, 3500);
+                return;
+              }
+              state.armed = null;
+              deletePost(id).then(function () { toast("削除しました"); }, fail);
+            }
+          }, armed ? "本当に削除" : "削除"));
+      }
+      var by = (author ? author.name : "名無し") +
+        (author && author.parts && author.parts.length ? "(" + author.parts.join("/") + ")" : "") + " ・ " + ago(v.at);
+      ul.append(h("li", { class: "post" + (v.closed ? " closed" : "") },
+        h("div", { class: "post-top" }, h("div", { class: "chips" }, chips), v.closed ? h("span", { class: "closed-tag" }, "募集終了") : null),
+        h("h3", null, v.title),
+        v.body ? h("p", { class: "body" }, v.body) : null,
+        v.contact ? h("p", { class: "contact" }, "連絡先: " + v.contact) : null,
+        h("div", { class: "post-foot" }, h("span", { class: "by" }, by), acts)));
+    });
+  }
+
+  function profileComplete(p) { return !!(p && p.name && p.line && p.grade && p.parts && p.parts.length); }
+  function renderGate() {
+    var need = state.membersReady && state.canWrite && !profileComplete(myProfile());
+    if (need && !state.gate) { state.gate = true; openProfile(true); }
+    else if (!need && state.gate) {
+      state.gate = false;
+      var w = $("prof-wrap"); w.hidden = true; w.classList.remove("gate");
+      $("prof-cancel").hidden = false;
+    }
+  }
+  async function saveProfile(rec) {
+    await state.db.collection("members").doc(state.uid).set(rec);
+  }
+  async function addPost(rec) {
+    await state.db.collection("posts").doc().set(rec);
+  }
+  async function updatePost(id, patch) {
+    await state.db.collection("posts").doc(id).update(patch);
+  }
+  async function deletePost(id) {
+    await state.db.collection("posts").doc(id).delete();
+  }
+
+  function buildChips(boxId, selected) {
+    var box = $(boxId); box.replaceChildren();
+    PARTS.forEach(function (p) {
+      box.append(h("button", {
+        class: "chip", type: "button", "data-part": p, "aria-pressed": String(selected.indexOf(p) >= 0),
+        onclick: function (e) {
+          var b = e.currentTarget;
+          b.setAttribute("aria-pressed", String(b.getAttribute("aria-pressed") !== "true"));
+        }
+      }, p));
+    });
+  }
+  function pickedParts(boxId) {
+    return [].map.call($(boxId).querySelectorAll('button[aria-pressed="true"]'), function (b) { return b.dataset.part; });
+  }
+  function closeWrap(id) { if (id === "prof-wrap" && state.gate) return; $(id).hidden = true; }
+  function openProfile(gate) {
+    var p = myProfile(), g = gate === true;
+    $("prof-wrap").classList.toggle("gate", g);
+    $("prof-title").textContent = g ? "はじめに、プロフィールを登録" : "プロフィール";
+    $("prof-cancel").hidden = g;
+    $("nick").value = p ? p.name : (lsGet("kon.nick") || "");
+    $("grade").value = p && p.grade ? String(p.grade) : "";
+    $("line").value = p && p.line ? p.line : (lsGet("kon.line") || "");
+    $("bio").value = p && p.bio ? p.bio : "";
+    buildChips("prof-parts", p && p.parts ? p.parts : []);
+    $("prof-wrap").hidden = false;
+    setTimeout(function () { $("nick").focus(); }, 0);
+  }
+  function openPost() {
+    if (!myProfile()) { toast("先にプロフィールを登録してください"); openProfile(); return; }
+    $("p-title").value = ""; $("p-body").value = ""; $("p-contact").value = lsGet("kon.contact") || (myProfile().line ? "LINE " + myProfile().line : "");
+    buildChips("post-parts", []);
+    $("post-wrap").hidden = false;
+    setTimeout(function () { $("p-title").focus(); }, 0);
+  }
+
+  var SLOTS = range(9, 20).map(function (hr) {
+    return { id: "h" + hr, name: hr + "時台", t: hr + ":00–" + hr + ":55" };
+  });
+  var WD5 = [1, 2, 3, 4, 5, 6];
+  var NUM = ["一", "二", "三"];
+  var Q_STATUS = { collecting: "希望受付中", closed: "受付終了・調整中", published: "公開中" };
+  function skey(w, s) { return w + "_" + s; }
+  function slotLabel(key) {
+    var p = key.split("_"), s = SLOTS.filter(function (x) { return x.id === p[1]; })[0];
+    return WD[+p[0]] + " " + (s ? s.t : p[1]);
+  }
+  function bandName(id) { var b = state.bands.get(id); return b ? b.name : "(削除されたバンド)"; }
+  function bandGrade(b) {
+    var g = 0;
+    (b.memberIds || []).forEach(function (id) { var m = state.members.get(id); if (m && m.grade > g) g = m.grade; });
+    return g;
+  }
+  function gradeText(g) {
+    return ({1:"1年",2:"2年",3:"3年",4:"4年",5:"5年",6:"専攻科1年",7:"専攻科2年"})[g] || "学年未登録";
+  }
+  function qLabel(q) { return q.name + "(" + q.start.slice(5).replace("-", "/") + "〜" + q.end.slice(5).replace("-", "/") + ")"; }
+  function quartersSorted() {
+    var arr = [];
+    state.quarters.forEach(function (v, id) { arr.push([id, v]); });
+    arr.sort(function (a, b) { return a[1].start < b[1].start ? 1 : -1; });
+    return arr;
+  }
+  function currentQ() {
+    var arr = quartersSorted();
+    if (!arr.length) return null;
+    if (state.qid) { var f = arr.filter(function (e) { return e[0] === state.qid; })[0]; if (f) return f; }
+    var t = dkey(today);
+    var cov = arr.filter(function (e) { return e[1].start <= t && t <= e[1].end; })[0];
+    return cov || arr[0];
+  }
+  function quarterFor(k) {
+    var found = null;
+    state.quarters.forEach(function (q) { if (q.status === "published" && q.start <= k && k <= q.end) found = q; });
+    return found;
+  }
+  function shiftUsed(k) {
+    var q = quarterFor(k), w = parse(k).getDay(), n = 0;
+    if (q && q.assign) SLOTS.forEach(function (s) { if (q.assign[skey(w, s.id)]) n++; });
+    return n;
+  }
+  function shiftBandAt(dateStr, hr) {
+    var q = quarterFor(dateStr);
+    return q && q.assign ? q.assign[skey(parse(dateStr).getDay(), "h" + hr)] || null : null;
+  }
+  function renderShiftDay(d, ul) {
+    var k = dkey(d), q = quarterFor(k), w = d.getDay();
+    SLOTS.forEach(function (s) {
+      var bid = q && q.assign ? q.assign[skey(w, s.id)] : null, p = s.t.split("–");
+      ul.append(h("li", { class: "slot" + (bid ? " taken" : "") },
+        h("div", { class: "t" }, p[0], h("small", null, "–" + p[1])),
+        h("div", { class: "who" },
+          bid ? h("b", null, bandName(bid)) : h("span", { class: "free" }, q ? "割り当てなし" : "シフト未確定"),
+          h("span", null, s.name)),
+        h("span")));
+    });
+  }
+  function saveQuarter(id, rec) { return state.db.collection("quarters").doc(id).set(rec); }
+
+  function renderShift() {
+    var arr = quartersSorted(), cur = currentQ(), sel = $("q-select");
+    sel.replaceChildren();
+    arr.forEach(function (e) { sel.append(h("option", { value: e[0] }, e[1].name)); });
+    if (cur) sel.value = cur[0];
+    sel.hidden = !arr.length;
+    $("q-new").hidden = !state.admin;
+    $("q-info").textContent = cur
+      ? qLabel(cur[1]) + " ・ " + (Q_STATUS[cur[1].status] || "")
+      : (state.admin ? "クォーターがまだありません。「クォーターを作る」から始めてください。" : "幹部がクォーターを作ると、希望を出せるようになります。");
+    renderGrid(cur); renderAdmin(cur); renderPrefs(cur); renderBands();
+  }
+
+  function renderGrid(cur) {
+    var wrap = $("grid-wrap"), note = $("grid-note"), t = $("shift-grid");
+    t.replaceChildren();
+    if (!cur) { wrap.hidden = true; note.textContent = ""; return; }
+    var q = cur[1], editable = state.admin && q.status !== "published";
+    var visible = q.status === "published" || state.admin;
+    wrap.hidden = !visible;
+    note.textContent = q.status === "published" ? "" : (state.admin ? "調整中です。「確定して公開」を押すまで、部員には見えません。" : "シフトが確定すると、ここに表示されます。");
+    if (!visible) return;
+    var assign = q.assign || {}, head = h("tr", null, h("th", null, ""));
+    WD5.forEach(function (w) { head.append(h("th", { scope: "col" }, WD[w])); });
+    t.append(h("thead", null, head));
+    var body = h("tbody");
+    SLOTS.forEach(function (s) {
+      var tr = h("tr", null, h("th", { scope: "row" }, s.name, h("small", null, s.t)));
+      WD5.forEach(function (w) {
+        var k = skey(w, s.id), val = assign[k] || "";
+        if (!editable) { tr.append(h("td", null, val ? bandName(val) : "")); return; }
+        var sel = h("select", { "aria-label": slotLabel(k) });
+        sel.append(h("option", { value: "" }, "—"));
+        state.bands.forEach(function (b, id) { sel.append(h("option", { value: id }, b.name)); });
+        sel.value = val;
+        sel.addEventListener("change", function () {
+          var na = Object.assign({}, assign);
+          if (sel.value) Object.keys(na).forEach(function (kk) { if (na[kk] === sel.value) delete na[kk]; });
+          if (sel.value) na[k] = sel.value; else delete na[k];
+          saveQuarter(cur[0], Object.assign({}, q, { assign: na })).catch(fail);
+        });
+        tr.append(h("td", null, sel));
+      });
+      body.append(tr);
+    });
+    t.append(body);
+  }
+
+  function arm(key, fn) {
+    if (state.armed !== key) {
+      state.armed = key; renderShift();
+      setTimeout(function () { if (state.armed === key) { state.armed = null; renderShift(); } }, 3500);
+      return;
+    }
+    state.armed = null; fn();
+  }
+
+  function renderAdmin(cur) {
+    var panel = $("admin-panel");
+    panel.hidden = !(state.admin && cur);
+    if (panel.hidden) return;
+    var id = cur[0], q = cur[1], box = $("admin-actions");
+    box.replaceChildren();
+    var mk = function (label, cls, fn) { return h("button", { class: "btn " + cls, type: "button", onclick: fn }, label); };
+    var setStatus = function (s, msg) {
+      saveQuarter(id, Object.assign({}, q, { status: s })).then(function () { toast(msg); }, fail);
+    };
+    if (q.status === "collecting") box.append(mk("受付を締め切る", "primary", function () { setStatus("closed", "受付を締め切りました"); }));
+    if (q.status === "closed") {
+      var has = Object.keys(q.assign || {}).length > 0, ak = "auto:" + id, aa = state.armed === ak;
+      box.append(mk(has ? (aa ? "本当に組み直す" : "自動で組み直す") : "自動でシフトを組む", aa ? "danger" : "primary", function () {
+        if (has) arm(ak, function () { runAuto(cur); }); else runAuto(cur);
+      }));
+      box.append(mk("確定して公開", "primary", function () { setStatus("published", "シフトを公開しました"); }));
+      box.append(mk("受付を再開", "ghost", function () { setStatus("collecting", "受付を再開しました"); }));
+    }
+    if (q.status === "published") box.append(mk("公開を取り下げる", "ghost", function () { setStatus("closed", "公開を取り下げました"); }));
+    var dk = "qdel:" + id, da = state.armed === dk;
+    box.append(mk(da ? "本当に削除" : "クォーターを削除", da ? "danger" : "ghost", function () {
+      arm(dk, function () { state.db.collection("quarters").doc(id).delete().then(function () { toast("削除しました"); }, fail); });
+    }));
+    var missing = [], total = 0;
+    state.bands.forEach(function (b, bid) { total++; if (!state.prefs.has(id + "__" + bid)) missing.push(b.name); });
+    $("admin-report").textContent = "希望を出したバンド: " + (total - missing.length) + " / " + total +
+      (missing.length ? "\n未提出: " + missing.join("、") : "") +
+      (state.autoNote && state.autoNote.id === id ? "\n" + state.autoNote.text : "");
+  }
+
+  function runAuto(cur) {
+    var q = cur[1], list = [];
+    state.bands.forEach(function (b, id) {
+      list.push({ id: id, name: b.name, g: bandGrade(b), pref: (state.prefs.get(cur[0] + "__" + id) || {}).choices || [] });
+    });
+    var assign = {}, done = {}, rounds = [0, 0, 0], contested = 0;
+    for (var r = 0; r < 3; r++) {
+      var wants = {};
+      list.forEach(function (x) {
+        var k = x.pref[r];
+        if (done[x.id] || !k || assign[k]) return;
+        (wants[k] = wants[k] || []).push(x);
+      });
+      Object.keys(wants).forEach(function (k) {
+        var c = wants[k].slice().sort(function () { return Math.random() - 0.5; }).sort(function (a, b) { return b.g - a.g; });
+        assign[k] = c[0].id; done[c[0].id] = true; rounds[r]++;
+        if (c.length > 1) contested++;
+      });
+    }
+    var left = list.filter(function (x) { return !done[x.id]; }).map(function (x) { return x.name; });
+    state.autoNote = {
+      id: cur[0],
+      text: "自動で組みました。第一希望 " + rounds[0] + "件、第二希望 " + rounds[1] + "件、第三希望 " + rounds[2] + "件。" +
+        "希望が重なった枠 " + contested + "件は、学年(同じなら抽選)で決めました。" +
+        (left.length ? "\n決まらなかったバンド: " + left.join("、") + "(表で手動で入れてください)" : "\n全バンドが決まりました。")
+    };
+    saveQuarter(cur[0], Object.assign({}, q, { assign: assign })).then(function () { toast("シフトを組みました"); }, fail);
+  }
+
+  function renderPrefs(cur) {
+    var box = $("pref-list"), mine = [];
+    box.replaceChildren();
+    state.bands.forEach(function (b, id) { if ((b.memberIds || []).indexOf(state.uid) >= 0) mine.push([id, b]); });
+    if (!mine.length) { box.append(h("p", { class: "empty" }, "あなたが入っているバンドはまだありません。下の「バンドを作る」から登録してください。")); return; }
+    if (!cur) { box.append(h("p", { class: "empty" }, "クォーターが始まると、ここから希望を出せます。")); return; }
+    mine.forEach(function (e) { box.append(prefCard(e[0], e[1], cur)); });
+  }
+  function prefCard(bid, b, cur) {
+    var q = cur[1], pid = cur[0] + "__" + bid, saved = state.prefs.get(pid);
+    var open = q.status === "collecting" && state.canWrite, els = [];
+    var fields = [0, 1, 2].map(function (i) {
+      var s = h("select", { id: "pref-" + bid + "-" + i, disabled: !open });
+      s.append(h("option", { value: "" }, i === 0 ? "選んでください" : "選ばない"));
+      WD5.forEach(function (w) { SLOTS.forEach(function (sl) { var k = skey(w, sl.id); s.append(h("option", { value: k }, slotLabel(k))); }); });
+      s.value = saved && saved.choices && saved.choices[i] ? saved.choices[i] : "";
+      els.push(s);
+      return h("div", { class: "field" }, h("label", { for: s.id }, "第" + NUM[i] + "希望"), s);
+    });
+    var btn = open ? h("button", {
+      class: "btn primary", type: "button",
+      onclick: function () {
+        var vals = els.map(function (e) { return e.value; });
+        if (!vals[0]) { toast("第一希望を選んでください"); return; }
+        var ch = vals.filter(Boolean);
+        if (ch.some(function (v, i) { return ch.indexOf(v) !== i; })) { toast("同じ枠は2回選べません"); return; }
+        state.db.collection("prefs").doc(pid).set({ qid: cur[0], bandId: bid, choices: ch, by: state.uid, at: Date.now() })
+          .then(function () { toast("希望を出しました"); }, fail);
+      }
+    }, saved ? "希望を更新" : "希望を出す") : null;
+    var status = open ? null : h("p", { class: "note" }, saved ? "受付は終了しました。" : "このクォーターの希望は出ていません。");
+    return h("div", { class: "post" }, h("h3", null, b.name), h("div", { class: "pref-sel" }, fields), btn, status);
+  }
+
+  function renderBands() {
+    var ul = $("band-list"), arr = [];
+    ul.replaceChildren();
+    state.bands.forEach(function (b, id) { arr.push([id, b]); });
+    arr.sort(function (a, b) { return a[1].name < b[1].name ? -1 : 1; });
+    $("band-new").disabled = !state.canWrite;
+    if (!arr.length) { ul.append(h("li", { class: "empty" }, "まだバンドがありません。「バンドを作る」から登録してください。")); return; }
+    arr.forEach(function (e) {
+      var id = e[0], b = e[1], acts = null;
+      var names = (b.memberIds || []).map(function (m) {
+        var p = state.members.get(m);
+        return p ? p.name + (p.grade ? "(" + gradeText(p.grade) + ")" : "") : "未登録";
+      });
+      if ((b.by === state.uid || state.admin) && state.canWrite) {
+        var dk = "b:" + id, da = state.armed === dk;
+        acts = h("div", { class: "acts" },
+          h("button", { class: "btn ghost", type: "button", onclick: function () { openBand(id); } }, "編集"),
+          h("button", {
+            class: "btn " + (da ? "danger" : "ghost"), type: "button",
+            onclick: function () { arm(dk, function () { state.db.collection("bands").doc(id).delete().then(function () { toast("削除しました"); }, fail); }); }
+          }, da ? "本当に削除" : "削除"));
+      }
+      ul.append(h("li", { class: "post" },
+        h("h3", null, b.name),
+        h("p", { class: "body" }, names.join("、")),
+        h("div", { class: "post-foot" }, h("span", { class: "by" }, "シフトで使う学年: " + gradeText(bandGrade(b))), acts)));
+    });
+  }
+
+  function buildMemberChips(sel) {
+    var box = $("band-members"), arr = [];
+    box.replaceChildren();
+    state.members.forEach(function (m, id) { arr.push([id, m]); });
+    arr.sort(function (a, b) { return a[1].name < b[1].name ? -1 : 1; });
+    arr.forEach(function (e) {
+      box.append(h("button", {
+        class: "chip", type: "button", "data-id": e[0], "aria-pressed": String(sel.indexOf(e[0]) >= 0),
+        onclick: function (ev) { var b = ev.currentTarget; b.setAttribute("aria-pressed", String(b.getAttribute("aria-pressed") !== "true")); }
+      }, e[1].name + (e[1].grade ? "(" + gradeText(e[1].grade) + ")" : "")));
+    });
+  }
+  function openBand(id) {
+    if (!myProfile()) { toast("先にプロフィールを登録してください"); openProfile(); return; }
+    state.editBand = id;
+    var b = id ? state.bands.get(id) : null;
+    $("band-title").textContent = id ? "バンドを編集" : "バンドを作る";
+    $("band-name").value = b ? b.name : "";
+    buildMemberChips(b ? (b.memberIds || []) : [state.uid]);
+    $("band-wrap").hidden = false;
+    setTimeout(function () { $("band-name").focus(); }, 0);
+  }
+  function openQ() {
+    $("q-name").value = ""; $("q-start").value = ""; $("q-end").value = "";
+    $("q-wrap").hidden = false;
+    setTimeout(function () { $("q-name").focus(); }, 0);
+  }
+
+  var subtle = (window.crypto && window.crypto.subtle) || null;
+  function b64(buf) {
+    var a = new Uint8Array(buf), s = "";
+    for (var i = 0; i < a.length; i++) s += String.fromCharCode(a[i]);
+    return btoa(s);
+  }
+  function unb64(s) {
+    var bin = atob(s), a = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i);
+    return a;
+  }
+  async function genPair() {
+    var kp = await subtle.generateKey({ name: "RSA-OAEP", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-256" }, true, ["encrypt", "decrypt"]);
+    return { pub: await subtle.exportKey("jwk", kp.publicKey), priv: await subtle.exportKey("jwk", kp.privateKey) };
+  }
+  function impPub(jwk) { return subtle.importKey("jwk", jwk, { name: "RSA-OAEP", hash: "SHA-256" }, false, ["encrypt"]); }
+  function impPriv(jwk) { return subtle.importKey("jwk", jwk, { name: "RSA-OAEP", hash: "SHA-256" }, false, ["decrypt"]); }
+  function newBandKey() { return subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]); }
+  async function wrapKey(aes, pubJwk) {
+    var raw = await subtle.exportKey("raw", aes);
+    return b64(await subtle.encrypt({ name: "RSA-OAEP" }, await impPub(pubJwk), raw));
+  }
+  async function unwrapKey(w, privJwk) {
+    var raw = await subtle.decrypt({ name: "RSA-OAEP" }, await impPriv(privJwk), unb64(w));
+    return subtle.importKey("raw", raw, { name: "AES-GCM" }, true, ["encrypt", "decrypt"]);
+  }
+  async function encText(aes, text) {
+    var iv = window.crypto.getRandomValues(new Uint8Array(12));
+    var ct = await subtle.encrypt({ name: "AES-GCM", iv: iv }, aes, new TextEncoder().encode(text));
+    return { iv: b64(iv), ct: b64(ct) };
+  }
+  async function decText(aes, iv, ct) {
+    var pt = await subtle.decrypt({ name: "AES-GCM", iv: unb64(iv) }, aes, unb64(ct));
+    return new TextDecoder().decode(pt);
+  }
+
+  function loadPair() {
+    if (state.pairP) return state.pairP;
+    if (!subtle || !state.db || !state.uid) return Promise.resolve(null);
+    state.pairP = (async function () {
+      var ref = state.db.collection("users").doc(state.uid).collection("keys").doc("keypair");
+      var snap = await ref.get();
+      var d = snap.exists ? snap.data() : null;
+      if (!d || !d.priv || !d.pub) {
+        var p = await genPair();
+        await ref.set({ pub: p.pub, priv: p.priv, at: Date.now() });
+        d = p;
+      }
+      state.pair = { pub: d.pub, priv: d.priv };
+      return state.pair;
+    })().catch(function () { state.pairP = null; return null; });
+    return state.pairP;
+  }
+  async function publishPub() {
+    var me = myProfile();
+    if (!me || !state.pair) return;
+    if (me.pub && me.pub.n === state.pair.pub.n) return;
+    await state.db.collection("members").doc(state.uid).update({ pub: state.pair.pub });
+  }
+  async function maintainKeys() {
+    var pair = await loadPair();
+    if (!pair) return;
+    await publishPub();
+    var mine = myBands();
+    for (var i = 0; i < mine.length; i++) {
+      var bid = mine[i][0], band = mine[i][1];
+      var col = state.db.collection("bands").doc(bid).collection("keys");
+      var snap = await col.get(), have = {};
+      snap.docs.forEach(function (d) { have[d.id] = d.data(); });
+      var aes = state.keyCache.get(bid) || null;
+      if (!aes && have[state.uid]) {
+        try { aes = await unwrapKey(have[state.uid].w, pair.priv); state.keyCache.set(bid, aes); } catch (e) { aes = null; }
+      }
+      if (!aes && snap.empty) {
+        aes = await newBandKey(); state.keyCache.set(bid, aes); have = {};
+      }
+      if (!aes) continue;
+      var ids = [state.uid].concat((band.memberIds || []).filter(function (x) { return x !== state.uid; }));
+      for (var j = 0; j < ids.length; j++) {
+        var m = state.members.get(ids[j]);
+        if (have[ids[j]] || !m || !m.pub) continue;
+        var w = await wrapKey(aes, m.pub);
+        await state.db.collection("bands").doc(bid).collection("keys").doc(ids[j]).set({ w: w, by: state.uid, at: Date.now() });
+      }
+    }
+    renderChat();
+  }
+  function keySig() {
+    var me = myProfile();
+    return (me && me.pub ? "1" : "0") + "#" + myBands().map(function (e) {
+      return e[0] + ":" + (e[1].memberIds || []).map(function (id) {
+        var m = state.members.get(id);
+        return id + (m && m.pub ? "+" : "-");
+      }).join(",");
+    }).join("|");
+  }
+  function maybeMaintain() {
+    if (state.mode !== "shared" || !state.membersReady || !subtle || !profileComplete(myProfile())) return;
+    if (state.keyRun) return;
+    var sig = keySig();
+    if (sig === state.keySig) return;
+    state.keySig = sig; state.keyRun = true;
+    maintainKeys().catch(function () {}).then(function () { state.keyRun = false; maybeMaintain(); });
+  }
+
+  function fmtTime(ts) { var d = new Date(ts || 0); return (d.getMonth() + 1) + "/" + d.getDate() + " " + d.getHours() + ":" + pad(d.getMinutes()); }
+  function myBands() {
+    var arr = [];
+    state.bands.forEach(function (b, id) { if ((b.memberIds || []).indexOf(state.uid) >= 0) arr.push([id, b]); });
+    arr.sort(function (a, b) { return a[1].name < b[1].name ? -1 : 1; });
+    return arr;
+  }
+  function renderChat() {
+    var mine = myBands(), sel = $("chat-band");
+    sel.replaceChildren();
+    mine.forEach(function (e) { sel.append(h("option", { value: e[0] }, e[1].name)); });
+    if (!mine.some(function (e) { return e[0] === state.chatBand; })) state.chatBand = mine.length ? mine[0][0] : null;
+    if (state.chatBand) sel.value = state.chatBand;
+    sel.hidden = mine.length < 2;
+    var band = state.chatBand ? state.bands.get(state.chatBand) : null;
+    $("chat-title").textContent = band ? band.name : "バンドのチャット";
+    $("chat-empty").hidden = !!state.chatBand;
+    $("chat-empty").textContent = "所属しているバンドがありません。「シフト」タブの「バンドを作る」で登録するか、幹部にバンドへ入れてもらってください。";
+    $("chat-box").hidden = !state.chatBand;
+    var ready = !!state.chatBand && state.keyCache.has(state.chatBand);
+    $("chat-note").hidden = !state.chatBand || ready;
+    $("chat-note").textContent = subtle
+      ? "暗号化の鍵を準備しています。バンドのメンバーがアプリを開くと、自動で使えるようになります。"
+      : "この環境では暗号化が使えないため、チャットは使えません。";
+    $("chat-input").disabled = !state.canWrite || !ready;
+    $("chat-send").disabled = !state.canWrite || !ready;
+    renderMsgs();
+    ensureChat();
+  }
+  function ensureChat() {
+    var want = state.tab === "chat" && state.chatBand && state.db ? state.chatBand : null;
+    if (want === state.chatFor) return;
+    if (state.chatUnsub) { state.chatUnsub(); state.chatUnsub = null; }
+    state.chatFor = want; state.chatMsgs = [];
+    if (!want) return;
+    state.chatRaw = [];
+    var u1 = state.db.collection("bands").doc(want).collection("messages").orderBy("at", "desc").limit(150).onSnapshot(function (snap) {
+      var arr = [];
+      snap.docs.forEach(function (d) { var v = d.data(); if (v && v.ct) arr.push([d.id, v]); });
+      arr.reverse();
+      state.chatRaw = arr; rebuildMsgs();
+    }, function () { toast("チャットを読み込めませんでした"); });
+    var u2 = state.db.collection("bands").doc(want).collection("keys").doc(state.uid).onSnapshot(function (snap) {
+      if (!snap.exists || state.keyCache.has(want)) return;
+      loadPair().then(function (pair) { return pair ? unwrapKey(snap.data().w, pair.priv) : null; }).then(function (k) {
+        if (k) { state.keyCache.set(want, k); renderChat(); rebuildMsgs(); }
+      }).catch(function () { toast("鍵を読み込めませんでした"); });
+    }, function () {});
+    state.chatUnsub = function () { u1(); u2(); };
+  }
+  async function rebuildMsgs() {
+    var bid = state.chatFor, aes = bid ? state.keyCache.get(bid) : null, out = [];
+    if (aes) {
+      for (var i = 0; i < state.chatRaw.length; i++) {
+        var e = state.chatRaw[i], v = e[1], t = "";
+        try { t = await decText(aes, v.iv, v.ct); } catch (err) { t = "(読み込めないメッセージ)"; }
+        out.push([e[0], { uid: v.uid, text: t, at: v.at }]);
+      }
+    }
+    if (bid !== state.chatFor) return;
+    state.chatMsgs = out; renderMsgs(true);
+  }
+  function renderMsgs(stick) {
+    var box = $("chat-msgs");
+    var near = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+    box.replaceChildren();
+    if (!state.chatMsgs.length) box.append(h("p", { class: "empty" }, "まだメッセージがありません。最初の一言をどうぞ。"));
+    state.chatMsgs.forEach(function (e) {
+      var id = e[0], v = e[1], me = v.uid === state.uid, m = state.members.get(v.uid), del = null;
+      if ((me || state.admin) && state.canWrite) {
+        var key = "m:" + id, a = state.armed === key;
+        del = h("button", {
+          class: "del", type: "button",
+          onclick: function () {
+            if (state.armed !== key) {
+              state.armed = key; renderMsgs();
+              setTimeout(function () { if (state.armed === key) { state.armed = null; renderMsgs(); } }, 3500);
+              return;
+            }
+            state.armed = null;
+            state.db.collection("bands").doc(state.chatFor).collection("messages").doc(id).delete().catch(fail);
+          }
+        }, a ? "本当に削除" : "削除");
+      }
+      box.append(h("div", { class: "msg" + (me ? " me" : "") },
+        me ? null : h("span", { class: "who2" }, m ? m.name : "名無し"),
+        h("div", { class: "bub" }, v.text),
+        h("div", { class: "meta" }, fmtTime(v.at), del)));
+    });
+    if (stick || near) box.scrollTop = box.scrollHeight;
+  }
+
+  function openSheet(date, room, hour) {
+    state.pending = { date: date, room: room, hour: hour };
+    var d = parse(date), r = ROOMS.filter(function (x) { return x.id === room; })[0];
+    $("sheet-when").textContent = (d.getMonth() + 1) + "/" + d.getDate() + "(" + WD[d.getDay()] + ") " + hour + ":00–" + (hour + 1) + ":00 ・ " + r.name;
+    $("band").value = lsGet("kon.band") || "";
+    $("memo").value = "";
+    $("sheet-wrap").hidden = false;
+    setTimeout(function () { $("band").focus(); }, 0);
+  }
+  function closeSheet() { $("sheet-wrap").hidden = true; state.pending = null; $("sheet-ok").disabled = false; }
+  $("sheet-cancel").addEventListener("click", closeSheet);
+  $("sheet-wrap").addEventListener("click", function (e) { if (e.target === $("sheet-wrap")) closeSheet(); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape") return;
+    if (!$("sheet-wrap").hidden) closeSheet();
+    closeWrap("prof-wrap"); closeWrap("post-wrap"); closeWrap("q-wrap"); closeWrap("band-wrap");
+  });
+  $("sheet").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var p = state.pending, band = $("band").value.trim(), memo = $("memo").value.trim();
+    if (!p || !band) return;
+    lsSet("kon.band", band);
+    $("sheet-ok").disabled = true;
+    book(p.date, p.room, p.hour, band, memo).then(function () {
+      closeSheet(); toast("予約しました");
+    }, function (err) {
+      closeSheet();
+      toast(err === "taken" ? "先に予約が入っていました" : "予約できませんでした。もう一度お試しください");
+    });
+  });
+
+  [].forEach.call(document.querySelectorAll(".tabs button"), function (b) {
+    b.addEventListener("click", function () { state.tab = b.dataset.tab; state.armed = null; render(); });
+  });
+  $("flt-mine").addEventListener("click", function () {
+    if (!(myProfile() && myProfile().parts && myProfile().parts.length)) { toast("先にパートを登録してください"); openProfile(); return; }
+    state.onlyMine = true; renderBoard();
+  });
+  $("flt-all").addEventListener("click", function () { state.onlyMine = false; renderBoard(); });
+  $("me-btn").addEventListener("click", openProfile);
+  $("banner-btn").addEventListener("click", openProfile);
+  $("post-btn").addEventListener("click", openPost);
+  $("prof-cancel").addEventListener("click", function () { closeWrap("prof-wrap"); });
+  $("post-cancel").addEventListener("click", function () { closeWrap("post-wrap"); });
+  $("prof-wrap").addEventListener("click", function (e) { if (e.target === $("prof-wrap")) closeWrap("prof-wrap"); });
+  $("post-wrap").addEventListener("click", function (e) { if (e.target === $("post-wrap")) closeWrap("post-wrap"); });
+  async function handleProfileSave() {
+    var button = $("prof-save");
+    if (button.disabled) return;
+    var name = $("nick").value.trim();
+    var line = $("line").value.trim();
+    var parts = pickedParts("prof-parts");
+    var grade = Number($("grade").value) || 0;
+    if (!name) { toast("名前を入力してください"); $("nick").focus(); return; }
+    if (!line) { toast("LINE名を入力してください"); $("line").focus(); return; }
+    if (!grade) { toast("学年を選んでください"); $("grade").focus(); return; }
+    if (!parts.length) { toast("パートを1つ以上選んでください"); return; }
+
+    button.disabled = true;
+    button.textContent = "保存中…";
+    try {
+      lsSet("kon.nick", name);
+      lsSet("kon.line", line);
+      var previous = myProfile();
+      var record = {
+        name: name,
+        line: line,
+        bio: $("bio").value.trim(),
+        parts: parts,
+        grade: grade,
+        at: Date.now()
+      };
+      if (previous && previous.pub) record.pub = previous.pub;
+      await saveProfile(record);
+      closeWrap("prof-wrap");
+      toast("プロフィールを保存しました");
+      render();
+    } catch (err) {
+      console.error("profile save failed", err);
+      toast("保存できませんでした。通信状態を確認して、もう一度お試しください");
+    } finally {
+      button.disabled = false;
+      button.textContent = "保存する";
+    }
+  }
+  $("prof-save").addEventListener("click", handleProfileSave);
+  $("prof-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    handleProfileSave();
+  });
+  $("post-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var title = $("p-title").value.trim(), contact = $("p-contact").value.trim();
+    if (!title) return;
+    lsSet("kon.contact", contact);
+    addPost({
+      uid: state.uid, title: title, body: $("p-body").value.trim(), contact: contact,
+      parts: pickedParts("post-parts"), closed: false, at: Date.now()
+    }).then(function () {
+      closeWrap("post-wrap"); state.tab = "board"; render(); toast("募集を投稿しました");
+    }, fail);
+  });
+
+  $("q-select").addEventListener("change", function () { state.qid = $("q-select").value; renderShift(); });
+  $("q-new").addEventListener("click", openQ);
+  $("band-new").addEventListener("click", function () { openBand(null); });
+  $("q-cancel").addEventListener("click", function () { closeWrap("q-wrap"); });
+  $("band-cancel").addEventListener("click", function () { closeWrap("band-wrap"); });
+  $("q-wrap").addEventListener("click", function (e) { if (e.target === $("q-wrap")) closeWrap("q-wrap"); });
+  $("band-wrap").addEventListener("click", function (e) { if (e.target === $("band-wrap")) closeWrap("band-wrap"); });
+  $("q-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = $("q-name").value.trim(), s = $("q-start").value, en = $("q-end").value;
+    if (!name || !s || !en) return;
+    if (s > en) { toast("終了日は開始日より後にしてください"); return; }
+    var ref = state.db.collection("quarters").doc();
+    state.qid = ref.id;
+    ref.set({ name: name, start: s, end: en, status: "collecting", assign: {}, at: Date.now() }).then(function () {
+      closeWrap("q-wrap"); toast("クォーターを作りました");
+    }, fail);
+  });
+  $("band-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = $("band-name").value.trim();
+    var ids = [].map.call($("band-members").querySelectorAll('button[aria-pressed="true"]'), function (b) { return b.dataset.id; });
+    if (!name) return;
+    if (!ids.length) { toast("メンバーを1人以上選んでください"); return; }
+    var old = state.editBand ? state.bands.get(state.editBand) : null;
+    var rec = { name: name, memberIds: ids, by: old && old.by ? old.by : state.uid, at: Date.now() };
+    var p = state.editBand ? state.db.collection("bands").doc(state.editBand).set(rec) : state.db.collection("bands").doc().set(rec);
+    p.then(function () { closeWrap("band-wrap"); toast("バンドを保存しました"); }, fail);
+  });
+
+  $("chat-band").addEventListener("change", function () { state.chatBand = $("chat-band").value; render(); });
+  $("chat-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var text = $("chat-input").value.trim();
+    if (!text || !state.chatFor || !state.canWrite) return;
+    $("chat-input").value = "";
+    var aes = state.keyCache.get(state.chatFor), bid = state.chatFor;
+    if (!aes) { $("chat-input").value = text; toast("鍵の準備ができていません"); return; }
+    encText(aes, text).then(function (enc) {
+      return state.db.collection("bands").doc(bid).collection("messages").doc().set({ uid: state.uid, iv: enc.iv, ct: enc.ct, at: Date.now() });
+    }).catch(function () { $("chat-input").value = text; fail(); });
+  });
+
+  render();
+  init();
+})();
+</script>
+</body>
+</html>

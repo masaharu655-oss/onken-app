@@ -275,7 +275,7 @@
     </div>
   </div>
 
-  <!-- リマインドバー（予約アラート専用） -->
+  <!-- リマインドバー -->
   <div id="remind-area" class="remind-bar hidden"></div>
 
   <!-- ナビゲーションタブ -->
@@ -312,26 +312,24 @@
       <div id="timeline-list">読み込み中...</div>
     </div>
 
-    <!-- 自由予約フォーム -->
+    <!-- 自由予約フォーム（開始時刻・終了時刻を選択） -->
     <div class="card">
       <h3>空き枠を新規予約する</h3>
       <form id="form-reservation" onsubmit="handleReservation(event)">
         <label>予約日</label>
         <input type="date" id="res-date" required readonly style="background:#ede8df;">
-        <label>時間帯</label>
-        <select id="res-time" required>
-          <option value="09:00-10:00">09:00 - 10:00</option>
-          <option value="10:00-11:00">10:00 - 11:00</option>
-          <option value="11:00-12:00">11:00 - 12:00</option>
-          <option value="12:00-12:55">12:00 - 12:55</option>
-          <option value="13:00-13:55">13:00 - 13:55</option>
-          <option value="14:00-14:55">14:00 - 14:55</option>
-          <option value="15:00-15:55">15:00 - 15:55</option>
-          <option value="16:00-16:55">16:00 - 16:55</option>
-          <option value="17:00-17:55">17:00 - 17:55</option>
-          <option value="18:00-18:55">18:00 - 18:55</option>
-          <option value="19:00-19:55">19:00 - 19:55</option>
-        </select>
+        
+        <div style="display:flex; gap:12px;">
+          <div style="flex:1;">
+            <label>開始時刻</label>
+            <input type="time" id="res-start-time" min="09:00" max="20:00" value="12:00" required>
+          </div>
+          <div style="flex:1;">
+            <label>終了時刻</label>
+            <input type="time" id="res-end-time" min="09:00" max="20:00" value="13:00" required>
+          </div>
+        </div>
+
         <label>使用目的 / バンド名</label>
         <input type="text" id="res-purpose" placeholder="バンド名または目的を入力" required>
         <button type="submit">予約を確定する</button>
@@ -518,45 +516,45 @@
 
   // 確定シフト表データ（曜日常設シフト）
   const FIXED_WEEKLY_SCHEDULE = {
-    "月": {
-      "15:00-15:55": "キリカ",
-      "16:00-16:55": "ビギナーズラッカー",
-      "17:00-17:55": "りんごジャム",
-      "18:00-18:55": "予備バンド",
-      "19:00-19:55": "TAIMS"
-    },
-    "火": {
-      "13:00-13:55": "オトナ未満",
-      "15:00-15:55": "オセロり",
-      "16:00-16:55": "ROCK man",
-      "17:00-17:55": "私利私欲",
-      "18:00-18:55": "めっとめっと",
-      "19:00-19:55": "君と黄身"
-    },
-    "水": {
-      "15:00-15:55": "長女不安定",
-      "16:00-16:55": "Aster Stellar",
-      "17:00-17:55": "少年少女",
-      "18:00-18:55": "Honey Holic",
-      "19:00-19:55": "カカオ80%"
-    },
-    "木": {
-      "15:00-15:55": "真・人類",
-      "16:00-16:55": "こびと",
-      "17:00-17:55": "あまあまいちごショートケーキ",
-      "18:00-18:55": "ぷかぷかマヨネーズ",
-      "19:00-19:55": "The men's"
-    },
-    "金": {
-      "15:00-15:55": "きゅーそくストリート",
-      "16:00-16:55": "鮮脳",
-      "17:00-17:55": "ちりめんもんすたー",
-      "18:00-18:55": "アブレカブレ",
-      "19:00-19:55": "41mA"
-    },
-    "土": {
-      "14:00-14:55": "猫速96m"
-    }
+    "月": [
+      { start: "15:00", end: "15:55", band: "キリカ" },
+      { start: "16:00", end: "16:55", band: "ビギナーズラッカー" },
+      { start: "17:00", end: "17:55", band: "りんごジャム" },
+      { start: "18:00", end: "18:55", band: "予備バンド" },
+      { start: "19:00", end: "19:55", band: "TAIMS" }
+    ],
+    "火": [
+      { start: "13:00", end: "13:55", band: "オトナ未満" },
+      { start: "15:00", end: "15:55", band: "オセロり" },
+      { start: "16:00", end: "16:55", band: "ROCK man" },
+      { start: "17:00", end: "17:55", band: "私利私欲" },
+      { start: "18:00", end: "18:55", band: "めっとめっと" },
+      { start: "19:00", end: "19:55", band: "君と黄身" }
+    ],
+    "水": [
+      { start: "15:00", end: "15:55", band: "長女不安定" },
+      { start: "16:00", end: "16:55", band: "Aster Stellar" },
+      { start: "17:00", end: "17:55", band: "少年少女" },
+      { start: "18:00", end: "18:55", band: "Honey Holic" },
+      { start: "19:00", end: "19:55", band: "カカオ80%" }
+    ],
+    "木": [
+      { start: "15:00", end: "15:55", band: "真・人類" },
+      { start: "16:00", end: "16:55", band: "こびと" },
+      { start: "17:00", end: "17:55", band: "あまあまいちごショートケーキ" },
+      { start: "18:00", end: "18:55", band: "ぷかぷかマヨネーズ" },
+      { start: "19:00", end: "19:55", band: "The men's" }
+    ],
+    "金": [
+      { start: "15:00", end: "15:55", band: "きゅーそくストリート" },
+      { start: "16:00", end: "16:55", band: "鮮脳" },
+      { start: "17:00", end: "17:55", band: "ちりめんもんすたー" },
+      { start: "18:00", end: "18:55", band: "アブレカブレ" },
+      { start: "19:00", end: "19:55", band: "41mA" }
+    ],
+    "土": [
+      { start: "14:00", end: "14:55", band: "猫速96m" }
+    ]
   };
 
   const TIME_SLOTS = [
@@ -646,27 +644,28 @@
     const container = document.getElementById('timeline-list');
     container.innerHTML = '読み込み中...';
 
-    const dayFixedSchedule = FIXED_WEEKLY_SCHEDULE[dayJP] || {};
+    const dayFixedSchedule = FIXED_WEEKLY_SCHEDULE[dayJP] || [];
 
     db.collection('reservations').where('date', '==', dateStr).get().then(snapshot => {
-      let dbResMap = {};
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        dbResMap[data.time] = data;
-      });
+      let userResList = [];
+      snapshot.forEach(doc => userResList.push(doc.data()));
 
       let html = '';
       TIME_SLOTS.forEach(slot => {
+        const [slotStart, slotEnd] = slot.split('-');
+        const fixed = dayFixedSchedule.find(f => f.start === slotStart);
+        const userRes = userResList.find(r => (r.startTime <= slotStart && r.endTime > slotStart) || (r.time === slot));
+
         let statusHtml = '';
         let purposeText = '';
 
-        if (dayFixedSchedule[slot]) {
-          const bandName = dayFixedSchedule[slot];
-          statusHtml = `<span class="status-tag fixed">${bandName}</span>`;
+        if (fixed) {
+          statusHtml = `<span class="status-tag fixed">${fixed.band}</span>`;
           purposeText = '確定シフト';
-        } else if (dbResMap[slot]) {
-          const r = dbResMap[slot];
-          statusHtml = `<span class="status-tag user-res">${r.purpose} (${r.userName})</span>`;
+        } else if (userRes) {
+          const userStr = `${userRes.purpose} (${userRes.userName})`;
+          const timeRangeStr = userRes.startTime ? `${userRes.startTime}〜${userRes.endTime}` : slot;
+          statusHtml = `<span class="status-tag user-res">${userStr} [${timeRangeStr}]</span>`;
           purposeText = '部員予約';
         } else {
           statusHtml = `<span class="status-tag empty">空き枠</span>`;
@@ -782,7 +781,8 @@
       snapshot.forEach(doc => {
         const d = doc.data();
         if (d.userId === currentUser.id) {
-          messages.push(`🔔 本日 【${d.time}】 に部室予約があります (${d.purpose})`);
+          const tDisplay = d.startTime ? `${d.startTime}〜${d.endTime}` : d.time;
+          messages.push(`🔔 本日 【${tDisplay}】 に部室予約があります (${d.purpose})`);
         }
       });
       if (messages.length > 0) {
@@ -812,39 +812,69 @@
         return;
       }
       let html = '<ul style="margin:0; padding-left:20px; font-size:0.9rem;">';
-      myRes.forEach(r => html += `<li><strong>${r.date} ${r.time}:</strong> ${r.purpose}</li>`);
+      myRes.forEach(r => {
+        const tDisplay = r.startTime ? `${r.startTime}〜${r.endTime}` : r.time;
+        html += `<li><strong>${r.date} ${tDisplay}:</strong> ${r.purpose}</li>`;
+      });
       html += '</ul>';
       container.innerHTML = html;
     });
   }
 
+  // 開始時刻・終了時刻を選択した自由予約処理
   function handleReservation(e) {
     e.preventDefault();
     if (!currentUser) return alert('先にプロフィールを登録してください');
     const date = document.getElementById('res-date').value || selectedDateStr;
-    const time = document.getElementById('res-time').value;
+    const startTime = document.getElementById('res-start-time').value;
+    const endTime = document.getElementById('res-end-time').value;
     const purpose = document.getElementById('res-purpose').value;
+
+    if (startTime >= endTime) {
+      return alert('❌ 終了時刻は開始時刻より後の時間を指定してください。');
+    }
 
     const d = new Date(date);
     const daysJP = ['日', '月', '火', '水', '木', '金', '土'];
     const dayJP = daysJP[d.getDay()];
+    const dayFixedSchedule = FIXED_WEEKLY_SCHEDULE[dayJP] || [];
 
-    if (FIXED_WEEKLY_SCHEDULE[dayJP] && FIXED_WEEKLY_SCHEDULE[dayJP][time]) {
-      return alert(`❌ ${time} はすでに固定シフト「${FIXED_WEEKLY_SCHEDULE[dayJP][time]}」が割り当てられています。`);
+    // 固定シフトとの重複チェック
+    for (let f of dayFixedSchedule) {
+      if (startTime < f.end && endTime > f.start) {
+        return alert(`❌ 指定時間枠は固定シフト「${f.band} (${f.start}〜${f.end})」と重なっているため予約できません。`);
+      }
     }
 
-    db.collection('reservations').where('date', '==', date).where('time', '==', time).get().then(snapshot => {
-      if (!snapshot.empty) return alert('❌ 指定された日時の部室はすでに予約されています。');
+    // 既存予約との重複チェック
+    db.collection('reservations').where('date', '==', date).get().then(snapshot => {
+      let isOverlap = false;
+      snapshot.forEach(doc => {
+        const r = doc.data();
+        const rStart = r.startTime || r.time.split('-')[0];
+        const rEnd = r.endTime || r.time.split('-')[1];
+        if (startTime < rEnd && endTime > rStart) {
+          isOverlap = true;
+        }
+      });
+
+      if (isOverlap) {
+        return alert('❌ 指定された時間帯には既に別の部室予約が入っています。');
+      }
 
       db.collection('reservations').add({
-        date, time, purpose,
+        date,
+        startTime,
+        endTime,
+        time: `${startTime}-${endTime}`,
+        purpose,
         userId: currentUser.id,
         userName: currentUser.name,
         userGrade: currentUser.grade,
         userDept: currentUser.dept,
         createdAt: new Date()
       }).then(() => {
-        alert('予約が完了しました！');
+        alert(`予約が完了しました！（${startTime} 〜 ${endTime}）`);
         document.getElementById('res-purpose').value = '';
         loadTimelineForDate(date);
         loadMySchedule();
@@ -863,19 +893,18 @@
     const d = new Date(date);
     const daysJP = ['日', '月', '火', '水', '木', '金', '土'];
     const dayJP = daysJP[d.getDay()];
-    const dayFixedSchedule = FIXED_WEEKLY_SCHEDULE[dayJP] || {};
+    const dayFixedSchedule = FIXED_WEEKLY_SCHEDULE[dayJP] || [];
 
     db.collection('reservations').where('date', '==', date).get().then(snapshot => {
       let combinedShifts = [];
-      Object.keys(dayFixedSchedule).forEach(time => {
-        combinedShifts.push({ id: `fixed_${time}`, time: time, purpose: dayFixedSchedule[time], isFixed: true });
+      dayFixedSchedule.forEach(f => {
+        combinedShifts.push({ id: `fixed_${f.start}`, time: `${f.start}-${f.end}`, purpose: f.band, isFixed: true });
       });
 
       snapshot.forEach(doc => {
         const data = doc.data();
-        if (!combinedShifts.find(s => s.time === data.time)) {
-          combinedShifts.push({ id: doc.id, time: data.time, purpose: data.purpose, isFixed: false });
-        }
+        const tDisplay = data.startTime ? `${data.startTime}-${data.endTime}` : data.time;
+        combinedShifts.push({ id: doc.id, time: tDisplay, purpose: data.purpose, isFixed: false });
       });
 
       if (combinedShifts.length === 0) {
@@ -953,7 +982,6 @@
     });
   }
 
-  // バンド一覧（名前＋学年学科を表示）
   function loadBands() {
     const container = document.getElementById('band-list');
     const chatBandSelect = document.getElementById('chat-band-select');

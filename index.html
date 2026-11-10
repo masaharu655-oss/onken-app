@@ -363,7 +363,7 @@
     </div>
   </div>
 
-  <!-- 2. 出欠タブ（自分が所属するバンドのみ回答枠表示） -->
+  <!-- 2. 出欠タブ -->
   <div id="tab-attendance" class="tab-content hidden">
     <div class="card">
       <h3>所属バンドのシフト出欠確認</h3>
@@ -453,30 +453,65 @@
     </div>
   </div>
 
-  <!-- 8. 三役専用メニュー（データ初期化機能付き） -->
+  <!-- 8. 三役専用メニュー（固定シフト編集機能を追加） -->
   <div id="tab-admin" class="tab-content hidden">
     <div class="card admin-card">
       <h3>三役専用管理メニュー</h3>
       
-      <h4>1. 日別 全バンドシフトの出欠集計</h4>
+      <h4>1. 曜日別 固定シフト枠の追加・編集</h4>
+      <p style="font-size:0.8rem; color:var(--text-sub); margin-top:0;">枠表に表示される曜日ごとの確定シフトを追加・管理します。</p>
+      <form onsubmit="handleSaveFixedShift(event)">
+        <div style="display:flex; gap:10px;">
+          <div style="flex:1;">
+            <label>曜日</label>
+            <select id="admin-shift-day" required>
+              <option value="月">月</option>
+              <option value="火">火</option>
+              <option value="水">水</option>
+              <option value="木">木</option>
+              <option value="金">金</option>
+              <option value="土">土</option>
+            </select>
+          </div>
+          <div style="flex:1;">
+            <label>バンド名</label>
+            <select id="admin-shift-band" required></select>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <div style="flex:1;">
+            <label>開始時刻</label>
+            <input type="time" id="admin-shift-start" step="600" required>
+          </div>
+          <div style="flex:1;">
+            <label>終了時刻</label>
+            <input type="time" id="admin-shift-end" step="600" required>
+          </div>
+        </div>
+        <button type="submit">シフト枠を追加・更新する</button>
+      </form>
+      <div id="admin-fixed-schedule-list" style="margin-top:14px;"></div>
+
+      <hr style="margin:20px 0; border-color: var(--border-color);">
+      <h4>2. 日別 全バンドシフトの出欠集計</h4>
       <label>確認したい日付を選択</label>
       <input type="date" id="admin-attendance-date" onchange="loadAdminAttendance()">
       <div id="admin-attendance-list" style="margin-top:12px;"></div>
 
       <hr style="margin:20px 0; border-color: var(--border-color);">
-      <h4>2. 提出されたシフト希望の確認・集計</h4>
+      <h4>3. 提出されたシフト希望の確認・集計</h4>
       <button class="btn-secondary btn-small" onclick="downloadShiftRequestsCSV()">希望一覧をCSVダウンロード</button>
       <div id="admin-shift-requests" style="margin-top:10px;"></div>
 
       <hr style="margin:20px 0; border-color: var(--border-color);">
-      <h4>3. 全体イベント・お知らせ編集</h4>
+      <h4>4. 全体イベント・お知らせ編集</h4>
       <form id="form-event" onsubmit="handleAddEvent(event)">
         <input type="text" id="event-title" placeholder="お知らせ内容を入力" required>
         <button type="submit">お知らせを追加投稿する</button>
       </form>
 
       <hr style="margin:20px 0; border-color: var(--border-color);">
-      <h4>4. 部員管理（部費納入・アカウント削除）</h4>
+      <h4>5. 部員管理（部費納入・アカウント削除）</h4>
       <div style="display:flex; gap:10px; margin-bottom:12px;">
         <button class="btn-secondary btn-small" onclick="toggleAllFee(true)">全員「納入済み」にする</button>
         <button class="btn-secondary btn-small" onclick="toggleAllFee(false)">全員「未納」にする</button>
@@ -484,7 +519,7 @@
       <div id="fee-management-list"></div>
 
       <hr style="margin:20px 0; border-color: var(--border-color);">
-      <h4>5. 個人情報・個人予約データのリセット</h4>
+      <h4>6. 個人情報・個人予約データのリセット</h4>
       <p style="font-size:0.8rem; color:#c62828; margin-top:0;">※確定シフト枠とバンド名だけを残し、部員名簿・個人予約・出欠等の個人データを一括クリアします。</p>
       <button class="btn-danger btn-small" onclick="resetPersonalData()">名簿・個人データの初期化を実行</button>
     </div>
@@ -562,7 +597,7 @@
     return `${num}${dept || ''}`;
   }
 
-  const FIXED_WEEKLY_SCHEDULE = {
+  let FIXED_WEEKLY_SCHEDULE = {
     "月": [
       { start: "15:00", end: "15:55", band: "キリカ" },
       { start: "16:00", end: "16:55", band: "ビギナーズラッカー" },
@@ -628,6 +663,7 @@
   let selectedDateStr = "";
 
   window.addEventListener('DOMContentLoaded', () => {
+    loadFixedScheduleFromDB();
     const saved = localStorage.getItem('onken_user');
     if (!saved) {
       openProfileModal();
@@ -638,6 +674,15 @@
 
     renderWeekDateButtons();
   });
+
+  function loadFixedScheduleFromDB() {
+    db.collection('system').doc('fixed_schedule').get().then(doc => {
+      if (doc.exists && doc.data().schedule) {
+        FIXED_WEEKLY_SCHEDULE = doc.data().schedule;
+      }
+      if (selectedDateStr) loadTimelineForDate(selectedDateStr);
+    });
+  }
 
   function renderWeekDateButtons() {
     const container = document.getElementById('week-date-buttons');
@@ -714,8 +759,7 @@
 
         if (fixed) {
           if (userRes && userRes.isTransfer) {
-            const userTag = formatUserTag(userRes.userGrade, userRes.userDept);
-            statusHtml = `<span class="status-tag transferred">${fixed.band} <small style="font-size:0.85rem; color:#e65100;">(代: ${userRes.purpose} / ${userTag}${userRes.userName})</small></span>`;
+            statusHtml = `<span class="status-tag transferred">${fixed.band} <small style="font-size:0.85rem; color:#e65100;">(代: ${userRes.purpose} / ${userRes.userName})</small></span>`;
             purposeText = 'シフト譲受練習';
           } else {
             statusHtml = `<span class="status-tag fixed">${fixed.band}</span>`;
@@ -723,9 +767,8 @@
             onClickAction = `onclick="promptTransfer('${dateStr}', '${slotStart}', '${slotEnd}', '${fixed.band}')"`;
           }
         } else if (userRes) {
-          const userTag = formatUserTag(userRes.userGrade, userRes.userDept);
           const timeRangeStr = userRes.startTime ? `${userRes.startTime}〜${userRes.endTime}` : slot;
-          statusHtml = `<span class="status-tag user-res">${userRes.purpose} <small style="font-size:0.85rem; color:var(--text-sub);">(${userTag}${userRes.userName})</small></span>`;
+          statusHtml = `<span class="status-tag user-res">${userRes.purpose} <small style="font-size:0.85rem; color:var(--text-sub);">(${userRes.userName})</small></span>`;
           purposeText = `部員予約 [${timeRangeStr}]`;
         } else {
           isCardEmpty = true;
@@ -837,6 +880,7 @@
       document.getElementById('admin-tab-btn').classList.remove('hidden');
       loadAdminShiftRequests();
       loadAdminAttendance();
+      renderAdminFixedScheduleList();
     } else {
       document.getElementById('admin-tab-btn').classList.add('hidden');
     }
@@ -859,7 +903,10 @@
     if (tabId === 'tab-attendance') loadAttendance();
     if (tabId === 'tab-bands') loadBands();
     if (tabId === 'tab-part-search') loadPartMembers();
-    if (tabId === 'tab-admin') loadAdminAttendance();
+    if (tabId === 'tab-admin') {
+      loadAdminAttendance();
+      renderAdminFixedScheduleList();
+    }
   }
 
   function loadReminders() {
@@ -1013,8 +1060,7 @@
               const att = attMap[k];
               if (att.status === '参加') yesCount++;
               if (att.status === '欠席') noCount++;
-              const uTag = formatUserTag(att.userGrade, att.userDept);
-              memberListHtml += `<li>${uTag}${att.userName}: ${att.status === '参加' ? '⭕ 参加' : '❌ 欠席'}</li>`;
+              memberListHtml += `<li>${att.userName}: ${att.status === '参加' ? '⭕ 参加' : '❌ 欠席'}</li>`;
             }
           });
           memberListHtml += '</ul>';
@@ -1090,8 +1136,7 @@
           Object.keys(attMap).forEach(k => {
             if (k.startsWith(`${date}_${shift.id}_`)) {
               const att = attMap[k];
-              const uTag = formatUserTag(att.userGrade, att.userDept);
-              const nameStr = `${uTag}${att.userName}`;
+              const nameStr = `${att.userName}`;
               if (att.status === '参加') yesMembers.push(nameStr);
               if (att.status === '欠席') noMembers.push(nameStr);
             }
@@ -1133,17 +1178,18 @@
     });
   }
 
+  // バンド一覧（重複削除・名前のみ表示・ボタン表記「加入」化）
   function loadBands() {
     const container = document.getElementById('band-list');
     const chatBandSelect = document.getElementById('chat-band-select');
     const reqBandSelect = document.getElementById('req-band-select');
+    const adminBandSelect = document.getElementById('admin-shift-band');
 
     db.collection('users').get().then(usersSnap => {
       let userMap = {};
       usersSnap.forEach(uDoc => {
         const uData = uDoc.data();
-        const tag = formatUserTag(uData.grade, uData.dept);
-        userMap[uData.id] = `${tag}${uData.name || uData.lineName || '無名'}`;
+        userMap[uData.id] = `${uData.name || uData.lineName || '無名'}`;
       });
 
       db.collection('bands').get().then(snapshot => {
@@ -1181,12 +1227,16 @@
           }
           allBandsOptions += `<option value="${b.name}">${b.name}</option>`;
 
-          let joinedNames = (b.members || []).map(id => userMap[id]).filter(n => n);
+          // リーダー名と重複する一般メンバー表示を除外
+          let joinedNames = (b.members || []).map(id => userMap[id]).filter(n => n && n !== b.leaderName);
           let supportNames = (b.supportMembers || []).map(id => userMap[id]).filter(n => n);
 
           let memberDisplay = '';
           if (b.leaderName) memberDisplay += `<span style="color:#d84315; font-weight:700;">リーダー: ${b.leaderName}</span> `;
-          if (joinedNames.length > 0) memberDisplay += `【正式】${joinedNames.join(', ')}`;
+          if (joinedNames.length > 0) {
+            if (memberDisplay) memberDisplay += ' / ';
+            memberDisplay += `メンバー: ${joinedNames.join(', ')}`;
+          }
           if (supportNames.length > 0) {
             if (memberDisplay) memberDisplay += ' / ';
             memberDisplay += `【サポート】${supportNames.join(', ')}`;
@@ -1196,7 +1246,7 @@
           html += `<div style="border-bottom:1px solid var(--border-color); padding:12px 0; display:flex; justify-content:space-between; align-items:center;">
             <div>
               <strong style="font-size:1.05rem;">${b.name}</strong>
-              <div style="font-size:0.8rem; color:var(--text-sub); margin-top:3px;">加入者: ${memberDisplay}</div>
+              <div style="font-size:0.8rem; color:var(--text-sub); margin-top:3px;">${memberDisplay}</div>
             </div>
             <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
               ${isLeader 
@@ -1204,8 +1254,8 @@
                 : `<button class="btn-small btn-secondary" onclick="becomeLeader('${b.id || ''}', '${b.name}')">リーダーになる</button>`}
 
               ${isMember 
-                ? '<span style="font-size:0.85rem; color:#2e7d32; font-weight:500; align-self:center;">正式加入中</span>' 
-                : `<button class="btn-small" onclick="joinBandByName('${b.id || ''}', '${b.name}', 'regular')">正式加入</button>`}
+                ? '<span style="font-size:0.85rem; color:#2e7d32; font-weight:500; align-self:center;">加入中</span>' 
+                : `<button class="btn-small" onclick="joinBandByName('${b.id || ''}', '${b.name}', 'regular')">加入</button>`}
               
               ${isSupport 
                 ? '<span style="font-size:0.85rem; color:#1976d2; font-weight:500; align-self:center;">サポート中</span>' 
@@ -1217,14 +1267,14 @@
         container.innerHTML = html || 'バンドの読み込みに失敗しました。';
         if (chatBandSelect) chatBandSelect.innerHTML = myBandsOptions || '<option value="">参加中のバンドがありません</option>';
         if (reqBandSelect) reqBandSelect.innerHTML = myBandsOptions || allBandsOptions;
+        if (adminBandSelect) adminBandSelect.innerHTML = allBandsOptions;
       });
     });
   }
 
   function becomeLeader(bandId, bandName) {
     if (!currentUser) return alert('先にプロフィールを登録してください');
-    const uTag = formatUserTag(currentUser.grade, currentUser.dept);
-    const leaderDisplayName = `${uTag}${currentUser.name}`;
+    const leaderDisplayName = `${currentUser.name}`;
 
     if (!confirm(`バンド「${bandName}」のリーダーに登録・設定しますか？`)) return;
 
@@ -1259,9 +1309,8 @@
       const updateField = type === 'regular' ? 'members' : 'supportMembers';
       db.collection('bands').doc(bandId).update({ [updateField]: firebase.firestore.FieldValue.arrayUnion(currentUser.id) });
     } else {
-      const uTag = formatUserTag(currentUser.grade, currentUser.dept);
       db.collection('bands').add({
-        name: bandName, leaderName: `${uTag}${currentUser.name}`,
+        name: bandName, leaderName: `${currentUser.name}`,
         members: type === 'regular' ? [currentUser.id] : [],
         supportMembers: type === 'support' ? [currentUser.id] : [],
         createdAt: new Date()
@@ -1278,7 +1327,7 @@
 
     localStorage.setItem('onken_user', JSON.stringify(currentUser));
     loadBands();
-    alert(`「${bandName}」に${type === 'regular' ? '正式メンバー' : 'サポートメンバー'}として加入しました！`);
+    alert(`「${bandName}」に${type === 'regular' ? 'メンバー' : 'サポートメンバー'}として加入しました！`);
   }
 
   function loadPartMembers() {
@@ -1368,16 +1417,14 @@
     const input = document.getElementById('chat-input');
     if (!band) return;
 
-    const uTag = formatUserTag(currentUser.grade, currentUser.dept);
     db.collection('chats').doc(band).collection('messages').add({
-      text: input.value, userName: `${uTag}${currentUser.name}`, createdAt: new Date()
+      text: input.value, userName: `${currentUser.name}`, createdAt: new Date()
     }).then(() => input.value = '');
   }
 
   function handleShiftRequest(e) {
     e.preventDefault();
     if (!currentUser) return alert('先にプロフィールを登録してください');
-    const uTag = formatUserTag(currentUser.grade, currentUser.dept);
     const bandSelect = document.getElementById('req-band-select').value;
 
     db.collection('shift_requests').add({
@@ -1385,7 +1432,7 @@
       choice1: document.getElementById('req-choice1').value,
       choice2: document.getElementById('req-choice2').value,
       choice3: document.getElementById('req-choice3').value,
-      submittedBy: `${uTag}${currentUser.name}`, createdAt: new Date()
+      submittedBy: `${currentUser.name}`, createdAt: new Date()
     }).then(() => {
       alert('シフト希望を提出しました！');
       if (['部長', '副部長', '会計'].includes(currentUser.role)) loadAdminShiftRequests();
@@ -1428,6 +1475,57 @@
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+
+  // 三役用：固定シフト編集・管理機能
+  function handleSaveFixedShift(e) {
+    e.preventDefault();
+    const day = document.getElementById('admin-shift-day').value;
+    const band = document.getElementById('admin-shift-band').value;
+    const start = document.getElementById('admin-shift-start').value;
+    const end = document.getElementById('admin-shift-end').value;
+
+    if (start >= end) return alert('❌ 終了時刻は開始時刻より後の時間を指定してください。');
+
+    if (!FIXED_WEEKLY_SCHEDULE[day]) FIXED_WEEKLY_SCHEDULE[day] = [];
+    FIXED_WEEKLY_SCHEDULE[day].push({ start, end, band });
+    FIXED_WEEKLY_SCHEDULE[day].sort((a, b) => (a.start > b.start ? 1 : -1));
+
+    db.collection('system').doc('fixed_schedule').set({ schedule: FIXED_WEEKLY_SCHEDULE }).then(() => {
+      alert(`【${day}曜】 ${start}〜${end} に ${band} を登録しました！`);
+      renderAdminFixedScheduleList();
+      if (selectedDateStr) loadTimelineForDate(selectedDateStr);
+    });
+  }
+
+  function deleteFixedShift(day, index) {
+    if (!confirm(`【${day}曜】のこのシフト枠を削除しますか？`)) return;
+    FIXED_WEEKLY_SCHEDULE[day].splice(index, 1);
+    db.collection('system').doc('fixed_schedule').set({ schedule: FIXED_WEEKLY_SCHEDULE }).then(() => {
+      renderAdminFixedScheduleList();
+      if (selectedDateStr) loadTimelineForDate(selectedDateStr);
+    });
+  }
+
+  function renderAdminFixedScheduleList() {
+    const container = document.getElementById('admin-fixed-schedule-list');
+    if (!container) return;
+    let html = '<div style="font-size:0.85rem;">';
+    const days = ['月', '火', '水', '木', '金', '土'];
+    days.forEach(day => {
+      const slots = FIXED_WEEKLY_SCHEDULE[day] || [];
+      if (slots.length > 0) {
+        html += `<strong style="display:block; margin-top:8px; color:var(--accent-dark);">${day}曜日:</strong>`;
+        slots.forEach((s, idx) => {
+          html += `<div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; padding:6px 10px; border-radius:6px; margin-top:4px; border:1px solid var(--border-color);">
+            <span>${s.start}〜${s.end} : <strong>${s.band}</strong></span>
+            <button class="btn-small btn-danger" style="margin:0;" onclick="deleteFixedShift('${day}', ${idx})">削除</button>
+          </div>`;
+        });
+      }
+    });
+    html += '</div>';
+    container.innerHTML = html;
   }
 
   function loadFeeManagement() {
@@ -1478,9 +1576,8 @@
     }
   }
 
-  // 個人・名簿データの初期化（バンド名簿と確定シフトは保持）
   function resetPersonalData() {
-    if (!confirm("⚠️ 本当に名簿・部員プロフィールや予約・出欠などの個人データをリセットしますか？\n※バンド名一覧および固定シフト枠データは保持されます。")) return;
+    if (!confirm("⚠️ 本当に名簿・部員プロフィールや予約・出欠などの個人データをリセットしますか？\n※確定シフト枠とバンド名一覧は保持されます。")) return;
 
     const collectionsToDelete = ['users', 'reservations', 'attendance', 'shift_requests'];
     
@@ -1492,7 +1589,6 @@
       });
     });
 
-    // バンドコレクション内のメンバー・リーダー情報をクリア
     promises.push(
       db.collection('bands').get().then(snapshot => {
         const batch = db.batch();

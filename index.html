@@ -31,4 +31,1489 @@
     body {
       background-color: var(--bg-color);
       color: var(--text-main);
-      margin:
+      margin: 0;
+      padding: 24px 16px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* ヘッダーデザイン */
+    .header-area {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+    .title-group h1 {
+      font-size: 2.0rem;
+      font-weight: 700;
+      margin: 0;
+      color: var(--accent-dark);
+      letter-spacing: -0.02em;
+    }
+    .title-group p {
+      margin: 4px 0 0 0;
+      font-size: 0.85rem;
+      color: var(--text-sub);
+    }
+
+    .user-pill {
+      background: #ede8df;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      font-weight: 500;
+    }
+
+    .remind-bar {
+      background: #fff8e7;
+      border: 1px solid #ffe0b2;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      color: #8c6d1f;
+    }
+
+    /* メニュータブ */
+    .nav-tabs {
+      display: flex;
+      gap: 24px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 24px;
+      padding-bottom: 8px;
+      overflow-x: auto;
+    }
+    .nav-tab {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-sub);
+      cursor: pointer;
+      padding-bottom: 8px;
+      position: relative;
+      white-space: nowrap;
+      transition: color 0.2s;
+    }
+    .nav-tab.active {
+      color: var(--accent-dark);
+      font-weight: 700;
+    }
+    .nav-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -9px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--accent-dark);
+    }
+
+    /* カードデザイン */
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    h2, h3, h4 {
+      margin-top: 0;
+      font-weight: 700;
+      color: var(--accent-dark);
+    }
+
+    label {
+      display: block;
+      margin-top: 14px;
+      font-weight: 500;
+      font-size: 0.85rem;
+      color: var(--text-sub);
+    }
+
+    input, select, textarea, button {
+      width: 100%;
+      padding: 12px 14px;
+      margin-top: 6px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      font-size: 0.95rem;
+      background-color: var(--input-bg);
+      color: var(--text-main);
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #a89f91;
+      background-color: #ffffff;
+    }
+
+    button {
+      background-color: var(--accent-dark);
+      color: #ffffff;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      margin-top: 18px;
+      border-radius: 8px;
+      transition: opacity 0.2s;
+    }
+    button:hover { opacity: 0.85; }
+    .btn-secondary { background-color: #e5ded3; color: var(--text-main); border: 1px solid var(--border-color); }
+    .btn-secondary:hover { background-color: #dad2c5; }
+    .btn-danger { background-color: #c62828; color: #ffffff; }
+    .btn-small { width: auto; padding: 6px 12px; font-size: 0.8rem; margin-top: 0; }
+
+    /* チップ選択 */
+    .chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .chip {
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      background: var(--input-bg);
+      color: var(--text-main);
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .chip.selected {
+      background: var(--accent-dark);
+      color: #ffffff;
+      border-color: var(--accent-dark);
+    }
+
+    /* 日付セレクター */
+    .date-selector-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+    }
+    .date-btn {
+      flex: 0 0 calc(100% / 8 - 7px);
+      min-width: 55px;
+      background: #ffffff;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 8px 4px;
+      text-align: center;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0;
+      transition: all 0.2s;
+    }
+    .date-btn .sub { font-size: 0.75rem; color: var(--text-sub); }
+    .date-btn .day { font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-top: 2px; }
+    .date-btn.active {
+      background: var(--accent-dark);
+      color: #ffffff;
+      border-color: var(--accent-dark);
+    }
+    .date-btn.active .sub, .date-btn.active .day { color: #ffffff; }
+
+    /* タイムスケジュールリスト */
+    #timeline-list {
+      transition: opacity 0.25s ease-in-out;
+    }
+    .fade-out { opacity: 0; }
+
+    .time-slot-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 18px;
+      border-radius: 10px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-color);
+      margin-bottom: 12px;
+      transition: all 0.2s;
+    }
+    
+    .time-slot-card.is-empty {
+      background: #f4fbf7;
+      border: 1.5px dashed #4caf50;
+      cursor: pointer;
+    }
+    .time-slot-card.is-empty:hover {
+      background: #e8f5e9;
+      transform: translateY(-1px);
+    }
+
+    .time-slot-card .time-range { font-weight: 700; font-size: 1.05rem; }
+    .time-slot-card .sub-label { font-size: 0.75rem; color: var(--text-sub); margin-top: 2px; }
+    
+    .time-slot-card .status-tag { 
+      font-size: 1.15rem; 
+      font-weight: 700; 
+      letter-spacing: -0.01em;
+    }
+    .time-slot-card .status-tag.fixed { color: #1565c0; }
+    .time-slot-card .status-tag.user-res { color: #2e7d32; }
+    .time-slot-card .status-tag.transferred { color: #e65100; }
+    .time-slot-card .status-tag.empty {
+      color: #2e7d32;
+      font-size: 0.95rem;
+      background: #e8f5e9;
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid #a5d6a7;
+    }
+
+    /* モーダル */
+    .modal {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .modal-content {
+      background: var(--card-bg); padding: 28px; border-radius: 12px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; border: 1px solid var(--card-border);
+    }
+
+    .hidden { display: none !important; }
+    .chat-box { height: 250px; overflow-y: auto; border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; background: var(--input-bg); margin-bottom: 12px; }
+    .chat-msg { margin-bottom: 10px; padding: 10px; border-radius: 8px; background: #ffffff; border: 1px solid var(--card-border); }
+    .chat-msg .sender { font-weight: 700; font-size: 0.85rem; color: var(--text-sub); }
+    .admin-card { border: 1px solid #d4cbbd; background: #fdfbf7; }
+
+    /* 出欠表スタイル */
+    .status-btn { width: auto; margin: 0; padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; }
+    .status-btn.active-yes { background: #2e7d32; color: #ffffff; border: none; }
+    .status-btn.active-no { background: #c62828; color: #ffffff; border: none; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <!-- ヘッダー -->
+  <div class="header-area">
+    <div class="title-group">
+      <h1>音楽研究部</h1>
+      <p>音楽研究部 練習枠予約</p>
+    </div>
+    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+      <div class="user-pill" id="user-info">● 未登録</div>
+      <button class="btn-secondary btn-small" onclick="openProfileModal()">プロフィール編集</button>
+    </div>
+  </div>
+
+  <!-- リマインドバー -->
+  <div id="remind-area" class="remind-bar hidden"></div>
+
+  <!-- ナビゲーションタブ -->
+  <div class="nav-tabs" id="tab-menu">
+    <div class="nav-tab active" onclick="switchTab('tab-reservation')">枠表</div>
+    <div class="nav-tab" onclick="switchTab('tab-attendance')">出欠</div>
+    <div class="nav-tab" onclick="switchTab('tab-bands')">バンド</div>
+    <div class="nav-tab" onclick="switchTab('tab-part-search')">メンバー検索</div>
+    <div class="nav-tab" onclick="switchTab('tab-roster')">名簿</div>
+    <div class="nav-tab" onclick="switchTab('tab-chat')">チャット</div>
+    <div class="nav-tab" onclick="switchTab('tab-shift-req')">シフト希望</div>
+    <div class="nav-tab hidden" id="admin-tab-btn" onclick="switchTab('tab-admin')">三役</div>
+  </div>
+
+  <!-- 1. 枠表（部室予約）タブ -->
+  <div id="tab-reservation" class="tab-content">
+    <div class="card" style="background:#f2ede4; border-color:#dcd4c5; margin-bottom:16px;">
+      <h3 style="margin-bottom:8px; font-size:1.05rem;">📌 MYスケジュール（自分の予定）</h3>
+      <div id="my-schedule-list">ログインすると表示されます。</div>
+    </div>
+
+    <div class="date-selector-bar" id="week-date-buttons"></div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 id="selected-date-header" style="margin:0; font-size:1.2rem;">----</h3>
+        <span style="font-size:0.8rem; color:var(--text-sub);">平日・土 9:00〜20:00 (シフト制)</span>
+      </div>
+
+      <div id="timeline-list">読み込み中...</div>
+    </div>
+
+    <div class="card" id="reservation-form-card">
+      <h3>空き枠を新規予約する</h3>
+      <form id="form-reservation" onsubmit="handleReservation(event)">
+        <label>予約日</label>
+        <input type="date" id="res-date" required readonly style="background:#ede8df;">
+        
+        <div style="display:flex; gap:12px;">
+          <div style="flex:1;">
+            <label>開始時刻 (10分刻み)</label>
+            <input type="time" id="res-start-time" min="09:00" max="20:00" step="600" value="12:00" required>
+          </div>
+          <div style="flex:1;">
+            <label>終了時刻 (10分刻み)</label>
+            <input type="time" id="res-end-time" min="09:00" max="20:00" step="600" value="13:00" required>
+          </div>
+        </div>
+
+        <label>使用目的 / バンド名</label>
+        <input type="text" id="res-purpose" placeholder="バンド名または目的を入力" required>
+        <button type="submit">予約を確定する</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. 出欠タブ（自分が所属するバンドのみ回答枠表示） -->
+  <div id="tab-attendance" class="tab-content hidden">
+    <div class="card">
+      <h3>所属バンドのシフト出欠確認</h3>
+      <label>対象日を選択</label>
+      <input type="date" id="attendance-date" onchange="loadAttendance()">
+      <div id="attendance-shifts-container" style="margin-top: 16px;">読み込み中...</div>
+    </div>
+  </div>
+
+  <!-- 3. バンド作成・参加タブ -->
+  <div id="tab-bands" class="tab-content hidden">
+    <div class="card">
+      <h3>新しいバンドを作成する</h3>
+      <form onsubmit="handleCreateBand(event)">
+        <label>バンド名</label>
+        <input type="text" id="new-band-name" placeholder="バンド名を入力" required>
+        <button type="submit">バンドを結成する</button>
+      </form>
+    </div>
+    <div class="card">
+      <h3>バンド一覧・加入申請・リーダー設定</h3>
+      <div id="band-list">読み込み中...</div>
+    </div>
+  </div>
+
+  <!-- 4. パート別メンバー検索タブ -->
+  <div id="tab-part-search" class="tab-content hidden">
+    <div class="card">
+      <h3>パート別 メンバー検索</h3>
+      <label>表示したいパートを選択してください</label>
+      <select id="part-search-select" onchange="loadPartMembers()">
+        <option value="Gt">Gt (ギター)</option>
+        <option value="Ba">Ba (ベース)</option>
+        <option value="Dr">Dr (ドラム)</option>
+        <option value="Vo">Vo (ボーカル)</option>
+        <option value="Key">Key (キーボード)</option>
+      </select>
+    </div>
+    <div class="card">
+      <h3 id="part-search-title">Gt 担当メンバー一覧</h3>
+      <div id="part-members-list">読み込み中...</div>
+    </div>
+  </div>
+
+  <!-- 5. 部員名簿 -->
+  <div id="tab-roster" class="tab-content hidden">
+    <div class="card">
+      <h3>部員名簿</h3>
+      <div style="display:flex; gap:10px;">
+        <button class="btn-secondary" onclick="loadRoster('grade')">学年順で並び替え</button>
+        <button class="btn-secondary" onclick="loadRoster('dept')">学科順で並び替え</button>
+      </div>
+      <div id="roster-list" style="margin-top:15px;"></div>
+    </div>
+  </div>
+
+  <!-- 6. バンドチャット -->
+  <div id="tab-chat" class="tab-content hidden">
+    <div class="card">
+      <h3>バンド内専用チャット</h3>
+      <label>対象バンド選択（所属バンドのみ）</label>
+      <select id="chat-band-select" onchange="loadChat()"></select>
+      <div class="chat-box" id="chat-messages" style="margin-top:10px;"></div>
+      <form id="form-chat" onsubmit="handleSendChat(event)">
+        <input type="text" id="chat-input" placeholder="メッセージを入力..." required>
+        <button type="submit">送信</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 7. シフト希望 -->
+  <div id="tab-shift-req" class="tab-content hidden">
+    <div class="card">
+      <h3>バンドシフト希望申請（バンドリーダー専用）</h3>
+      <form id="form-shift-req" onsubmit="handleShiftRequest(event)">
+        <label>対象バンド選択</label>
+        <select id="req-band-select" required></select>
+
+        <label>第1希望（日時・時間帯）</label>
+        <input type="text" id="req-choice1" required placeholder="例: 月曜 16:00-17:00">
+        <label>第2希望</label>
+        <input type="text" id="req-choice2" placeholder="例: 水曜 15:00-16:00">
+        <label>第3希望</label>
+        <input type="text" id="req-choice3" placeholder="例: 金曜 17:00-18:00">
+        <button type="submit">希望を提出する</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 8. 三役専用メニュー（データ初期化機能付き） -->
+  <div id="tab-admin" class="tab-content hidden">
+    <div class="card admin-card">
+      <h3>三役専用管理メニュー</h3>
+      
+      <h4>1. 日別 全バンドシフトの出欠集計</h4>
+      <label>確認したい日付を選択</label>
+      <input type="date" id="admin-attendance-date" onchange="loadAdminAttendance()">
+      <div id="admin-attendance-list" style="margin-top:12px;"></div>
+
+      <hr style="margin:20px 0; border-color: var(--border-color);">
+      <h4>2. 提出されたシフト希望の確認・集計</h4>
+      <button class="btn-secondary btn-small" onclick="downloadShiftRequestsCSV()">希望一覧をCSVダウンロード</button>
+      <div id="admin-shift-requests" style="margin-top:10px;"></div>
+
+      <hr style="margin:20px 0; border-color: var(--border-color);">
+      <h4>3. 全体イベント・お知らせ編集</h4>
+      <form id="form-event" onsubmit="handleAddEvent(event)">
+        <input type="text" id="event-title" placeholder="お知らせ内容を入力" required>
+        <button type="submit">お知らせを追加投稿する</button>
+      </form>
+
+      <hr style="margin:20px 0; border-color: var(--border-color);">
+      <h4>4. 部員管理（部費納入・アカウント削除）</h4>
+      <div style="display:flex; gap:10px; margin-bottom:12px;">
+        <button class="btn-secondary btn-small" onclick="toggleAllFee(true)">全員「納入済み」にする</button>
+        <button class="btn-secondary btn-small" onclick="toggleAllFee(false)">全員「未納」にする</button>
+      </div>
+      <div id="fee-management-list"></div>
+
+      <hr style="margin:20px 0; border-color: var(--border-color);">
+      <h4>5. 個人情報・個人予約データのリセット</h4>
+      <p style="font-size:0.8rem; color:#c62828; margin-top:0;">※確定シフト枠とバンド名だけを残し、部員名簿・個人予約・出欠等の個人データを一括クリアします。</p>
+      <button class="btn-danger btn-small" onclick="resetPersonalData()">名簿・個人データの初期化を実行</button>
+    </div>
+  </div>
+</div>
+
+<!-- プロフィール登録/編集 モーダル -->
+<div id="profile-modal" class="modal hidden">
+  <div class="modal-content">
+    <h2>プロフィール登録</h2>
+    <form id="form-profile" onsubmit="handleSaveProfile(event)">
+      <label>名前（例: 村田柾陽）</label>
+      <input type="text" id="prof-name" placeholder="村田柾陽" required>
+      <label>LINE表示名（例: まさはる）</label>
+      <input type="text" id="prof-line" placeholder="まさはる" required>
+      <label>学年</label>
+      <select id="prof-grade" onchange="toggleDeptSelect()" required>
+        <option value="1年">1年</option>
+        <option value="2年">2年</option>
+        <option value="3年">3年</option>
+        <option value="4年">4年</option>
+        <option value="5年">5年</option>
+        <option value="専攻科1年">専攻科1年</option>
+        <option value="専攻科2年">専攻科2年</option>
+      </select>
+      <div id="dept-group">
+        <label>学科</label>
+        <select id="prof-dept">
+          <option value="AC">AC</option>
+          <option value="BC">BC</option>
+          <option value="MI">MI</option>
+        </select>
+      </div>
+      <label>担当パート（タップで複数選択）</label>
+      <div class="chip-group" id="part-chips">
+        <div class="chip" onclick="toggleChip(this)" data-part="Gt">Gt</div>
+        <div class="chip" onclick="toggleChip(this)" data-part="Ba">Ba</div>
+        <div class="chip" onclick="toggleChip(this)" data-part="Dr">Dr</div>
+        <div class="chip" onclick="toggleChip(this)" data-part="Vo">Vo</div>
+        <div class="chip" onclick="toggleChip(this)" data-part="Key">Key</div>
+      </div>
+      <label>役職</label>
+      <select id="prof-role" required>
+        <option value="部員">部員</option>
+        <option value="部長">部長</option>
+        <option value="副部長">副部長</option>
+        <option value="会計">会計</option>
+      </select>
+      <label>一言コメント</label>
+      <textarea id="prof-comment" rows="2" placeholder="よろしくお願いします！"></textarea>
+      <button type="submit">保存して更新する</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDummyKeyForDeploymentStandard",
+    authDomain: "onken-app.firebaseapp.com",
+    projectId: "onken-app",
+    storageBucket: "onken-app.appspot.com",
+    messagingSenderId: "123456789",
+    appId: "1:123456789:web:abcdef"
+  };
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  function formatUserTag(grade, dept) {
+    if (!grade) return '';
+    if (grade.includes('専攻科')) {
+      const num = grade.replace(/[^0-9]/g, '');
+      return `専${num}`;
+    }
+    const num = grade.replace(/[^0-9]/g, '');
+    return `${num}${dept || ''}`;
+  }
+
+  const FIXED_WEEKLY_SCHEDULE = {
+    "月": [
+      { start: "15:00", end: "15:55", band: "キリカ" },
+      { start: "16:00", end: "16:55", band: "ビギナーズラッカー" },
+      { start: "17:00", end: "17:55", band: "りんごジャム" },
+      { start: "18:00", end: "18:55", band: "予備バンド" },
+      { start: "19:00", end: "19:55", band: "TAIMS" }
+    ],
+    "火": [
+      { start: "13:00", end: "13:55", band: "オトナ未満" },
+      { start: "15:00", end: "15:55", band: "オセロり" },
+      { start: "16:00", end: "16:55", band: "ROCK man" },
+      { start: "17:00", end: "17:55", band: "私利私欲" },
+      { start: "18:00", end: "18:55", band: "めっとめっと" },
+      { start: "19:00", end: "19:55", band: "君と黄身" }
+    ],
+    "水": [
+      { start: "15:00", end: "15:55", band: "長女不安定" },
+      { start: "16:00", end: "16:55", band: "Aster Stellar" },
+      { start: "17:00", end: "17:55", band: "少年少女" },
+      { start: "18:00", end: "18:55", band: "Honey Holic" },
+      { start: "19:00", end: "19:55", band: "カカオ80%" }
+    ],
+    "木": [
+      { start: "15:00", end: "15:55", band: "真・人類" },
+      { start: "16:00", end: "16:55", band: "こびと" },
+      { start: "17:00", end: "17:55", band: "あまあまいちごショートケーキ" },
+      { start: "18:00", end: "18:55", band: "ぷかぷかマヨネーズ" },
+      { start: "19:00", end: "19:55", band: "The men's" }
+    ],
+    "金": [
+      { start: "15:00", end: "15:55", band: "きゅーそくストリート" },
+      { start: "16:00", end: "16:55", band: "鮮脳" },
+      { start: "17:00", end: "17:55", band: "ちりめんもんすたー" },
+      { start: "18:00", end: "18:55", band: "アブレカブレ" },
+      { start: "19:00", end: "19:55", band: "41mA" }
+    ],
+    "土": [
+      { start: "14:00", end: "14:55", band: "猫速96m" }
+    ]
+  };
+
+  const TIME_SLOTS = [
+    "09:00-10:00", "10:00-11:00", "11:00-12:00",
+    "12:00-12:55", "13:00-13:55", "14:00-14:55",
+    "15:00-15:55", "16:00-16:55", "17:00-17:55",
+    "18:00-18:55", "19:00-19:55"
+  ];
+
+  const DEFAULT_BANDS = [
+    { name: "キリカ" }, { name: "少年少女" }, { name: "Aster Stellar" },
+    { name: "ROCK man" }, { name: "オトナ未満" }, { name: "41mA" },
+    { name: "ちりめんもんすたー" }, { name: "オセロり" }, { name: "長女不安定" },
+    { name: "あまあまいちごショートケーキ" }, { name: "ぷかぷかマヨネーズ" },
+    { name: "ビギナーズラッカー" }, { name: "きゅーそくストリート" },
+    { name: "こびと" }, { name: "りんごジャム" }, { name: "Honey Holic" },
+    { name: "The men's" }, { name: "アブレカブレ" }, { name: "鮮脳" },
+    { name: "TAIMS" }, { name: "猫速96m" }, { name: "真・人類" },
+    { name: "めっとめっと" }, { name: "君と黄身" }, { name: "カカオ80%" },
+    { name: "私利私欲" }, { name: "予備バンド" }
+  ];
+
+  let currentUser = null;
+  let selectedDateStr = "";
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('onken_user');
+    if (!saved) {
+      openProfileModal();
+    } else {
+      currentUser = JSON.parse(saved);
+      renderUI();
+    }
+
+    renderWeekDateButtons();
+  });
+
+  function renderWeekDateButtons() {
+    const container = document.getElementById('week-date-buttons');
+    container.innerHTML = '';
+
+    const daysJP = ['日', '月', '火', '水', '木', '金', '土'];
+    const today = new Date();
+
+    for (let i = 0; i < 8; i++) {
+      const d = new Date(today);
+      d.setDate(d.getDate() + i);
+
+      const dateStr = d.toISOString().split('T')[0];
+      const dayNum = d.getDate();
+      const dayJP = daysJP[d.getDay()];
+
+      const btn = document.createElement('div');
+      btn.className = `date-btn ${i === 0 ? 'active' : ''}`;
+      btn.innerHTML = `
+        <span class="sub">${i === 0 ? '今日' : dayJP}</span>
+        <span class="day">${dayNum}</span>
+      `;
+      btn.onclick = () => selectDate(dateStr, btn);
+      container.appendChild(btn);
+
+      if (i === 0) selectedDateStr = dateStr;
+    }
+
+    loadTimelineForDate(selectedDateStr);
+  }
+
+  function selectDate(dateStr, btnEl) {
+    document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('active'));
+    btnEl.classList.add('active');
+    selectedDateStr = dateStr;
+    document.getElementById('res-date').value = dateStr;
+    
+    const timelineEl = document.getElementById('timeline-list');
+    timelineEl.classList.add('fade-out');
+    setTimeout(() => {
+      loadTimelineForDate(dateStr);
+      timelineEl.classList.remove('fade-out');
+    }, 200);
+  }
+
+  function loadTimelineForDate(dateStr) {
+    document.getElementById('res-date').value = dateStr;
+
+    const d = new Date(dateStr);
+    const daysJP = ['日', '月', '火', '水', '木', '金', '土'];
+    const dayJP = daysJP[d.getDay()];
+    const m = d.getMonth() + 1;
+    const dayNum = d.getDate();
+
+    document.getElementById('selected-date-header').innerText = `${m}月${dayNum}日(${dayJP}) 部室シフト`;
+
+    const container = document.getElementById('timeline-list');
+    const dayFixedSchedule = FIXED_WEEKLY_SCHEDULE[dayJP] || [];
+
+    db.collection('reservations').where('date', '==', dateStr).get().then(snapshot => {
+      let userResList = [];
+      snapshot.forEach(doc => userResList.push({ id: doc.id, ...doc.data() }));
+
+      let html = '';
+      TIME_SLOTS.forEach(slot => {
+        const [slotStart, slotEnd] = slot.split('-');
+        const fixed = dayFixedSchedule.find(f => f.start === slotStart);
+        const userRes = userResList.find(r => (r.startTime <= slotStart && r.endTime > slotStart) || (r.time === slot));
+
+        let statusHtml = '';
+        let purposeText = '';
+        let isCardEmpty = false;
+        let onClickAction = '';
+
+        if (fixed) {
+          if (userRes && userRes.isTransfer) {
+            const userTag = formatUserTag(userRes.userGrade, userRes.userDept);
+            statusHtml = `<span class="status-tag transferred">${fixed.band} <small style="font-size:0.85rem; color:#e65100;">(代: ${userRes.purpose} / ${userTag}${userRes.userName})</small></span>`;
+            purposeText = 'シフト譲受練習';
+          } else {
+            statusHtml = `<span class="status-tag fixed">${fixed.band}</span>`;
+            purposeText = '確定シフト';
+            onClickAction = `onclick="promptTransfer('${dateStr}', '${slotStart}', '${slotEnd}', '${fixed.band}')"`;
+          }
+        } else if (userRes) {
+          const userTag = formatUserTag(userRes.userGrade, userRes.userDept);
+          const timeRangeStr = userRes.startTime ? `${userRes.startTime}〜${userRes.endTime}` : slot;
+          statusHtml = `<span class="status-tag user-res">${userRes.purpose} <small style="font-size:0.85rem; color:var(--text-sub);">(${userTag}${userRes.userName})</small></span>`;
+          purposeText = `部員予約 [${timeRangeStr}]`;
+        } else {
+          isCardEmpty = true;
+          statusHtml = `<span class="status-tag empty">✨ 予約可能 (タップで選択)</span>`;
+          purposeText = '空き枠';
+          onClickAction = `onclick="fillFormTime('${slotStart}', '${slotEnd}')"`;
+        }
+
+        html += `
+          <div class="time-slot-card ${isCardEmpty ? 'is-empty' : ''}" ${onClickAction}>
+            <div>
+              <div class="time-range">${slot}</div>
+              <div class="sub-label">${purposeText}</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              ${statusHtml}
+              ${fixed && !userRes ? `<button class="btn-small btn-secondary" style="margin:0;" onclick="event.stopPropagation(); promptTransfer('${dateStr}', '${slotStart}', '${slotEnd}', '${fixed.band}')">譲受</button>` : ''}
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    });
+  }
+
+  function fillFormTime(start, end) {
+    document.getElementById('res-start-time').value = start;
+    document.getElementById('res-end-time').value = end;
+    document.getElementById('res-purpose').focus();
+    document.getElementById('reservation-form-card').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function promptTransfer(date, start, end, fixedBand) {
+    if (!currentUser) return alert('先にプロフィールを登録してください');
+    const myBand = prompt(`「${fixedBand}」の枠 (${start}〜${end}) を譲り受けて使用しますか？\n使用するあなたのバンド名を入力してください:`);
+    if (!myBand) return;
+
+    db.collection('reservations').add({
+      date, startTime: start, endTime: end, time: `${start}-${end}`,
+      purpose: myBand, isTransfer: true, originalBand: fixedBand,
+      userId: currentUser.id, userName: currentUser.name,
+      userGrade: currentUser.grade, userDept: currentUser.dept, createdAt: new Date()
+    }).then(() => {
+      alert(`「${fixedBand}」からのシフト譲受枠として予約登録しました！`);
+      loadTimelineForDate(date);
+    });
+  }
+
+  function toggleChip(el) { el.classList.toggle('selected'); }
+
+  function openProfileModal() {
+    if (currentUser) {
+      document.getElementById('prof-name').value = currentUser.name || '';
+      document.getElementById('prof-line').value = currentUser.lineName || '';
+      document.getElementById('prof-grade').value = currentUser.grade || '1年';
+      document.getElementById('prof-dept').value = currentUser.dept || 'AC';
+      document.getElementById('prof-role').value = currentUser.role || '部員';
+      document.getElementById('prof-comment').value = currentUser.comment || '';
+
+      document.querySelectorAll('#part-chips .chip').forEach(chip => {
+        if ((currentUser.parts || []).includes(chip.dataset.part)) chip.classList.add('selected');
+        else chip.classList.remove('selected');
+      });
+      toggleDeptSelect();
+    }
+    document.getElementById('profile-modal').classList.remove('hidden');
+  }
+
+  function toggleDeptSelect() {
+    const grade = document.getElementById('prof-grade').value;
+    const deptGroup = document.getElementById('dept-group');
+    if (grade.includes('専攻科')) deptGroup.classList.add('hidden');
+    else deptGroup.classList.remove('hidden');
+  }
+
+  function handleSaveProfile(e) {
+    e.preventDefault();
+    const parts = Array.from(document.querySelectorAll('#part-chips .chip.selected')).map(c => c.dataset.part);
+    const grade = document.getElementById('prof-grade').value;
+    const dept = grade.includes('専攻科') ? '-' : document.getElementById('prof-dept').value;
+
+    currentUser = {
+      id: currentUser ? currentUser.id : 'user_' + Date.now(),
+      name: document.getElementById('prof-name').value,
+      lineName: document.getElementById('prof-line').value,
+      grade: grade, dept: dept, parts: parts,
+      role: document.getElementById('prof-role').value,
+      comment: document.getElementById('prof-comment').value,
+      feePaid: currentUser ? currentUser.feePaid : false,
+      bands: currentUser ? (currentUser.bands || []) : [],
+      supportBands: currentUser ? (currentUser.supportBands || []) : []
+    };
+
+    localStorage.setItem('onken_user', JSON.stringify(currentUser));
+    db.collection('users').doc(currentUser.id).set(currentUser);
+    document.getElementById('profile-modal').classList.add('hidden');
+    renderUI();
+  }
+
+  function renderUI() {
+    if (!currentUser) return;
+    const isExec = ['部長', '副部長', '会計'].includes(currentUser.role);
+    const partsText = (currentUser.parts || []).join('/');
+    const userTag = formatUserTag(currentUser.grade, currentUser.dept);
+    document.getElementById('user-info').innerHTML = `● ${userTag}${currentUser.name} ・ ${partsText || '未設定'}`;
+
+    if (isExec) {
+      document.getElementById('admin-tab-btn').classList.remove('hidden');
+      loadAdminShiftRequests();
+      loadAdminAttendance();
+    } else {
+      document.getElementById('admin-tab-btn').classList.add('hidden');
+    }
+
+    loadReminders();
+    loadMySchedule();
+    loadBands();
+    loadPartMembers();
+    loadRoster('grade');
+    loadFeeManagement();
+  }
+
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+    document.getElementById(tabId).classList.remove('hidden');
+    event.target.classList.add('active');
+
+    if (tabId === 'tab-chat') loadChat();
+    if (tabId === 'tab-attendance') loadAttendance();
+    if (tabId === 'tab-bands') loadBands();
+    if (tabId === 'tab-part-search') loadPartMembers();
+    if (tabId === 'tab-admin') loadAdminAttendance();
+  }
+
+  function loadReminders() {
+    if (!currentUser) return;
+    const remindBox = document.getElementById('remind-area');
+    let messages = [];
+
+    const today = new Date().toISOString().split('T')[0];
+    db.collection('reservations').where('date', '==', today).get().then(snapshot => {
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        if (d.userId === currentUser.id) {
+          const tDisplay = d.startTime ? `${d.startTime}〜${d.endTime}` : d.time;
+          messages.push(`🔔 本日 【${tDisplay}】 に部室予約があります (${d.purpose})`);
+        }
+      });
+      if (messages.length > 0) {
+        remindBox.innerHTML = messages.join('<br>');
+        remindBox.classList.remove('hidden');
+      } else {
+        remindBox.classList.add('hidden');
+      }
+    });
+  }
+
+  function loadMySchedule() {
+    if (!currentUser) return;
+    const container = document.getElementById('my-schedule-list');
+    const today = new Date().toISOString().split('T')[0];
+
+    db.collection('reservations').where('userId', '==', currentUser.id).get().then(snapshot => {
+      let myRes = [];
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        if (d.date >= today) myRes.push(d);
+      });
+      myRes.sort((a, b) => (a.date > b.date ? 1 : -1));
+
+      if (myRes.length === 0) {
+        container.innerHTML = '<p style="margin:0; font-size:0.85rem; color:var(--text-sub);">今後の予約予定はありません。</p>';
+        return;
+      }
+      let html = '<ul style="margin:0; padding-left:20px; font-size:0.9rem;">';
+      myRes.forEach(r => {
+        const tDisplay = r.startTime ? `${r.startTime}〜${r.endTime}` : r.time;
+        html += `<li><strong>${r.date} ${tDisplay}:</strong> ${r.purpose} ${r.isTransfer ? '(譲受枠)' : ''}</li>`;
+      });
+      html += '</ul>';
+      container.innerHTML = html;
+    });
+  }
+
+  function handleReservation(e) {
+    e.preventDefault();
+    if (!currentUser) return alert('先にプロフィールを登録してください');
+    const date = document.getElementById('res-date').value || selectedDateStr;
+    const startTime = document.getElementById('res-start-time').value;
+    const endTime = document.getElementById('res-end-time').value;
+    const purpose = document.getElementById('res-purpose').value;
+
+    if (startTime >= endTime) {
+      return alert('❌ 終了時刻は開始時刻より後の時間を指定してください。');
+    }
+
+    const d = new Date(date);
+    const daysJP = ['日', '月', '火', '水', '木', '金', '土'];
+    const dayJP = daysJP[d.getDay()];
+    const dayFixedSchedule = FIXED_WEEKLY_SCHEDULE[dayJP] || [];
+
+    for (let f of dayFixedSchedule) {
+      if (startTime < f.end && endTime > f.start) {
+        return alert(`❌ 指定時間枠は固定シフト「${f.band} (${f.start}〜${f.end})」と重なっているため予約できません。`);
+      }
+    }
+
+    db.collection('reservations').where('date', '==', date).get().then(snapshot => {
+      let isOverlap = false;
+      snapshot.forEach(doc => {
+        const r = doc.data();
+        const rStart = r.startTime || r.time.split('-')[0];
+        const rEnd = r.endTime || r.time.split('-')[1];
+        if (startTime < rEnd && endTime > rStart) {
+          isOverlap = true;
+        }
+      });
+
+      if (isOverlap) {
+        return alert('❌ 指定された時間帯には既に別の部室予約が入っています。');
+      }
+
+      db.collection('reservations').add({
+        date, startTime, endTime, time: `${startTime}-${endTime}`, purpose,
+        userId: currentUser.id, userName: currentUser.name, userGrade: currentUser.grade, userDept: currentUser.dept, createdAt: new Date()
+      }).then(() => {
+        alert(`予約が完了しました！（${startTime} 〜 ${endTime}）`);
+        document.getElementById('res-purpose').value = '';
+        loadTimelineForDate(date);
+        loadMySchedule();
+        loadReminders();
+      });
+    });
+  }
+
+  function loadAttendance() {
+    let dateInput = document.getElementById('attendance-date');
+    if (!dateInput.value) dateInput.value = selectedDateStr || new Date().toISOString().split('T')[0];
+    const date = dateInput.value;
+    const container = document.getElementById('attendance-shifts-container');
+    container.innerHTML = '読み込み中...';
+
+    const myBandsList = currentUser ? [...(currentUser.bands || []), ...(currentUser.supportBands || [])] : [];
+
+    const d = new Date(date);
+    const daysJP = ['日', '月', '火', '水', '木', '金', '土'];
+    const dayJP = daysJP[d.getDay()];
+    const dayFixedSchedule = FIXED_WEEKLY_SCHEDULE[dayJP] || [];
+
+    db.collection('reservations').where('date', '==', date).get().then(snapshot => {
+      let combinedShifts = [];
+      dayFixedSchedule.forEach(f => {
+        combinedShifts.push({ id: `fixed_${f.start}`, time: `${f.start}-${f.end}`, purpose: f.band, isFixed: true });
+      });
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const tDisplay = data.startTime ? `${data.startTime}-${data.endTime}` : data.time;
+        combinedShifts.push({ id: doc.id, time: tDisplay, purpose: data.purpose, isFixed: false });
+      });
+
+      const myShifts = combinedShifts.filter(s => myBandsList.includes(s.purpose));
+
+      if (myShifts.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-sub);">この日にあなたが参加しているバンドのシフトはありません。</p>';
+        return;
+      }
+
+      db.collection('attendance').where('date', '==', date).get().then(attSnap => {
+        let attMap = {};
+        attSnap.forEach(attDoc => attMap[attDoc.id] = attDoc.data());
+
+        let html = '';
+        myShifts.forEach(shift => {
+          const shiftTitle = `${date} ${shift.purpose} (${shift.time})`;
+          const docId = currentUser ? `${date}_${shift.id}_${currentUser.id}` : null;
+          const currentStatus = (docId && attMap[docId]) ? attMap[docId].status : null;
+
+          let yesCount = 0, noCount = 0;
+          let memberListHtml = '<ul style="margin:8px 0 0 0; padding-left:20px; font-size:0.85rem; color:var(--text-sub);">';
+          Object.keys(attMap).forEach(k => {
+            if (k.startsWith(`${date}_${shift.id}_`)) {
+              const att = attMap[k];
+              if (att.status === '参加') yesCount++;
+              if (att.status === '欠席') noCount++;
+              const uTag = formatUserTag(att.userGrade, att.userDept);
+              memberListHtml += `<li>${uTag}${att.userName}: ${att.status === '参加' ? '⭕ 参加' : '❌ 欠席'}</li>`;
+            }
+          });
+          memberListHtml += '</ul>';
+
+          html += `
+            <div style="background:var(--input-bg); padding:14px; border-radius:8px; margin-bottom:12px; border:1px solid var(--border-color);">
+              <strong style="color:var(--accent-dark); font-size:1.05rem;">${shiftTitle}</strong>
+              <div style="margin-top:10px; display:flex; align-items:center; justify-content:space-between;">
+                <div>
+                  <small style="color:var(--text-sub);">あなたの回答: </small>
+                  <button class="status-btn ${currentStatus === '参加' ? 'active-yes' : 'btn-secondary'}" onclick="submitShiftAttendance('${shift.id}', '${date}', '参加')">⭕ 参加</button>
+                  <button class="status-btn ${currentStatus === '欠席' ? 'active-no' : 'btn-secondary'}" onclick="submitShiftAttendance('${shift.id}', '${date}', '欠席')">❌ 欠席</button>
+                </div>
+                <div style="font-size:0.85rem; color:var(--text-sub);">参加: ${yesCount}名 / 欠席: ${noCount}名</div>
+              </div>
+              ${memberListHtml}
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      });
+    });
+  }
+
+  function submitShiftAttendance(shiftId, date, status) {
+    if (!currentUser) return alert('先にプロフィールを登録してください');
+    const docId = `${date}_${shiftId}_${currentUser.id}`;
+    db.collection('attendance').doc(docId).set({
+      shiftId, date, userId: currentUser.id, userName: currentUser.name, userGrade: currentUser.grade, userDept: currentUser.dept, status, updatedAt: new Date()
+    }).then(() => loadAttendance());
+  }
+
+  function loadAdminAttendance() {
+    let dateInput = document.getElementById('admin-attendance-date');
+    if (!dateInput.value) dateInput.value = selectedDateStr || new Date().toISOString().split('T')[0];
+    const date = dateInput.value;
+    const container = document.getElementById('admin-attendance-list');
+    if (!container) return;
+    container.innerHTML = '読み込み中...';
+
+    const d = new Date(date);
+    const daysJP = ['日', '月', '火', '水', '木', '金', '土'];
+    const dayJP = daysJP[d.getDay()];
+    const dayFixedSchedule = FIXED_WEEKLY_SCHEDULE[dayJP] || [];
+
+    db.collection('reservations').where('date', '==', date).get().then(snapshot => {
+      let combinedShifts = [];
+      dayFixedSchedule.forEach(f => {
+        combinedShifts.push({ id: `fixed_${f.start}`, time: `${f.start}-${f.end}`, purpose: f.band, isFixed: true });
+      });
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const tDisplay = data.startTime ? `${data.startTime}-${data.endTime}` : data.time;
+        combinedShifts.push({ id: doc.id, time: tDisplay, purpose: data.purpose, isFixed: false });
+      });
+
+      if (combinedShifts.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-sub);">この日に登録された全バンドのシフトはありません。</p>';
+        return;
+      }
+
+      db.collection('attendance').where('date', '==', date).get().then(attSnap => {
+        let attMap = {};
+        attSnap.forEach(attDoc => attMap[attDoc.id] = attDoc.data());
+
+        let html = '';
+        combinedShifts.forEach(shift => {
+          const shiftTitle = `${date} ${shift.purpose} (${shift.time})`;
+          let yesMembers = [];
+          let noMembers = [];
+
+          Object.keys(attMap).forEach(k => {
+            if (k.startsWith(`${date}_${shift.id}_`)) {
+              const att = attMap[k];
+              const uTag = formatUserTag(att.userGrade, att.userDept);
+              const nameStr = `${uTag}${att.userName}`;
+              if (att.status === '参加') yesMembers.push(nameStr);
+              if (att.status === '欠席') noMembers.push(nameStr);
+            }
+          });
+
+          html += `
+            <div style="background:#ffffff; padding:12px; border-radius:8px; margin-bottom:10px; border:1px solid var(--border-color);">
+              <strong style="color:var(--accent-dark); font-size:0.95rem;">${shiftTitle}</strong>
+              <div style="font-size:0.85rem; margin-top:6px;">
+                <span style="color:#2e7d32; font-weight:700;">⭕ 参加 (${yesMembers.length}名):</span> ${yesMembers.join(', ') || 'なし'}
+              </div>
+              <div style="font-size:0.85rem; margin-top:3px;">
+                <span style="color:#c62828; font-weight:700;">❌ 欠席 (${noMembers.length}名):</span> ${noMembers.join(', ') || 'なし'}
+              </div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      });
+    });
+  }
+
+  function handleCreateBand(e) {
+    e.preventDefault();
+    if (!currentUser) return alert('先にプロフィールを登録してください');
+    const name = document.getElementById('new-band-name').value.trim();
+    if (!name) return;
+
+    db.collection('bands').add({
+      name: name, leaderId: currentUser.id, leaderName: currentUser.name,
+      members: [currentUser.id], supportMembers: [], createdAt: new Date()
+    }).then(() => {
+      if (!currentUser.bands) currentUser.bands = [];
+      currentUser.bands.push(name);
+      localStorage.setItem('onken_user', JSON.stringify(currentUser));
+      document.getElementById('new-band-name').value = '';
+      loadBands();
+      alert(`バンド「${name}」を作成しました！`);
+    });
+  }
+
+  function loadBands() {
+    const container = document.getElementById('band-list');
+    const chatBandSelect = document.getElementById('chat-band-select');
+    const reqBandSelect = document.getElementById('req-band-select');
+
+    db.collection('users').get().then(usersSnap => {
+      let userMap = {};
+      usersSnap.forEach(uDoc => {
+        const uData = uDoc.data();
+        const tag = formatUserTag(uData.grade, uData.dept);
+        userMap[uData.id] = `${tag}${uData.name || uData.lineName || '無名'}`;
+      });
+
+      db.collection('bands').get().then(snapshot => {
+        let dbBands = [];
+        snapshot.forEach(doc => dbBands.push({ id: doc.id, ...doc.data() }));
+        let allBands = [...DEFAULT_BANDS];
+
+        dbBands.forEach(dbB => {
+          const found = allBands.find(b => b.name === dbB.name);
+          if (found) {
+            found.id = dbB.id;
+            found.leaderId = dbB.leaderId;
+            found.leaderName = dbB.leaderName;
+            found.members = dbB.members || [];
+            found.supportMembers = dbB.supportMembers || [];
+          } else {
+            allBands.push({
+              id: dbB.id, name: dbB.name, leaderId: dbB.leaderId, leaderName: dbB.leaderName,
+              members: dbB.members || [], supportMembers: dbB.supportMembers || []
+            });
+          }
+        });
+
+        let html = '';
+        let myBandsOptions = '';
+        let allBandsOptions = '';
+
+        allBands.forEach(b => {
+          const isLeader = currentUser && (b.leaderId === currentUser.id);
+          const isMember = currentUser && ((b.members || []).includes(currentUser.id) || (currentUser.bands || []).includes(b.name));
+          const isSupport = currentUser && ((b.supportMembers || []).includes(currentUser.id) || (currentUser.supportBands || []).includes(b.name));
+
+          if (isMember || isSupport) {
+            myBandsOptions += `<option value="${b.name}">${b.name} ${isSupport ? '(サポート)' : ''}</option>`;
+          }
+          allBandsOptions += `<option value="${b.name}">${b.name}</option>`;
+
+          let joinedNames = (b.members || []).map(id => userMap[id]).filter(n => n);
+          let supportNames = (b.supportMembers || []).map(id => userMap[id]).filter(n => n);
+
+          let memberDisplay = '';
+          if (b.leaderName) memberDisplay += `<span style="color:#d84315; font-weight:700;">リーダー: ${b.leaderName}</span> `;
+          if (joinedNames.length > 0) memberDisplay += `【正式】${joinedNames.join(', ')}`;
+          if (supportNames.length > 0) {
+            if (memberDisplay) memberDisplay += ' / ';
+            memberDisplay += `【サポート】${supportNames.join(', ')}`;
+          }
+          if (!memberDisplay) memberDisplay = 'メンバー未登録';
+
+          html += `<div style="border-bottom:1px solid var(--border-color); padding:12px 0; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <strong style="font-size:1.05rem;">${b.name}</strong>
+              <div style="font-size:0.8rem; color:var(--text-sub); margin-top:3px;">加入者: ${memberDisplay}</div>
+            </div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
+              ${isLeader 
+                ? '<span style="font-size:0.8rem; background:#ede8df; color:var(--text-main); padding:4px 8px; border-radius:12px; font-weight:700;">リーダー</span>' 
+                : `<button class="btn-small btn-secondary" onclick="becomeLeader('${b.id || ''}', '${b.name}')">リーダーになる</button>`}
+
+              ${isMember 
+                ? '<span style="font-size:0.85rem; color:#2e7d32; font-weight:500; align-self:center;">正式加入中</span>' 
+                : `<button class="btn-small" onclick="joinBandByName('${b.id || ''}', '${b.name}', 'regular')">正式加入</button>`}
+              
+              ${isSupport 
+                ? '<span style="font-size:0.85rem; color:#1976d2; font-weight:500; align-self:center;">サポート中</span>' 
+                : (isMember ? '' : `<button class="btn-small btn-secondary" onclick="joinBandByName('${b.id || ''}', '${b.name}', 'support')">サポート加入</button>`)}
+            </div>
+          </div>`;
+        });
+
+        container.innerHTML = html || 'バンドの読み込みに失敗しました。';
+        if (chatBandSelect) chatBandSelect.innerHTML = myBandsOptions || '<option value="">参加中のバンドがありません</option>';
+        if (reqBandSelect) reqBandSelect.innerHTML = myBandsOptions || allBandsOptions;
+      });
+    });
+  }
+
+  function becomeLeader(bandId, bandName) {
+    if (!currentUser) return alert('先にプロフィールを登録してください');
+    const uTag = formatUserTag(currentUser.grade, currentUser.dept);
+    const leaderDisplayName = `${uTag}${currentUser.name}`;
+
+    if (!confirm(`バンド「${bandName}」のリーダーに登録・設定しますか？`)) return;
+
+    if (bandId) {
+      db.collection('bands').doc(bandId).update({
+        leaderId: currentUser.id,
+        leaderName: leaderDisplayName,
+        members: firebase.firestore.FieldValue.arrayUnion(currentUser.id)
+      }).then(() => {
+        alert(`「${bandName}」のリーダーとして設定しました！`);
+        loadBands();
+      });
+    } else {
+      db.collection('bands').add({
+        name: bandName,
+        leaderId: currentUser.id,
+        leaderName: leaderDisplayName,
+        members: [currentUser.id],
+        supportMembers: [],
+        createdAt: new Date()
+      }).then(() => {
+        alert(`「${bandName}」のリーダーとして設定しました！`);
+        loadBands();
+      });
+    }
+  }
+
+  function joinBandByName(bandId, bandName, type) {
+    if (!currentUser) return alert('先にプロフィールを登録してください');
+    
+    if (bandId) {
+      const updateField = type === 'regular' ? 'members' : 'supportMembers';
+      db.collection('bands').doc(bandId).update({ [updateField]: firebase.firestore.FieldValue.arrayUnion(currentUser.id) });
+    } else {
+      const uTag = formatUserTag(currentUser.grade, currentUser.dept);
+      db.collection('bands').add({
+        name: bandName, leaderName: `${uTag}${currentUser.name}`,
+        members: type === 'regular' ? [currentUser.id] : [],
+        supportMembers: type === 'support' ? [currentUser.id] : [],
+        createdAt: new Date()
+      });
+    }
+
+    if (type === 'regular') {
+      if (!currentUser.bands) currentUser.bands = [];
+      if (!currentUser.bands.includes(bandName)) currentUser.bands.push(bandName);
+    } else {
+      if (!currentUser.supportBands) currentUser.supportBands = [];
+      if (!currentUser.supportBands.includes(bandName)) currentUser.supportBands.push(bandName);
+    }
+
+    localStorage.setItem('onken_user', JSON.stringify(currentUser));
+    loadBands();
+    alert(`「${bandName}」に${type === 'regular' ? '正式メンバー' : 'サポートメンバー'}として加入しました！`);
+  }
+
+  function loadPartMembers() {
+    const part = document.getElementById('part-search-select').value;
+    const title = document.getElementById('part-search-title');
+    const container = document.getElementById('part-members-list');
+    
+    title.innerText = `${part} 担当メンバー一覧`;
+    container.innerHTML = '<p style="color:var(--text-sub);">読み込み中...</p>';
+
+    db.collection('users').get().then(snapshot => {
+      let matchedUsers = [];
+      snapshot.forEach(doc => {
+        const u = doc.data();
+        if (u.parts && u.parts.includes(part)) matchedUsers.push(u);
+      });
+
+      if (matchedUsers.length === 0) {
+        container.innerHTML = `<p style="color:var(--text-sub);">${part} 担当として登録されている部員はまだいません。</p>`;
+        return;
+      }
+
+      let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
+      matchedUsers.forEach(u => {
+        const uTag = formatUserTag(u.grade, u.dept);
+        html += `
+          <div style="background:var(--input-bg); padding:12px 14px; border-radius:8px; border:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <strong>${uTag}${u.name}</strong>
+              <div style="font-size:0.8rem; color:var(--text-sub); margin-top:2px;">
+                LINE名: ${u.lineName || '-'} / 他パート: ${(u.parts || []).join(', ')}
+              </div>
+              ${u.comment ? `<div style="font-size:0.85rem; color:var(--text-main); margin-top:4px;">「${u.comment}」</div>` : ''}
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      container.innerHTML = html;
+    });
+  }
+
+  function loadRoster(sortBy) {
+    const container = document.getElementById('roster-list');
+    db.collection('users').get().then(snapshot => {
+      let users = [];
+      snapshot.forEach(doc => users.push(doc.data()));
+      users.sort((a, b) => (a[sortBy] > b[sortBy]) ? 1 : -1);
+
+      let html = '<table style="width:100%; text-align:left; border-collapse:collapse;"><tr><th>学年/学科</th><th>名前 (LINE)</th><th>パート</th><th>役職</th></tr>';
+      users.forEach(u => {
+        const uTag = formatUserTag(u.grade, u.dept);
+        html += `<tr style="border-bottom:1px solid var(--border-color);">
+          <td style="padding:10px 0;"><strong>${uTag}</strong></td>
+          <td>${u.name} (${u.lineName})</td>
+          <td>${u.parts ? u.parts.join(',') : ''}</td>
+          <td>${u.role}</td>
+        </tr>`;
+      });
+      html += '</table>';
+      container.innerHTML = html;
+    });
+  }
+
+  function loadChat() {
+    const band = document.getElementById('chat-band-select').value;
+    const container = document.getElementById('chat-messages');
+    if (!band) {
+      container.innerHTML = '<p style="color:var(--text-sub);">参加中のバンドを選択してください。</p>';
+      return;
+    }
+    db.collection('chats').doc(band).collection('messages').orderBy('createdAt', 'asc').onSnapshot(snapshot => {
+      let html = '';
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        html += `<div class="chat-msg"><div class="sender">${d.userName}</div><div>${d.text}</div></div>`;
+      });
+      container.innerHTML = html;
+      container.scrollTop = container.scrollHeight;
+    });
+  }
+
+  function handleSendChat(e) {
+    e.preventDefault();
+    if (!currentUser) return alert('先にプロフィールを登録してください');
+    const band = document.getElementById('chat-band-select').value;
+    const input = document.getElementById('chat-input');
+    if (!band) return;
+
+    const uTag = formatUserTag(currentUser.grade, currentUser.dept);
+    db.collection('chats').doc(band).collection('messages').add({
+      text: input.value, userName: `${uTag}${currentUser.name}`, createdAt: new Date()
+    }).then(() => input.value = '');
+  }
+
+  function handleShiftRequest(e) {
+    e.preventDefault();
+    if (!currentUser) return alert('先にプロフィールを登録してください');
+    const uTag = formatUserTag(currentUser.grade, currentUser.dept);
+    const bandSelect = document.getElementById('req-band-select').value;
+
+    db.collection('shift_requests').add({
+      bandName: bandSelect,
+      choice1: document.getElementById('req-choice1').value,
+      choice2: document.getElementById('req-choice2').value,
+      choice3: document.getElementById('req-choice3').value,
+      submittedBy: `${uTag}${currentUser.name}`, createdAt: new Date()
+    }).then(() => {
+      alert('シフト希望を提出しました！');
+      if (['部長', '副部長', '会計'].includes(currentUser.role)) loadAdminShiftRequests();
+    });
+  }
+
+  let globalShiftRequests = [];
+  function loadAdminShiftRequests() {
+    const container = document.getElementById('admin-shift-requests');
+    db.collection('shift_requests').orderBy('createdAt', 'desc').get().then(snapshot => {
+      if (snapshot.empty) {
+        container.innerHTML = '<p style="color:var(--text-sub);">提出されたシフト希望はありません。</p>';
+        return;
+      }
+      globalShiftRequests = [];
+      let html = '<table style="width:100%; border-collapse:collapse; font-size:0.85rem;"><tr><th>バンド</th><th>第1希望</th><th>第2希望</th><th>第3希望</th></tr>';
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        globalShiftRequests.push(d);
+        html += `<tr style="border-bottom:1px solid var(--border-color);">
+          <td style="padding:6px 0;"><strong>${d.bandName}</strong></td>
+          <td>${d.choice1}</td><td>${d.choice2 || '-'}</td><td>${d.choice3 || '-'}</td>
+        </tr>`;
+      });
+      html += '</table>';
+      container.innerHTML = html;
+    });
+  }
+
+  function downloadShiftRequestsCSV() {
+    if (globalShiftRequests.length === 0) return alert('ダウンロードするデータがありません。');
+    let csvContent = "data:text/csv;charset=utf-8,バンド名,第1希望,第2希望,第3希望,提出者\n";
+    globalShiftRequests.forEach(r => {
+      csvContent += `"${r.bandName}","${r.choice1}","${r.choice2 || ''}","${r.choice3 || ''}","${r.submittedBy}"\n`;
+    });
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "shift_requests.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  function loadFeeManagement() {
+    const container = document.getElementById('fee-management-list');
+    db.collection('users').get().then(snapshot => {
+      let html = '<ul style="list-style:none; padding:0;">';
+      snapshot.forEach(doc => {
+        const u = doc.data();
+        const uTag = formatUserTag(u.grade, u.dept);
+        html += `<li style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:5px;">
+          <span>${uTag}${u.name}: ${u.feePaid ? '✅ 納入済み' : '❌ 未納'}</span>
+          <div>
+            <button class="btn-small btn-secondary" style="margin:0 4px;" onclick="toggleFee('${doc.id}', ${!u.feePaid})">切替</button>
+            <button class="btn-small btn-danger" style="margin:0;" onclick="deleteMember('${doc.id}', '${u.name}')">削除</button>
+          </div>
+        </li>`;
+      });
+      html += '</ul>';
+      container.innerHTML = html;
+    });
+  }
+
+  function toggleFee(id, status) {
+    db.collection('users').doc(id).update({ feePaid: status }).then(() => loadFeeManagement());
+  }
+
+  function toggleAllFee(status) {
+    const actionText = status ? '全員「納入済み」' : '全員「未納」';
+    if (!confirm(`本当に${actionText}に変更しますか？`)) return;
+
+    db.collection('users').get().then(snapshot => {
+      const batch = db.batch();
+      snapshot.forEach(doc => batch.update(doc.ref, { feePaid: status }));
+      return batch.commit();
+    }).then(() => {
+      alert(`${actionText}へ変更しました！`);
+      loadFeeManagement();
+    });
+  }
+
+  function deleteMember(id, name) {
+    if (confirm(`本当に ${name} さんの部員アカウントを削除しますか？`)) {
+      db.collection('users').doc(id).delete().then(() => {
+        alert(`${name} さんを削除しました。`);
+        loadFeeManagement();
+        loadRoster('grade');
+      });
+    }
+  }
+
+  // 個人・名簿データの初期化（バンド名簿と確定シフトは保持）
+  function resetPersonalData() {
+    if (!confirm("⚠️ 本当に名簿・部員プロフィールや予約・出欠などの個人データをリセットしますか？\n※バンド名一覧および固定シフト枠データは保持されます。")) return;
+
+    const collectionsToDelete = ['users', 'reservations', 'attendance', 'shift_requests'];
+    
+    let promises = collectionsToDelete.map(colName => {
+      return db.collection(colName).get().then(snapshot => {
+        const batch = db.batch();
+        snapshot.forEach(doc => batch.delete(doc.ref));
+        return batch.commit();
+      });
+    });
+
+    // バンドコレクション内のメンバー・リーダー情報をクリア
+    promises.push(
+      db.collection('bands').get().then(snapshot => {
+        const batch = db.batch();
+        snapshot.forEach(doc => {
+          batch.update(doc.ref, {
+            leaderId: null,
+            leaderName: null,
+            members: [],
+            supportMembers: []
+          });
+        });
+        return batch.commit();
+      })
+    );
+
+    Promise.all(promises).then(() => {
+      localStorage.removeItem('onken_user');
+      alert('データのリセットが完了しました。ページを再読み込みします。');
+      location.reload();
+    });
+  }
+</script>
+</body>
+</html>

@@ -223,7 +223,7 @@
     }
     .date-btn.active .sub, .date-btn.active .day { color: #ffffff; }
 
-    /* タイムスケジュールリスト（アニメーション） */
+    /* タイムスケジュールリスト */
     #timeline-list {
       transition: opacity 0.25s ease-in-out;
     }
@@ -241,7 +241,6 @@
       transition: all 0.2s;
     }
     
-    /* 空き枠強調 */
     .time-slot-card.is-empty {
       background: #f4fbf7;
       border: 1.5px dashed #4caf50;
@@ -364,17 +363,17 @@
     </div>
   </div>
 
-  <!-- 2. 出欠タブ -->
+  <!-- 2. 出欠タブ（自分のバンドのみ回答枠表示） -->
   <div id="tab-attendance" class="tab-content hidden">
     <div class="card">
-      <h3>バンドシフト別 出欠確認</h3>
+      <h3>所属バンドのシフト出欠確認</h3>
       <label>対象日を選択</label>
       <input type="date" id="attendance-date" onchange="loadAttendance()">
       <div id="attendance-shifts-container" style="margin-top: 16px;">読み込み中...</div>
     </div>
   </div>
 
-  <!-- 3. バンド作成・参加タブ（リーダー着任ボタン設置） -->
+  <!-- 3. バンド作成・参加タブ -->
   <div id="tab-bands" class="tab-content hidden">
     <div class="card">
       <h3>新しいバンドを作成する</h3>
@@ -385,7 +384,7 @@
       </form>
     </div>
     <div class="card">
-      <h3>バンド一覧・加入申請・リーダー着任</h3>
+      <h3>バンド一覧・加入申請・リーダー設定</h3>
       <div id="band-list">読み込み中...</div>
     </div>
   </div>
@@ -435,7 +434,7 @@
     </div>
   </div>
 
-  <!-- 7. シフト希望（バンドリーダー専用） -->
+  <!-- 7. シフト希望 -->
   <div id="tab-shift-req" class="tab-content hidden">
     <div class="card">
       <h3>バンドシフト希望申請（バンドリーダー専用）</h3>
@@ -454,24 +453,30 @@
     </div>
   </div>
 
-  <!-- 8. 三役専用メニュー -->
+  <!-- 8. 三役専用メニュー（全バンド出欠確認一覧機能付き） -->
   <div id="tab-admin" class="tab-content hidden">
     <div class="card admin-card">
       <h3>三役専用管理メニュー</h3>
       
-      <h4>1. 提出されたシフト希望の確認・集計</h4>
+      <h4>1. 日別 全バンドシフトの出欠集計</h4>
+      <label>確認したい日付を選択</label>
+      <input type="date" id="admin-attendance-date" onchange="loadAdminAttendance()">
+      <div id="admin-attendance-list" style="margin-top:12px;"></div>
+
+      <hr style="margin:20px 0; border-color: var(--border-color);">
+      <h4>2. 提出されたシフト希望の確認・集計</h4>
       <button class="btn-secondary btn-small" onclick="downloadShiftRequestsCSV()">希望一覧をCSVダウンロード</button>
       <div id="admin-shift-requests" style="margin-top:10px;"></div>
 
       <hr style="margin:20px 0; border-color: var(--border-color);">
-      <h4>2. 全体イベント・お知らせ編集</h4>
+      <h4>3. 全体イベント・お知らせ編集</h4>
       <form id="form-event" onsubmit="handleAddEvent(event)">
         <input type="text" id="event-title" placeholder="お知らせ内容を入力" required>
         <button type="submit">お知らせを追加投稿する</button>
       </form>
 
       <hr style="margin:20px 0; border-color: var(--border-color);">
-      <h4>3. 部員管理（部費納入・アカウント削除）</h4>
+      <h4>4. 部員管理（部費納入・アカウント削除）</h4>
       <div style="display:flex; gap:10px; margin-bottom:12px;">
         <button class="btn-secondary btn-small" onclick="toggleAllFee(true)">全員「納入済み」にする</button>
         <button class="btn-secondary btn-small" onclick="toggleAllFee(false)">全員「未納」にする</button>
@@ -826,6 +831,7 @@
     if (isExec) {
       document.getElementById('admin-tab-btn').classList.remove('hidden');
       loadAdminShiftRequests();
+      loadAdminAttendance();
     } else {
       document.getElementById('admin-tab-btn').classList.add('hidden');
     }
@@ -848,6 +854,7 @@
     if (tabId === 'tab-attendance') loadAttendance();
     if (tabId === 'tab-bands') loadBands();
     if (tabId === 'tab-part-search') loadPartMembers();
+    if (tabId === 'tab-admin') loadAdminAttendance();
   }
 
   function loadReminders() {
@@ -951,12 +958,15 @@
     });
   }
 
+  // 出欠タブ（自分が所属するバンドのシフトのみ回答ボタンを表示）
   function loadAttendance() {
     let dateInput = document.getElementById('attendance-date');
     if (!dateInput.value) dateInput.value = selectedDateStr || new Date().toISOString().split('T')[0];
     const date = dateInput.value;
     const container = document.getElementById('attendance-shifts-container');
     container.innerHTML = '読み込み中...';
+
+    const myBandsList = currentUser ? [...(currentUser.bands || []), ...(currentUser.supportBands || [])] : [];
 
     const d = new Date(date);
     const daysJP = ['日', '月', '火', '水', '木', '金', '土'];
@@ -975,8 +985,11 @@
         combinedShifts.push({ id: doc.id, time: tDisplay, purpose: data.purpose, isFixed: false });
       });
 
-      if (combinedShifts.length === 0) {
-        container.innerHTML = '<p style="color:var(--text-sub);">この日に登録されたシフトはありません。</p>';
+      // 自分の所属バンドに絞り込み
+      const myShifts = combinedShifts.filter(s => myBandsList.includes(s.purpose));
+
+      if (myShifts.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-sub);">この日にあなたが参加しているバンドのシフトはありません。</p>';
         return;
       }
 
@@ -985,7 +998,7 @@
         attSnap.forEach(attDoc => attMap[attDoc.id] = attDoc.data());
 
         let html = '';
-        combinedShifts.forEach(shift => {
+        myShifts.forEach(shift => {
           const shiftTitle = `${date} ${shift.purpose} (${shift.time})`;
           const docId = currentUser ? `${date}_${shift.id}_${currentUser.id}` : null;
           const currentStatus = (docId && attMap[docId]) ? attMap[docId].status : null;
@@ -1005,10 +1018,10 @@
 
           html += `
             <div style="background:var(--input-bg); padding:14px; border-radius:8px; margin-bottom:12px; border:1px solid var(--border-color);">
-              <strong style="color:var(--accent-dark); font-size:1rem;">${shiftTitle}</strong>
+              <strong style="color:var(--accent-dark); font-size:1.05rem;">${shiftTitle}</strong>
               <div style="margin-top:10px; display:flex; align-items:center; justify-content:space-between;">
                 <div>
-                  <small style="color:var(--text-sub);">回答: </small>
+                  <small style="color:var(--text-sub);">あなたの回答: </small>
                   <button class="status-btn ${currentStatus === '参加' ? 'active-yes' : 'btn-secondary'}" onclick="submitShiftAttendance('${shift.id}', '${date}', '参加')">⭕ 参加</button>
                   <button class="status-btn ${currentStatus === '欠席' ? 'active-no' : 'btn-secondary'}" onclick="submitShiftAttendance('${shift.id}', '${date}', '欠席')">❌ 欠席</button>
                 </div>
@@ -1031,6 +1044,74 @@
     }).then(() => loadAttendance());
   }
 
+  // 三役専用：全バンド出欠状況確認・一覧
+  function loadAdminAttendance() {
+    let dateInput = document.getElementById('admin-attendance-date');
+    if (!dateInput.value) dateInput.value = selectedDateStr || new Date().toISOString().split('T')[0];
+    const date = dateInput.value;
+    const container = document.getElementById('admin-attendance-list');
+    if (!container) return;
+    container.innerHTML = '読み込み中...';
+
+    const d = new Date(date);
+    const daysJP = ['日', '月', '火', '水', '木', '金', '土'];
+    const dayJP = daysJP[d.getDay()];
+    const dayFixedSchedule = FIXED_WEEKLY_SCHEDULE[dayJP] || [];
+
+    db.collection('reservations').where('date', '==', date).get().then(snapshot => {
+      let combinedShifts = [];
+      dayFixedSchedule.forEach(f => {
+        combinedShifts.push({ id: `fixed_${f.start}`, time: `${f.start}-${f.end}`, purpose: f.band, isFixed: true });
+      });
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const tDisplay = data.startTime ? `${data.startTime}-${data.endTime}` : data.time;
+        combinedShifts.push({ id: doc.id, time: tDisplay, purpose: data.purpose, isFixed: false });
+      });
+
+      if (combinedShifts.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-sub);">この日に登録された全バンドのシフトはありません。</p>';
+        return;
+      }
+
+      db.collection('attendance').where('date', '==', date).get().then(attSnap => {
+        let attMap = {};
+        attSnap.forEach(attDoc => attMap[attDoc.id] = attDoc.data());
+
+        let html = '';
+        combinedShifts.forEach(shift => {
+          const shiftTitle = `${date} ${shift.purpose} (${shift.time})`;
+          let yesMembers = [];
+          let noMembers = [];
+
+          Object.keys(attMap).forEach(k => {
+            if (k.startsWith(`${date}_${shift.id}_`)) {
+              const att = attMap[k];
+              const uTag = formatUserTag(att.userGrade, att.userDept);
+              const nameStr = `${uTag}${att.userName}`;
+              if (att.status === '参加') yesMembers.push(nameStr);
+              if (att.status === '欠席') noMembers.push(nameStr);
+            }
+          });
+
+          html += `
+            <div style="background:#ffffff; padding:12px; border-radius:8px; margin-bottom:10px; border:1px solid var(--border-color);">
+              <strong style="color:var(--accent-dark); font-size:0.95rem;">${shiftTitle}</strong>
+              <div style="font-size:0.85rem; margin-top:6px;">
+                <span style="color:#2e7d32; font-weight:700;">⭕ 参加 (${yesMembers.length}名):</span> ${yesMembers.join(', ') || 'なし'}
+              </div>
+              <div style="font-size:0.85rem; margin-top:3px;">
+                <span style="color:#c62828; font-weight:700;">❌ 欠席 (${noMembers.length}名):</span> ${noMembers.join(', ') || 'なし'}
+              </div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      });
+    });
+  }
+
   function handleCreateBand(e) {
     e.preventDefault();
     if (!currentUser) return alert('先にプロフィールを登録してください');
@@ -1050,7 +1131,7 @@
     });
   }
 
-  // バンド一覧（リーダー着任ボタン付き）
+  // バンド一覧（王冠なし・リーダー着任機能）
   function loadBands() {
     const container = document.getElementById('band-list');
     const chatBandSelect = document.getElementById('chat-band-select');
@@ -1103,7 +1184,7 @@
           let supportNames = (b.supportMembers || []).map(id => userMap[id]).filter(n => n);
 
           let memberDisplay = '';
-          if (b.leaderName) memberDisplay += `<span style="color:#d84315; font-weight:700;">👑 ${b.leaderName}</span> `;
+          if (b.leaderName) memberDisplay += `<span style="color:#d84315; font-weight:700;">リーダー: ${b.leaderName}</span> `;
           if (joinedNames.length > 0) memberDisplay += `【正式】${joinedNames.join(', ')}`;
           if (supportNames.length > 0) {
             if (memberDisplay) memberDisplay += ' / ';
@@ -1118,8 +1199,8 @@
             </div>
             <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
               ${isLeader 
-                ? '<span style="font-size:0.8rem; background:#ffecb3; color:#b78103; padding:4px 8px; border-radius:12px; font-weight:700;">👑 リーダー</span>' 
-                : `<button class="btn-small btn-secondary" onclick="becomeLeader('${b.id || ''}', '${b.name}')">👑 リーダーになる</button>`}
+                ? '<span style="font-size:0.8rem; background:#ede8df; color:var(--text-main); padding:4px 8px; border-radius:12px; font-weight:700;">リーダー</span>' 
+                : `<button class="btn-small btn-secondary" onclick="becomeLeader('${b.id || ''}', '${b.name}')">リーダーになる</button>`}
 
               ${isMember 
                 ? '<span style="font-size:0.85rem; color:#2e7d32; font-weight:500; align-self:center;">正式加入中</span>' 
@@ -1139,13 +1220,12 @@
     });
   }
 
-  // リーダー着任処理
   function becomeLeader(bandId, bandName) {
     if (!currentUser) return alert('先にプロフィールを登録してください');
     const uTag = formatUserTag(currentUser.grade, currentUser.dept);
     const leaderDisplayName = `${uTag}${currentUser.name}`;
 
-    if (!confirm(`バンド「${bandName}」のリーダーに登録・着任しますか？`)) return;
+    if (!confirm(`バンド「${bandName}」のリーダーに登録・設定しますか？`)) return;
 
     if (bandId) {
       db.collection('bands').doc(bandId).update({
@@ -1153,7 +1233,7 @@
         leaderName: leaderDisplayName,
         members: firebase.firestore.FieldValue.arrayUnion(currentUser.id)
       }).then(() => {
-        alert(`「${bandName}」のリーダーとして登録しました！`);
+        alert(`「${bandName}」のリーダーとして設定しました！`);
         loadBands();
       });
     } else {
@@ -1165,7 +1245,7 @@
         supportMembers: [],
         createdAt: new Date()
       }).then(() => {
-        alert(`「${bandName}」のリーダーとして登録しました！`);
+        alert(`「${bandName}」のリーダーとして設定しました！`);
         loadBands();
       });
     }

@@ -67,6 +67,7 @@
       font-size: 0.85rem;
       color: var(--text-main);
       border: 1px solid var(--border-color);
+      font-weight: 500;
     }
 
     .remind-bar {
@@ -222,23 +223,54 @@
     }
     .date-btn.active .sub, .date-btn.active .day { color: #ffffff; }
 
-    /* タイムスケジュールリスト */
+    /* タイムスケジュールリスト（アニメーション） */
+    #timeline-list {
+      transition: opacity 0.25s ease-in-out;
+    }
+    .fade-out { opacity: 0; }
+
     .time-slot-card {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 14px 16px;
+      padding: 16px 18px;
       border-radius: 10px;
       background: var(--input-bg);
       border: 1px solid var(--border-color);
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      transition: all 0.2s;
     }
-    .time-slot-card .time-range { font-weight: 700; font-size: 0.95rem; }
+    
+    /* 空き枠強調 */
+    .time-slot-card.is-empty {
+      background: #f4fbf7;
+      border: 1.5px dashed #4caf50;
+      cursor: pointer;
+    }
+    .time-slot-card.is-empty:hover {
+      background: #e8f5e9;
+      transform: translateY(-1px);
+    }
+
+    .time-slot-card .time-range { font-weight: 700; font-size: 1.05rem; }
     .time-slot-card .sub-label { font-size: 0.75rem; color: var(--text-sub); margin-top: 2px; }
-    .time-slot-card .status-tag { font-size: 0.9rem; font-weight: 700; }
+    
+    .time-slot-card .status-tag { 
+      font-size: 1.15rem; 
+      font-weight: 700; 
+      letter-spacing: -0.01em;
+    }
     .time-slot-card .status-tag.fixed { color: #1565c0; }
     .time-slot-card .status-tag.user-res { color: #2e7d32; }
-    .time-slot-card .status-tag.empty { color: #8c6d1f; }
+    .time-slot-card .status-tag.transferred { color: #e65100; }
+    .time-slot-card .status-tag.empty {
+      color: #2e7d32;
+      font-size: 0.95rem;
+      background: #e8f5e9;
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid #a5d6a7;
+    }
 
     /* モーダル */
     .modal {
@@ -292,28 +324,23 @@
 
   <!-- 1. 枠表（部室予約）タブ -->
   <div id="tab-reservation" class="tab-content">
-    <!-- MYスケジュール -->
     <div class="card" style="background:#f2ede4; border-color:#dcd4c5; margin-bottom:16px;">
       <h3 style="margin-bottom:8px; font-size:1.05rem;">📌 MYスケジュール（自分の予定）</h3>
       <div id="my-schedule-list">ログインすると表示されます。</div>
     </div>
 
-    <!-- 1週間分の日付セレクター -->
     <div class="date-selector-bar" id="week-date-buttons"></div>
 
-    <!-- 選択中日付のタイトル -->
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
         <h3 id="selected-date-header" style="margin:0; font-size:1.2rem;">----</h3>
         <span style="font-size:0.8rem; color:var(--text-sub);">平日・土 9:00〜20:00 (シフト制)</span>
       </div>
 
-      <!-- タイムスケジュール一覧 -->
       <div id="timeline-list">読み込み中...</div>
     </div>
 
-    <!-- 自由予約フォーム（開始時刻・終了時刻を選択） -->
-    <div class="card">
+    <div class="card" id="reservation-form-card">
       <h3>空き枠を新規予約する</h3>
       <form id="form-reservation" onsubmit="handleReservation(event)">
         <label>予約日</label>
@@ -321,12 +348,12 @@
         
         <div style="display:flex; gap:12px;">
           <div style="flex:1;">
-            <label>開始時刻</label>
-            <input type="time" id="res-start-time" min="09:00" max="20:00" value="12:00" required>
+            <label>開始時刻 (10分刻み)</label>
+            <input type="time" id="res-start-time" min="09:00" max="20:00" step="600" value="12:00" required>
           </div>
           <div style="flex:1;">
-            <label>終了時刻</label>
-            <input type="time" id="res-end-time" min="09:00" max="20:00" value="13:00" required>
+            <label>終了時刻 (10分刻み)</label>
+            <input type="time" id="res-end-time" min="09:00" max="20:00" step="600" value="13:00" required>
           </div>
         </div>
 
@@ -347,7 +374,7 @@
     </div>
   </div>
 
-  <!-- 3. バンド作成・参加タブ -->
+  <!-- 3. バンド作成・参加タブ（リーダー着任ボタン設置） -->
   <div id="tab-bands" class="tab-content hidden">
     <div class="card">
       <h3>新しいバンドを作成する</h3>
@@ -358,7 +385,7 @@
       </form>
     </div>
     <div class="card">
-      <h3>バンド一覧・加入申請</h3>
+      <h3>バンド一覧・加入申請・リーダー着任</h3>
       <div id="band-list">読み込み中...</div>
     </div>
   </div>
@@ -408,19 +435,20 @@
     </div>
   </div>
 
-  <!-- 7. シフト希望 -->
+  <!-- 7. シフト希望（バンドリーダー専用） -->
   <div id="tab-shift-req" class="tab-content hidden">
     <div class="card">
       <h3>バンドシフト希望申請（バンドリーダー専用）</h3>
       <form id="form-shift-req" onsubmit="handleShiftRequest(event)">
-        <label>バンド名</label>
-        <input type="text" id="req-band-name" required placeholder="バンド名を入力">
+        <label>対象バンド選択</label>
+        <select id="req-band-select" required></select>
+
         <label>第1希望（日時・時間帯）</label>
-        <input type="text" id="req-choice1" required placeholder="日時・時間帯を入力">
+        <input type="text" id="req-choice1" required placeholder="例: 月曜 16:00-17:00">
         <label>第2希望</label>
-        <input type="text" id="req-choice2" placeholder="日時・時間帯を入力">
+        <input type="text" id="req-choice2" placeholder="例: 水曜 15:00-16:00">
         <label>第3希望</label>
-        <input type="text" id="req-choice3" placeholder="日時・時間帯を入力">
+        <input type="text" id="req-choice3" placeholder="例: 金曜 17:00-18:00">
         <button type="submit">希望を提出する</button>
       </form>
     </div>
@@ -514,7 +542,16 @@
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  // 確定シフト表データ（曜日常設シフト）
+  function formatUserTag(grade, dept) {
+    if (!grade) return '';
+    if (grade.includes('専攻科')) {
+      const num = grade.replace(/[^0-9]/g, '');
+      return `専${num}`;
+    }
+    const num = grade.replace(/[^0-9]/g, '');
+    return `${num}${dept || ''}`;
+  }
+
   const FIXED_WEEKLY_SCHEDULE = {
     "月": [
       { start: "15:00", end: "15:55", band: "キリカ" },
@@ -627,7 +664,13 @@
     btnEl.classList.add('active');
     selectedDateStr = dateStr;
     document.getElementById('res-date').value = dateStr;
-    loadTimelineForDate(dateStr);
+    
+    const timelineEl = document.getElementById('timeline-list');
+    timelineEl.classList.add('fade-out');
+    setTimeout(() => {
+      loadTimelineForDate(dateStr);
+      timelineEl.classList.remove('fade-out');
+    }, 200);
   }
 
   function loadTimelineForDate(dateStr) {
@@ -642,13 +685,11 @@
     document.getElementById('selected-date-header').innerText = `${m}月${dayNum}日(${dayJP}) 部室シフト`;
 
     const container = document.getElementById('timeline-list');
-    container.innerHTML = '読み込み中...';
-
     const dayFixedSchedule = FIXED_WEEKLY_SCHEDULE[dayJP] || [];
 
     db.collection('reservations').where('date', '==', dateStr).get().then(snapshot => {
       let userResList = [];
-      snapshot.forEach(doc => userResList.push(doc.data()));
+      snapshot.forEach(doc => userResList.push({ id: doc.id, ...doc.data() }));
 
       let html = '';
       TIME_SLOTS.forEach(slot => {
@@ -658,32 +699,69 @@
 
         let statusHtml = '';
         let purposeText = '';
+        let isCardEmpty = false;
+        let onClickAction = '';
 
         if (fixed) {
-          statusHtml = `<span class="status-tag fixed">${fixed.band}</span>`;
-          purposeText = '確定シフト';
+          if (userRes && userRes.isTransfer) {
+            const userTag = formatUserTag(userRes.userGrade, userRes.userDept);
+            statusHtml = `<span class="status-tag transferred">${fixed.band} <small style="font-size:0.85rem; color:#e65100;">(代: ${userRes.purpose} / ${userTag}${userRes.userName})</small></span>`;
+            purposeText = 'シフト譲受練習';
+          } else {
+            statusHtml = `<span class="status-tag fixed">${fixed.band}</span>`;
+            purposeText = '確定シフト';
+            onClickAction = `onclick="promptTransfer('${dateStr}', '${slotStart}', '${slotEnd}', '${fixed.band}')"`;
+          }
         } else if (userRes) {
-          const userStr = `${userRes.purpose} (${userRes.userName})`;
+          const userTag = formatUserTag(userRes.userGrade, userRes.userDept);
           const timeRangeStr = userRes.startTime ? `${userRes.startTime}〜${userRes.endTime}` : slot;
-          statusHtml = `<span class="status-tag user-res">${userStr} [${timeRangeStr}]</span>`;
-          purposeText = '部員予約';
+          statusHtml = `<span class="status-tag user-res">${userRes.purpose} <small style="font-size:0.85rem; color:var(--text-sub);">(${userTag}${userRes.userName})</small></span>`;
+          purposeText = `部員予約 [${timeRangeStr}]`;
         } else {
-          statusHtml = `<span class="status-tag empty">空き枠</span>`;
-          purposeText = '予約可能';
+          isCardEmpty = true;
+          statusHtml = `<span class="status-tag empty">✨ 予約可能 (タップで選択)</span>`;
+          purposeText = '空き枠';
+          onClickAction = `onclick="fillFormTime('${slotStart}', '${slotEnd}')"`;
         }
 
         html += `
-          <div class="time-slot-card">
+          <div class="time-slot-card ${isCardEmpty ? 'is-empty' : ''}" ${onClickAction}>
             <div>
               <div class="time-range">${slot}</div>
               <div class="sub-label">${purposeText}</div>
             </div>
-            <div>${statusHtml}</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              ${statusHtml}
+              ${fixed && !userRes ? `<button class="btn-small btn-secondary" style="margin:0;" onclick="event.stopPropagation(); promptTransfer('${dateStr}', '${slotStart}', '${slotEnd}', '${fixed.band}')">譲受</button>` : ''}
+            </div>
           </div>
         `;
       });
 
       container.innerHTML = html;
+    });
+  }
+
+  function fillFormTime(start, end) {
+    document.getElementById('res-start-time').value = start;
+    document.getElementById('res-end-time').value = end;
+    document.getElementById('res-purpose').focus();
+    document.getElementById('reservation-form-card').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function promptTransfer(date, start, end, fixedBand) {
+    if (!currentUser) return alert('先にプロフィールを登録してください');
+    const myBand = prompt(`「${fixedBand}」の枠 (${start}〜${end}) を譲り受けて使用しますか？\n使用するあなたのバンド名を入力してください:`);
+    if (!myBand) return;
+
+    db.collection('reservations').add({
+      date, startTime: start, endTime: end, time: `${start}-${end}`,
+      purpose: myBand, isTransfer: true, originalBand: fixedBand,
+      userId: currentUser.id, userName: currentUser.name,
+      userGrade: currentUser.grade, userDept: currentUser.dept, createdAt: new Date()
+    }).then(() => {
+      alert(`「${fixedBand}」からのシフト譲受枠として予約登録しました！`);
+      loadTimelineForDate(date);
     });
   }
 
@@ -742,7 +820,8 @@
     if (!currentUser) return;
     const isExec = ['部長', '副部長', '会計'].includes(currentUser.role);
     const partsText = (currentUser.parts || []).join('/');
-    document.getElementById('user-info').innerHTML = `● ${currentUser.name} (${currentUser.grade} ${currentUser.dept}) ・ ${partsText || '未設定'}`;
+    const userTag = formatUserTag(currentUser.grade, currentUser.dept);
+    document.getElementById('user-info').innerHTML = `● ${userTag}${currentUser.name} ・ ${partsText || '未設定'}`;
 
     if (isExec) {
       document.getElementById('admin-tab-btn').classList.remove('hidden');
@@ -814,14 +893,13 @@
       let html = '<ul style="margin:0; padding-left:20px; font-size:0.9rem;">';
       myRes.forEach(r => {
         const tDisplay = r.startTime ? `${r.startTime}〜${r.endTime}` : r.time;
-        html += `<li><strong>${r.date} ${tDisplay}:</strong> ${r.purpose}</li>`;
+        html += `<li><strong>${r.date} ${tDisplay}:</strong> ${r.purpose} ${r.isTransfer ? '(譲受枠)' : ''}</li>`;
       });
       html += '</ul>';
       container.innerHTML = html;
     });
   }
 
-  // 開始時刻・終了時刻を選択した自由予約処理
   function handleReservation(e) {
     e.preventDefault();
     if (!currentUser) return alert('先にプロフィールを登録してください');
@@ -839,14 +917,12 @@
     const dayJP = daysJP[d.getDay()];
     const dayFixedSchedule = FIXED_WEEKLY_SCHEDULE[dayJP] || [];
 
-    // 固定シフトとの重複チェック
     for (let f of dayFixedSchedule) {
       if (startTime < f.end && endTime > f.start) {
         return alert(`❌ 指定時間枠は固定シフト「${f.band} (${f.start}〜${f.end})」と重なっているため予約できません。`);
       }
     }
 
-    // 既存予約との重複チェック
     db.collection('reservations').where('date', '==', date).get().then(snapshot => {
       let isOverlap = false;
       snapshot.forEach(doc => {
@@ -863,16 +939,8 @@
       }
 
       db.collection('reservations').add({
-        date,
-        startTime,
-        endTime,
-        time: `${startTime}-${endTime}`,
-        purpose,
-        userId: currentUser.id,
-        userName: currentUser.name,
-        userGrade: currentUser.grade,
-        userDept: currentUser.dept,
-        createdAt: new Date()
+        date, startTime, endTime, time: `${startTime}-${endTime}`, purpose,
+        userId: currentUser.id, userName: currentUser.name, userGrade: currentUser.grade, userDept: currentUser.dept, createdAt: new Date()
       }).then(() => {
         alert(`予約が完了しました！（${startTime} 〜 ${endTime}）`);
         document.getElementById('res-purpose').value = '';
@@ -929,8 +997,8 @@
               const att = attMap[k];
               if (att.status === '参加') yesCount++;
               if (att.status === '欠席') noCount++;
-              const gradeDeptText = (att.userGrade && att.userDept) ? `(${att.userGrade} ${att.userDept})` : '';
-              memberListHtml += `<li>${att.userName} ${gradeDeptText}: ${att.status === '参加' ? '⭕ 参加' : '❌ 欠席'}</li>`;
+              const uTag = formatUserTag(att.userGrade, att.userDept);
+              memberListHtml += `<li>${uTag}${att.userName}: ${att.status === '参加' ? '⭕ 参加' : '❌ 欠席'}</li>`;
             }
           });
           memberListHtml += '</ul>';
@@ -982,16 +1050,18 @@
     });
   }
 
+  // バンド一覧（リーダー着任ボタン付き）
   function loadBands() {
     const container = document.getElementById('band-list');
     const chatBandSelect = document.getElementById('chat-band-select');
+    const reqBandSelect = document.getElementById('req-band-select');
 
     db.collection('users').get().then(usersSnap => {
       let userMap = {};
       usersSnap.forEach(uDoc => {
         const uData = uDoc.data();
-        const infoStr = `${uData.name || uData.lineName || '無名'} (${uData.grade || ''} ${uData.dept || ''})`.trim();
-        userMap[uData.id] = infoStr;
+        const tag = formatUserTag(uData.grade, uData.dept);
+        userMap[uData.id] = `${tag}${uData.name || uData.lineName || '無名'}`;
       });
 
       db.collection('bands').get().then(snapshot => {
@@ -1003,28 +1073,37 @@
           const found = allBands.find(b => b.name === dbB.name);
           if (found) {
             found.id = dbB.id;
+            found.leaderId = dbB.leaderId;
+            found.leaderName = dbB.leaderName;
             found.members = dbB.members || [];
             found.supportMembers = dbB.supportMembers || [];
           } else {
-            allBands.push({ id: dbB.id, name: dbB.name, members: dbB.members || [], supportMembers: dbB.supportMembers || [] });
+            allBands.push({
+              id: dbB.id, name: dbB.name, leaderId: dbB.leaderId, leaderName: dbB.leaderName,
+              members: dbB.members || [], supportMembers: dbB.supportMembers || []
+            });
           }
         });
 
         let html = '';
         let myBandsOptions = '';
+        let allBandsOptions = '';
 
         allBands.forEach(b => {
+          const isLeader = currentUser && (b.leaderId === currentUser.id);
           const isMember = currentUser && ((b.members || []).includes(currentUser.id) || (currentUser.bands || []).includes(b.name));
           const isSupport = currentUser && ((b.supportMembers || []).includes(currentUser.id) || (currentUser.supportBands || []).includes(b.name));
 
           if (isMember || isSupport) {
             myBandsOptions += `<option value="${b.name}">${b.name} ${isSupport ? '(サポート)' : ''}</option>`;
           }
+          allBandsOptions += `<option value="${b.name}">${b.name}</option>`;
 
           let joinedNames = (b.members || []).map(id => userMap[id]).filter(n => n);
           let supportNames = (b.supportMembers || []).map(id => userMap[id]).filter(n => n);
 
           let memberDisplay = '';
+          if (b.leaderName) memberDisplay += `<span style="color:#d84315; font-weight:700;">👑 ${b.leaderName}</span> `;
           if (joinedNames.length > 0) memberDisplay += `【正式】${joinedNames.join(', ')}`;
           if (supportNames.length > 0) {
             if (memberDisplay) memberDisplay += ' / ';
@@ -1034,20 +1113,62 @@
 
           html += `<div style="border-bottom:1px solid var(--border-color); padding:12px 0; display:flex; justify-content:space-between; align-items:center;">
             <div>
-              <strong>${b.name}</strong>
+              <strong style="font-size:1.05rem;">${b.name}</strong>
               <div style="font-size:0.8rem; color:var(--text-sub); margin-top:3px;">加入者: ${memberDisplay}</div>
             </div>
-            <div style="display:flex; gap:6px;">
-              ${isMember ? '<span style="font-size:0.85rem; color:#2e7d32; font-weight:500;">正式加入中</span>' : `<button class="btn-small" onclick="joinBandByName('${b.id || ''}', '${b.name}', 'regular')">正式加入</button>`}
-              ${isSupport ? '<span style="font-size:0.85rem; color:#1976d2; font-weight:500;">サポート中</span>' : (isMember ? '' : `<button class="btn-small btn-secondary" onclick="joinBandByName('${b.id || ''}', '${b.name}', 'support')">サポート加入</button>`)}
+            <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
+              ${isLeader 
+                ? '<span style="font-size:0.8rem; background:#ffecb3; color:#b78103; padding:4px 8px; border-radius:12px; font-weight:700;">👑 リーダー</span>' 
+                : `<button class="btn-small btn-secondary" onclick="becomeLeader('${b.id || ''}', '${b.name}')">👑 リーダーになる</button>`}
+
+              ${isMember 
+                ? '<span style="font-size:0.85rem; color:#2e7d32; font-weight:500; align-self:center;">正式加入中</span>' 
+                : `<button class="btn-small" onclick="joinBandByName('${b.id || ''}', '${b.name}', 'regular')">正式加入</button>`}
+              
+              ${isSupport 
+                ? '<span style="font-size:0.85rem; color:#1976d2; font-weight:500; align-self:center;">サポート中</span>' 
+                : (isMember ? '' : `<button class="btn-small btn-secondary" onclick="joinBandByName('${b.id || ''}', '${b.name}', 'support')">サポート加入</button>`)}
             </div>
           </div>`;
         });
 
         container.innerHTML = html || 'バンドの読み込みに失敗しました。';
         if (chatBandSelect) chatBandSelect.innerHTML = myBandsOptions || '<option value="">参加中のバンドがありません</option>';
+        if (reqBandSelect) reqBandSelect.innerHTML = myBandsOptions || allBandsOptions;
       });
     });
+  }
+
+  // リーダー着任処理
+  function becomeLeader(bandId, bandName) {
+    if (!currentUser) return alert('先にプロフィールを登録してください');
+    const uTag = formatUserTag(currentUser.grade, currentUser.dept);
+    const leaderDisplayName = `${uTag}${currentUser.name}`;
+
+    if (!confirm(`バンド「${bandName}」のリーダーに登録・着任しますか？`)) return;
+
+    if (bandId) {
+      db.collection('bands').doc(bandId).update({
+        leaderId: currentUser.id,
+        leaderName: leaderDisplayName,
+        members: firebase.firestore.FieldValue.arrayUnion(currentUser.id)
+      }).then(() => {
+        alert(`「${bandName}」のリーダーとして登録しました！`);
+        loadBands();
+      });
+    } else {
+      db.collection('bands').add({
+        name: bandName,
+        leaderId: currentUser.id,
+        leaderName: leaderDisplayName,
+        members: [currentUser.id],
+        supportMembers: [],
+        createdAt: new Date()
+      }).then(() => {
+        alert(`「${bandName}」のリーダーとして登録しました！`);
+        loadBands();
+      });
+    }
   }
 
   function joinBandByName(bandId, bandName, type) {
@@ -1057,8 +1178,9 @@
       const updateField = type === 'regular' ? 'members' : 'supportMembers';
       db.collection('bands').doc(bandId).update({ [updateField]: firebase.firestore.FieldValue.arrayUnion(currentUser.id) });
     } else {
+      const uTag = formatUserTag(currentUser.grade, currentUser.dept);
       db.collection('bands').add({
-        name: bandName, leaderName: currentUser.name,
+        name: bandName, leaderName: `${uTag}${currentUser.name}`,
         members: type === 'regular' ? [currentUser.id] : [],
         supportMembers: type === 'support' ? [currentUser.id] : [],
         createdAt: new Date()
@@ -1100,10 +1222,11 @@
 
       let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
       matchedUsers.forEach(u => {
+        const uTag = formatUserTag(u.grade, u.dept);
         html += `
           <div style="background:var(--input-bg); padding:12px 14px; border-radius:8px; border:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
             <div>
-              <strong>${u.name}</strong> <small style="color:var(--text-sub);">(${u.grade} ${u.dept})</small>
+              <strong>${uTag}${u.name}</strong>
               <div style="font-size:0.8rem; color:var(--text-sub); margin-top:2px;">
                 LINE名: ${u.lineName || '-'} / 他パート: ${(u.parts || []).join(', ')}
               </div>
@@ -1126,8 +1249,9 @@
 
       let html = '<table style="width:100%; text-align:left; border-collapse:collapse;"><tr><th>学年/学科</th><th>名前 (LINE)</th><th>パート</th><th>役職</th></tr>';
       users.forEach(u => {
+        const uTag = formatUserTag(u.grade, u.dept);
         html += `<tr style="border-bottom:1px solid var(--border-color);">
-          <td style="padding:10px 0;">${u.grade} ${u.dept}</td>
+          <td style="padding:10px 0;"><strong>${uTag}</strong></td>
           <td>${u.name} (${u.lineName})</td>
           <td>${u.parts ? u.parts.join(',') : ''}</td>
           <td>${u.role}</td>
@@ -1163,20 +1287,24 @@
     const input = document.getElementById('chat-input');
     if (!band) return;
 
+    const uTag = formatUserTag(currentUser.grade, currentUser.dept);
     db.collection('chats').doc(band).collection('messages').add({
-      text: input.value, userName: `${currentUser.name} (${currentUser.grade} ${currentUser.dept})`, createdAt: new Date()
+      text: input.value, userName: `${uTag}${currentUser.name}`, createdAt: new Date()
     }).then(() => input.value = '');
   }
 
   function handleShiftRequest(e) {
     e.preventDefault();
     if (!currentUser) return alert('先にプロフィールを登録してください');
+    const uTag = formatUserTag(currentUser.grade, currentUser.dept);
+    const bandSelect = document.getElementById('req-band-select').value;
+
     db.collection('shift_requests').add({
-      bandName: document.getElementById('req-band-name').value,
+      bandName: bandSelect,
       choice1: document.getElementById('req-choice1').value,
       choice2: document.getElementById('req-choice2').value,
       choice3: document.getElementById('req-choice3').value,
-      submittedBy: `${currentUser.name} (${currentUser.grade} ${currentUser.dept})`, createdAt: new Date()
+      submittedBy: `${uTag}${currentUser.name}`, createdAt: new Date()
     }).then(() => {
       alert('シフト希望を提出しました！');
       if (['部長', '副部長', '会計'].includes(currentUser.role)) loadAdminShiftRequests();
@@ -1227,8 +1355,9 @@
       let html = '<ul style="list-style:none; padding:0;">';
       snapshot.forEach(doc => {
         const u = doc.data();
+        const uTag = formatUserTag(u.grade, u.dept);
         html += `<li style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:5px;">
-          <span>${u.name} (${u.grade} ${u.dept}): ${u.feePaid ? '✅ 納入済み' : '❌ 未納'}</span>
+          <span>${uTag}${u.name}: ${u.feePaid ? '✅ 納入済み' : '❌ 未納'}</span>
           <div>
             <button class="btn-small btn-secondary" style="margin:0 4px;" onclick="toggleFee('${doc.id}', ${!u.feePaid})">切替</button>
             <button class="btn-small btn-danger" style="margin:0;" onclick="deleteMember('${doc.id}', '${u.name}')">削除</button>

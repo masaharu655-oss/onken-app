@@ -453,7 +453,7 @@
     </div>
   </div>
 
-  <!-- 8. 三役専用メニュー（固定シフト編集機能を追加） -->
+  <!-- 8. 三役専用メニュー -->
   <div id="tab-admin" class="tab-content hidden">
     <div class="card admin-card">
       <h3>三役専用管理メニュー</h3>
@@ -607,7 +607,7 @@
     ],
     "火": [
       { start: "13:00", end: "13:55", band: "オトナ未満" },
-      { start: "15:00", end: "15:55", band: "オセロり" },
+      { start: "15:00", end: "15:55", band: "オセロリ" },
       { start: "16:00", end: "16:55", band: "ROCK man" },
       { start: "17:00", end: "17:55", band: "私利私欲" },
       { start: "18:00", end: "18:55", band: "めっとめっと" },
@@ -649,7 +649,7 @@
   const DEFAULT_BANDS = [
     { name: "キリカ" }, { name: "少年少女" }, { name: "Aster Stellar" },
     { name: "ROCK man" }, { name: "オトナ未満" }, { name: "41mA" },
-    { name: "ちりめんもんすたー" }, { name: "オセロり" }, { name: "長女不安定" },
+    { name: "ちりめんもんすたー" }, { name: "オセロリ" }, { name: "長女不安定" },
     { name: "あまあまいちごショートケーキ" }, { name: "ぷかぷかマヨネーズ" },
     { name: "ビギナーズラッカー" }, { name: "きゅーそくストリート" },
     { name: "こびと" }, { name: "りんごジャム" }, { name: "Honey Holic" },
@@ -1178,7 +1178,6 @@
     });
   }
 
-  // バンド一覧（重複削除・名前のみ表示・ボタン表記「加入」化）
   function loadBands() {
     const container = document.getElementById('band-list');
     const chatBandSelect = document.getElementById('chat-band-select');
@@ -1227,7 +1226,6 @@
           }
           allBandsOptions += `<option value="${b.name}">${b.name}</option>`;
 
-          // リーダー名と重複する一般メンバー表示を除外
           let joinedNames = (b.members || []).map(id => userMap[id]).filter(n => n && n !== b.leaderName);
           let supportNames = (b.supportMembers || []).map(id => userMap[id]).filter(n => n);
 
@@ -1477,7 +1475,6 @@
     document.body.removeChild(link);
   }
 
-  // 三役用：固定シフト編集・管理機能
   function handleSaveFixedShift(e) {
     e.preventDefault();
     const day = document.getElementById('admin-shift-day').value;

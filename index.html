@@ -602,6 +602,7 @@
 <div id="profile-modal" class="modal hidden">
   <div class="modal-content">
     <h2>プロフィール登録</h2>
+    <p style="font-size:0.8rem; color:var(--text-sub); margin-top:-6px;">※別端末（PC・スマホ）で登録済みの場合は、同じ名前・学年・学科を入力するとデータが自動で引き継がれます。</p>
     <form id="form-profile" onsubmit="handleSaveProfile(event)">
       <label>名前（例: 村田柾陽）</label>
       <input type="text" id="prof-name" placeholder="村田柾陽" required>
@@ -757,7 +758,14 @@
       openProfileModal();
     } else {
       currentUser = JSON.parse(saved);
-      renderUI();
+      // 起動時にFirestore上の最新ユーザーデータと同期
+      db.collection('users').doc(currentUser.id).get().then(doc => {
+        if (doc.exists) {
+          currentUser = doc.data();
+          localStorage.setItem('onken_user', JSON.stringify(currentUser));
+        }
+        renderUI();
+      }).catch(() => renderUI());
     }
 
     renderWeekDateButtons();
@@ -936,28 +944,69 @@
     else deptGroup.classList.remove('hidden');
   }
 
+  // PC・スマホ間で同一アカウントを引き継ぐプロフィール保存処理
   function handleSaveProfile(e) {
     e.preventDefault();
     const parts = Array.from(document.querySelectorAll('#part-chips .chip.selected')).map(c => c.dataset.part);
-    const grade = document.getElementById('prof-grade').value;
-    const dept = grade.includes('専攻科') ? '-' : document.getElementById('prof-dept').value;
+    const nameInput = document.getElementById('prof-name').value.trim();
+    const lineInput = document.getElementById('prof-line').value.trim();
+    const gradeInput = document.getElementById('prof-grade').value;
+    const deptInput = gradeInput.includes('専攻科') ? '-' : document.getElementById('prof-dept').value;
+    const roleInput = document.getElementById('prof-role').value;
+    const commentInput = document.getElementById('prof-comment').value;
 
-    currentUser = {
-      id: currentUser ? currentUser.id : 'user_' + Date.now(),
-      name: document.getElementById('prof-name').value,
-      lineName: document.getElementById('prof-line').value,
-      grade: grade, dept: dept, parts: parts,
-      role: document.getElementById('prof-role').value,
-      comment: document.getElementById('prof-comment').value,
-      feePaid: currentUser ? currentUser.feePaid : false,
-      bands: currentUser ? (currentUser.bands || []) : [],
-      supportBands: currentUser ? (currentUser.supportBands || []) : []
-    };
+    // 同じ「名前・学年・学科」がすでにFirestoreにあるか検索して同一アカウントに統合
+    db.collection('users')
+      .where('name', '==', nameInput)
+      .where('grade', '==', gradeInput)
+      .where('dept', '==', deptInput)
+      .get()
+      .then(snapshot => {
+        let matchedUser = null;
+        snapshot.forEach(doc => {
+          matchedUser = doc.data();
+        });
 
-    localStorage.setItem('onken_user', JSON.stringify(currentUser));
-    db.collection('users').doc(currentUser.id).set(currentUser);
-    document.getElementById('profile-modal').classList.add('hidden');
-    renderUI();
+        if (matchedUser) {
+          // 既存の別端末データが見つかった場合はIDと所属バンド・部費情報を引き継ぐ
+          currentUser = {
+            id: matchedUser.id,
+            name: nameInput,
+            lineName: lineInput,
+            grade: gradeInput,
+            dept: deptInput,
+            parts: parts,
+            role: roleInput,
+            comment: commentInput,
+            feePaid: matchedUser.feePaid || false,
+            bands: matchedUser.bands || [],
+            supportBands: matchedUser.supportBands || []
+          };
+          alert('別端末で登録済みのアカウントデータが見つかったため、所属バンドや予約データを引き継ぎました！');
+        } else {
+          // 新規または同一端末からの更新
+          currentUser = {
+            id: currentUser ? currentUser.id : 'user_' + Date.now(),
+            name: nameInput,
+            lineName: lineInput,
+            grade: gradeInput,
+            dept: deptInput,
+            parts: parts,
+            role: roleInput,
+            comment: commentInput,
+            feePaid: currentUser ? currentUser.feePaid : false,
+            bands: currentUser ? (currentUser.bands || []) : [],
+            supportBands: currentUser ? (currentUser.supportBands || []) : []
+          };
+        }
+
+        localStorage.setItem('onken_user', JSON.stringify(currentUser));
+        return db.collection('users').doc(currentUser.id).set(currentUser);
+      })
+      .then(() => {
+        document.getElementById('profile-modal').classList.add('hidden');
+        renderUI();
+      });
   }
 
   function renderUI() {
@@ -1268,8 +1317,9 @@
       members: [currentUser.id], supportMembers: [], createdAt: new Date()
     }).then(() => {
       if (!currentUser.bands) currentUser.bands = [];
-      currentUser.bands.push(name);
+      if (!currentUser.bands.includes(name)) currentUser.bands.push(name);
       localStorage.setItem('onken_user', JSON.stringify(currentUser));
+      db.collection('users').doc(currentUser.id).update({ bands: currentUser.bands });
       document.getElementById('new-band-name').value = '';
       loadBands();
       alert(`バンド「${name}」を作成しました！`);
@@ -1461,6 +1511,10 @@
     if (currentUser.bands) currentUser.bands = currentUser.bands.filter(b => b !== bandName);
     if (currentUser.supportBands) currentUser.supportBands = currentUser.supportBands.filter(b => b !== bandName);
     localStorage.setItem('onken_user', JSON.stringify(currentUser));
+    db.collection('users').doc(currentUser.id).update({
+      bands: currentUser.bands || [],
+      supportBands: currentUser.supportBands || []
+    });
 
     if (bandId) {
       const band = cachedAllBands.find(b => b.id === bandId);
@@ -1491,6 +1545,10 @@
     if (currentUser.bands) currentUser.bands = currentUser.bands.filter(b => b !== bandName);
     if (currentUser.supportBands) currentUser.supportBands = currentUser.supportBands.filter(b => b !== bandName);
     localStorage.setItem('onken_user', JSON.stringify(currentUser));
+    db.collection('users').doc(currentUser.id).update({
+      bands: currentUser.bands || [],
+      supportBands: currentUser.supportBands || []
+    });
 
     const finishDelete = () => {
       alert(`バンド「${bandName}」を削除しました。`);
@@ -1511,15 +1569,17 @@
 
     if (!confirm(`バンド「${bandName}」のリーダーに登録・設定しますか？`)) return;
 
+    if (!currentUser.bands) currentUser.bands = [];
+    if (!currentUser.bands.includes(bandName)) currentUser.bands.push(bandName);
+    localStorage.setItem('onken_user', JSON.stringify(currentUser));
+    db.collection('users').doc(currentUser.id).update({ bands: currentUser.bands });
+
     if (bandId) {
       db.collection('bands').doc(bandId).update({
         leaderId: currentUser.id,
         leaderName: leaderDisplayName,
         members: firebase.firestore.FieldValue.arrayUnion(currentUser.id)
       }).then(() => {
-        if (!currentUser.bands) currentUser.bands = [];
-        if (!currentUser.bands.includes(bandName)) currentUser.bands.push(bandName);
-        localStorage.setItem('onken_user', JSON.stringify(currentUser));
         alert(`「${bandName}」のリーダーとして設定しました！`);
         loadBands();
       });
@@ -1532,9 +1592,6 @@
         supportMembers: [],
         createdAt: new Date()
       }).then(() => {
-        if (!currentUser.bands) currentUser.bands = [];
-        if (!currentUser.bands.includes(bandName)) currentUser.bands.push(bandName);
-        localStorage.setItem('onken_user', JSON.stringify(currentUser));
         alert(`「${bandName}」のリーダーとして設定しました！`);
         loadBands();
       });
@@ -1565,6 +1622,10 @@
     }
 
     localStorage.setItem('onken_user', JSON.stringify(currentUser));
+    db.collection('users').doc(currentUser.id).update({
+      bands: currentUser.bands || [],
+      supportBands: currentUser.supportBands || []
+    });
     alert(`「${bandName}」に${type === 'regular' ? 'メンバー' : 'サポートメンバー'}として加入しました！`);
   }
 

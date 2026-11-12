@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>音楽研究部</title>
+  <!-- ホーム画面アイコン設定（動的生成スクリプトにより自動でセットされます） -->
+  <link id="apple-icon" rel="apple-touch-icon" href="">
+  <link id="fav-icon" rel="icon" type="image/png" href="">
   <!-- Google Fonts: Noto Sans JP -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,6 +14,40 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script>
+    // ページ読み込み前に「音研」アイコン画像をコードで自動生成してセット
+    (function() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
+
+      // 背景色（アプリのアクセントカラー）
+      ctx.fillStyle = '#232220';
+      ctx.fillRect(0, 0, 512, 512);
+
+      // 内側の細い枠線
+      ctx.strokeStyle = '#7a7670';
+      ctx.lineWidth = 8;
+      ctx.strokeRect(32, 32, 448, 448);
+
+      // 「音研」の文字
+      ctx.fillStyle = '#f7f4ee';
+      ctx.font = 'bold 170px "Noto Sans JP", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('音研', 256, 240);
+
+      // サブテキスト
+      ctx.fillStyle = '#b8b2a6';
+      ctx.font = 'bold 34px "Noto Sans JP", sans-serif';
+      ctx.fillText('ONKEN CLUB', 256, 375);
+
+      const iconDataUrl = canvas.toDataURL('image/png');
+      document.getElementById('apple-icon').href = iconDataUrl;
+      document.getElementById('fav-icon').href = iconDataUrl;
+    })();
+  </script>
   <style>
     :root {
       --bg-color: #f7f4ee;
@@ -271,6 +308,21 @@
       border: 1px solid #a5d6a7;
     }
 
+    /* バンド名リンクスタイル */
+    .band-name-link {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--accent-dark);
+      cursor: pointer;
+      text-decoration: underline;
+      text-decoration-color: #c2b8a8;
+      text-underline-offset: 3px;
+      transition: color 0.15s;
+    }
+    .band-name-link:hover {
+      color: #1565c0;
+    }
+
     /* モーダル */
     .modal {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -324,7 +376,7 @@
   <!-- 1. 枠表（部室予約）タブ -->
   <div id="tab-reservation" class="tab-content">
     <div class="card" style="background:#f2ede4; border-color:#dcd4c5; margin-bottom:16px;">
-      <h3 style="margin-bottom:8px; font-size:1.05rem;">📌 MYスケジュール（自分の予定）</h3>
+      <h3 style="margin-bottom:8px; font-size:1.05rem;">MYスケジュール（自分の予定）</h3>
       <div id="my-schedule-list">ログインすると表示されます。</div>
     </div>
 
@@ -373,19 +425,39 @@
     </div>
   </div>
 
-  <!-- 3. バンド作成・参加タブ -->
+  <!-- 3. バンド作成・参加タブ（一覧ビュー ＋ 個別詳細ページビュー） -->
   <div id="tab-bands" class="tab-content hidden">
-    <div class="card">
-      <h3>新しいバンドを作成する</h3>
-      <form onsubmit="handleCreateBand(event)">
-        <label>バンド名</label>
-        <input type="text" id="new-band-name" placeholder="バンド名を入力" required>
-        <button type="submit">バンドを結成する</button>
-      </form>
+    <!-- バンド一覧ビュー -->
+    <div id="band-list-view">
+      <div class="card">
+        <h3>新しいバンドを作成する</h3>
+        <form onsubmit="handleCreateBand(event)">
+          <label>バンド名</label>
+          <input type="text" id="new-band-name" placeholder="バンド名を入力" required>
+          <button type="submit">バンドを結成する</button>
+        </form>
+      </div>
+      <div class="card">
+        <h3>バンド一覧・加入申請・リーダー設定</h3>
+        <p style="font-size:0.8rem; color:var(--text-sub); margin-top:0;">※バンド名をタップするとメンバー詳細（学年学科・パート）や脱退・削除メニューが開きます。</p>
+        <div id="band-list">読み込み中...</div>
+      </div>
     </div>
-    <div class="card">
-      <h3>バンド一覧・加入申請・リーダー設定</h3>
-      <div id="band-list">読み込み中...</div>
+
+    <!-- バンド個別詳細ビュー -->
+    <div id="band-detail-view" class="hidden">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <button class="btn-secondary btn-small" onclick="closeBandDetail()">← バンド一覧へ戻る</button>
+        </div>
+        <h2 id="detail-band-title" style="margin-bottom:4px;">バンド名</h2>
+        <div id="detail-band-leader" style="font-size:0.9rem; color:#d84315; font-weight:700; margin-bottom:16px;"></div>
+
+        <h4 style="margin-bottom:8px; border-bottom:1px solid var(--border-color); padding-bottom:6px;">メンバー一覧</h4>
+        <div id="detail-band-members" style="margin-bottom:20px;"></div>
+
+        <div id="detail-band-actions" style="display:flex; gap:10px; flex-wrap:wrap; border-top:1px solid var(--border-color); padding-top:16px;"></div>
+      </div>
     </div>
   </div>
 
@@ -587,6 +659,14 @@
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
+  function getTodayLocalStr() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
   function formatUserTag(grade, dept) {
     if (!grade) return '';
     if (grade.includes('専攻科')) {
@@ -661,8 +741,16 @@
 
   let currentUser = null;
   let selectedDateStr = "";
+  let cachedAllBands = [];
+  let cachedUsersObjMap = {};
 
   window.addEventListener('DOMContentLoaded', () => {
+    const todayStr = getTodayLocalStr();
+    const attDateInput = document.getElementById('attendance-date');
+    if (attDateInput) attDateInput.value = todayStr;
+    const adminAttDateInput = document.getElementById('admin-attendance-date');
+    if (adminAttDateInput) adminAttDateInput.value = todayStr;
+
     loadFixedScheduleFromDB();
     const saved = localStorage.getItem('onken_user');
     if (!saved) {
@@ -695,7 +783,10 @@
       const d = new Date(today);
       d.setDate(d.getDate() + i);
 
-      const dateStr = d.toISOString().split('T')[0];
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const dateStr = `${y}-${m}-${day}`;
       const dayNum = d.getDate();
       const dayJP = daysJP[d.getDay()];
 
@@ -772,7 +863,7 @@
           purposeText = `部員予約 [${timeRangeStr}]`;
         } else {
           isCardEmpty = true;
-          statusHtml = `<span class="status-tag empty">✨ 予約可能 (タップで選択)</span>`;
+          statusHtml = `<span class="status-tag empty">予約可能 (タップで選択)</span>`;
           purposeText = '空き枠';
           onClickAction = `onclick="fillFormTime('${slotStart}', '${slotEnd}')"`;
         }
@@ -900,10 +991,17 @@
     event.target.classList.add('active');
 
     if (tabId === 'tab-chat') loadChat();
-    if (tabId === 'tab-attendance') loadAttendance();
-    if (tabId === 'tab-bands') loadBands();
+    if (tabId === 'tab-attendance') {
+      document.getElementById('attendance-date').value = getTodayLocalStr();
+      loadAttendance();
+    }
+    if (tabId === 'tab-bands') {
+      closeBandDetail();
+      loadBands();
+    }
     if (tabId === 'tab-part-search') loadPartMembers();
     if (tabId === 'tab-admin') {
+      document.getElementById('admin-attendance-date').value = getTodayLocalStr();
       loadAdminAttendance();
       renderAdminFixedScheduleList();
     }
@@ -914,7 +1012,7 @@
     const remindBox = document.getElementById('remind-area');
     let messages = [];
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = getTodayLocalStr();
     db.collection('reservations').where('date', '==', today).get().then(snapshot => {
       snapshot.forEach(doc => {
         const d = doc.data();
@@ -935,7 +1033,7 @@
   function loadMySchedule() {
     if (!currentUser) return;
     const container = document.getElementById('my-schedule-list');
-    const today = new Date().toISOString().split('T')[0];
+    const today = getTodayLocalStr();
 
     db.collection('reservations').where('userId', '==', currentUser.id).get().then(snapshot => {
       let myRes = [];
@@ -1012,7 +1110,7 @@
 
   function loadAttendance() {
     let dateInput = document.getElementById('attendance-date');
-    if (!dateInput.value) dateInput.value = selectedDateStr || new Date().toISOString().split('T')[0];
+    if (!dateInput.value) dateInput.value = getTodayLocalStr();
     const date = dateInput.value;
     const container = document.getElementById('attendance-shifts-container');
     container.innerHTML = '読み込み中...';
@@ -1095,7 +1193,7 @@
 
   function loadAdminAttendance() {
     let dateInput = document.getElementById('admin-attendance-date');
-    if (!dateInput.value) dateInput.value = selectedDateStr || new Date().toISOString().split('T')[0];
+    if (!dateInput.value) dateInput.value = getTodayLocalStr();
     const date = dateInput.value;
     const container = document.getElementById('admin-attendance-list');
     if (!container) return;
@@ -1186,17 +1284,23 @@
 
     db.collection('users').get().then(usersSnap => {
       let userMap = {};
+      cachedUsersObjMap = {};
       usersSnap.forEach(uDoc => {
         const uData = uDoc.data();
         userMap[uData.id] = `${uData.name || uData.lineName || '無名'}`;
+        cachedUsersObjMap[uData.id] = uData;
       });
 
       db.collection('bands').get().then(snapshot => {
         let dbBands = [];
         snapshot.forEach(doc => dbBands.push({ id: doc.id, ...doc.data() }));
-        let allBands = [...DEFAULT_BANDS];
+        let allBands = DEFAULT_BANDS.map(b => ({ ...b }));
 
         dbBands.forEach(dbB => {
+          if (dbB.isDeleted) {
+            allBands = allBands.filter(b => b.name !== dbB.name);
+            return;
+          }
           const found = allBands.find(b => b.name === dbB.name);
           if (found) {
             found.id = dbB.id;
@@ -1211,6 +1315,8 @@
             });
           }
         });
+
+        cachedAllBands = allBands;
 
         let html = '';
         let myBandsOptions = '';
@@ -1243,21 +1349,21 @@
 
           html += `<div style="border-bottom:1px solid var(--border-color); padding:12px 0; display:flex; justify-content:space-between; align-items:center;">
             <div>
-              <strong style="font-size:1.05rem;">${b.name}</strong>
+              <span class="band-name-link" onclick="openBandDetail('${b.name.replace(/'/g, "\\'")}')">${b.name}</span>
               <div style="font-size:0.8rem; color:var(--text-sub); margin-top:3px;">${memberDisplay}</div>
             </div>
             <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
               ${isLeader 
                 ? '<span style="font-size:0.8rem; background:#ede8df; color:var(--text-main); padding:4px 8px; border-radius:12px; font-weight:700;">リーダー</span>' 
-                : `<button class="btn-small btn-secondary" onclick="becomeLeader('${b.id || ''}', '${b.name}')">リーダーになる</button>`}
+                : `<button class="btn-small btn-secondary" onclick="becomeLeader('${b.id || ''}', '${b.name.replace(/'/g, "\\'")}')">リーダーになる</button>`}
 
               ${isMember 
                 ? '<span style="font-size:0.85rem; color:#2e7d32; font-weight:500; align-self:center;">加入中</span>' 
-                : `<button class="btn-small" onclick="joinBandByName('${b.id || ''}', '${b.name}', 'regular')">加入</button>`}
+                : `<button class="btn-small" onclick="joinBandByName('${b.id || ''}', '${b.name.replace(/'/g, "\\'")}', 'regular')">加入</button>`}
               
               ${isSupport 
                 ? '<span style="font-size:0.85rem; color:#1976d2; font-weight:500; align-self:center;">サポート中</span>' 
-                : (isMember ? '' : `<button class="btn-small btn-secondary" onclick="joinBandByName('${b.id || ''}', '${b.name}', 'support')">サポート加入</button>`)}
+                : (isMember ? '' : `<button class="btn-small btn-secondary" onclick="joinBandByName('${b.id || ''}', '${b.name.replace(/'/g, "\\'")}', 'support')">サポート加入</button>`)}
             </div>
           </div>`;
         });
@@ -1268,6 +1374,135 @@
         if (adminBandSelect) adminBandSelect.innerHTML = allBandsOptions;
       });
     });
+  }
+
+  function openBandDetail(bandName) {
+    const band = cachedAllBands.find(b => b.name === bandName);
+    if (!band) return;
+
+    document.getElementById('band-list-view').classList.add('hidden');
+    document.getElementById('band-detail-view').classList.remove('hidden');
+
+    document.getElementById('detail-band-title').innerText = band.name;
+    document.getElementById('detail-band-leader').innerText = band.leaderName ? `リーダー: ${band.leaderName}` : 'リーダー: 未設定';
+
+    const membersContainer = document.getElementById('detail-band-members');
+    const regularIds = band.members || [];
+    const supportIds = band.supportMembers || [];
+
+    let memberHtml = '';
+
+    if (regularIds.length === 0 && supportIds.length === 0) {
+      memberHtml = '<p style="color:var(--text-sub); font-size:0.9rem;">まだメンバーが登録されていません。</p>';
+    } else {
+      regularIds.forEach(uid => {
+        const u = cachedUsersObjMap[uid];
+        if (u) {
+          const uTag = formatUserTag(u.grade, u.dept);
+          const partsStr = (u.parts && u.parts.length > 0) ? u.parts.join(' / ') : 'パート未設定';
+          const isLeaderBadge = (band.leaderId === uid) ? '<span style="font-size:0.75rem; background:#ede8df; color:#d84315; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:700;">リーダー</span>' : '';
+          memberHtml += `
+            <div style="background:var(--input-bg); padding:10px 14px; border-radius:8px; margin-bottom:8px; border:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <strong>${uTag} ${u.name}</strong>${isLeaderBadge}
+                <div style="font-size:0.85rem; color:var(--text-sub); margin-top:2px;">パート: ${partsStr}</div>
+              </div>
+              <span style="font-size:0.8rem; color:#2e7d32; font-weight:700;">メンバー</span>
+            </div>
+          `;
+        }
+      });
+
+      supportIds.forEach(uid => {
+        const u = cachedUsersObjMap[uid];
+        if (u) {
+          const uTag = formatUserTag(u.grade, u.dept);
+          const partsStr = (u.parts && u.parts.length > 0) ? u.parts.join(' / ') : 'パート未設定';
+          memberHtml += `
+            <div style="background:var(--input-bg); padding:10px 14px; border-radius:8px; margin-bottom:8px; border:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <strong>${uTag} ${u.name}</strong>
+                <div style="font-size:0.85rem; color:var(--text-sub); margin-top:2px;">パート: ${partsStr}</div>
+              </div>
+              <span style="font-size:0.8rem; color:#1976d2; font-weight:700;">サポート</span>
+            </div>
+          `;
+        }
+      });
+    }
+    membersContainer.innerHTML = memberHtml;
+
+    const actionsContainer = document.getElementById('detail-band-actions');
+    const isJoined = currentUser && (
+      (band.members || []).includes(currentUser.id) ||
+      (band.supportMembers || []).includes(currentUser.id) ||
+      (currentUser.bands || []).includes(band.name) ||
+      (currentUser.supportBands || []).includes(band.name)
+    );
+
+    let actionBtnsHtml = '';
+    if (isJoined) {
+      actionBtnsHtml += `<button class="btn-secondary btn-small" onclick="leaveBand('${band.id || ''}', '${band.name.replace(/'/g, "\\'")}')">バンドを脱退する</button>`;
+    }
+    actionBtnsHtml += `<button class="btn-danger btn-small" onclick="deleteBand('${band.id || ''}', '${band.name.replace(/'/g, "\\'")}')">バンドを削除する</button>`;
+
+    actionsContainer.innerHTML = actionBtnsHtml;
+  }
+
+  function closeBandDetail() {
+    document.getElementById('band-detail-view').classList.add('hidden');
+    document.getElementById('band-list-view').classList.remove('hidden');
+  }
+
+  function leaveBand(bandId, bandName) {
+    if (!currentUser) return alert('先にプロフィールを登録してください');
+    if (!confirm(`バンド「${bandName}」から脱退しますか？`)) return;
+
+    if (currentUser.bands) currentUser.bands = currentUser.bands.filter(b => b !== bandName);
+    if (currentUser.supportBands) currentUser.supportBands = currentUser.supportBands.filter(b => b !== bandName);
+    localStorage.setItem('onken_user', JSON.stringify(currentUser));
+
+    if (bandId) {
+      const band = cachedAllBands.find(b => b.id === bandId);
+      let updateObj = {
+        members: firebase.firestore.FieldValue.arrayRemove(currentUser.id),
+        supportMembers: firebase.firestore.FieldValue.arrayRemove(currentUser.id)
+      };
+      if (band && band.leaderId === currentUser.id) {
+        updateObj.leaderId = null;
+        updateObj.leaderName = null;
+      }
+      db.collection('bands').doc(bandId).update(updateObj).then(() => {
+        alert(`「${bandName}」から脱退しました。`);
+        closeBandDetail();
+        loadBands();
+      });
+    } else {
+      alert(`「${bandName}」から脱退しました。`);
+      closeBandDetail();
+      loadBands();
+    }
+  }
+
+  function deleteBand(bandId, bandName) {
+    if (!currentUser) return alert('先にプロフィールを登録してください');
+    if (!confirm(`⚠️ 本当にバンド「${bandName}」を削除しますか？\nこの操作は取り消せません。`)) return;
+
+    if (currentUser.bands) currentUser.bands = currentUser.bands.filter(b => b !== bandName);
+    if (currentUser.supportBands) currentUser.supportBands = currentUser.supportBands.filter(b => b !== bandName);
+    localStorage.setItem('onken_user', JSON.stringify(currentUser));
+
+    const finishDelete = () => {
+      alert(`バンド「${bandName}」を削除しました。`);
+      closeBandDetail();
+      loadBands();
+    };
+
+    if (bandId) {
+      db.collection('bands').doc(bandId).update({ isDeleted: true }).then(finishDelete);
+    } else {
+      db.collection('bands').add({ name: bandName, isDeleted: true }).then(finishDelete);
+    }
   }
 
   function becomeLeader(bandId, bandName) {
@@ -1282,6 +1517,9 @@
         leaderName: leaderDisplayName,
         members: firebase.firestore.FieldValue.arrayUnion(currentUser.id)
       }).then(() => {
+        if (!currentUser.bands) currentUser.bands = [];
+        if (!currentUser.bands.includes(bandName)) currentUser.bands.push(bandName);
+        localStorage.setItem('onken_user', JSON.stringify(currentUser));
         alert(`「${bandName}」のリーダーとして設定しました！`);
         loadBands();
       });
@@ -1294,6 +1532,9 @@
         supportMembers: [],
         createdAt: new Date()
       }).then(() => {
+        if (!currentUser.bands) currentUser.bands = [];
+        if (!currentUser.bands.includes(bandName)) currentUser.bands.push(bandName);
+        localStorage.setItem('onken_user', JSON.stringify(currentUser));
         alert(`「${bandName}」のリーダーとして設定しました！`);
         loadBands();
       });
@@ -1305,14 +1546,14 @@
     
     if (bandId) {
       const updateField = type === 'regular' ? 'members' : 'supportMembers';
-      db.collection('bands').doc(bandId).update({ [updateField]: firebase.firestore.FieldValue.arrayUnion(currentUser.id) });
+      db.collection('bands').doc(bandId).update({ [updateField]: firebase.firestore.FieldValue.arrayUnion(currentUser.id) }).then(() => loadBands());
     } else {
       db.collection('bands').add({
-        name: bandName, leaderName: `${currentUser.name}`,
+        name: bandName,
         members: type === 'regular' ? [currentUser.id] : [],
         supportMembers: type === 'support' ? [currentUser.id] : [],
         createdAt: new Date()
-      });
+      }).then(() => loadBands());
     }
 
     if (type === 'regular') {
@@ -1324,7 +1565,6 @@
     }
 
     localStorage.setItem('onken_user', JSON.stringify(currentUser));
-    loadBands();
     alert(`「${bandName}」に${type === 'regular' ? 'メンバー' : 'サポートメンバー'}として加入しました！`);
   }
 

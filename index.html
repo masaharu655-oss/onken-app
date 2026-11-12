@@ -4,41 +4,33 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>音楽研究部</title>
-  <!-- ホーム画面アイコン設定（動的生成スクリプトにより自動でセットされます） -->
   <link id="apple-icon" rel="apple-touch-icon" href="">
   <link id="fav-icon" rel="icon" type="image/png" href="">
-  <!-- Google Fonts: Noto Sans JP -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script>
-    // ページ読み込み前に「音研」アイコン画像をコードで自動生成してセット
     (function() {
       const canvas = document.createElement('canvas');
       canvas.width = 512;
       canvas.height = 512;
       const ctx = canvas.getContext('2d');
 
-      // 背景色（アプリのアクセントカラー）
       ctx.fillStyle = '#232220';
       ctx.fillRect(0, 0, 512, 512);
 
-      // 内側の細い枠線
       ctx.strokeStyle = '#7a7670';
       ctx.lineWidth = 8;
       ctx.strokeRect(32, 32, 448, 448);
 
-      // 「音研」の文字
       ctx.fillStyle = '#f7f4ee';
       ctx.font = 'bold 170px "Noto Sans JP", sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('音研', 256, 240);
 
-      // サブテキスト
       ctx.fillStyle = '#b8b2a6';
       ctx.font = 'bold 34px "Noto Sans JP", sans-serif';
       ctx.fillText('ONKEN CLUB', 256, 375);
@@ -115,6 +107,32 @@
       margin-bottom: 20px;
       font-size: 0.9rem;
       color: #8c6d1f;
+      font-weight: 500;
+    }
+
+    /* お知らせバナー */
+    .notice-card {
+      background: #eef5fc;
+      border: 1px solid #bbdefb;
+      border-left: 4px solid #1976d2;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+    .notice-card h3 {
+      margin: 0 0 8px 0;
+      font-size: 1.0rem;
+      color: #0d47a1;
+    }
+    .notice-item {
+      padding: 6px 0;
+      border-bottom: 1px dashed #bbdefb;
+      font-size: 0.9rem;
+      color: var(--text-main);
+    }
+    .notice-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
     }
 
     /* メニュータブ */
@@ -288,6 +306,11 @@
       transform: translateY(-1px);
     }
 
+    .time-slot-card.is-banned {
+      background: #ffebee;
+      border: 1px solid #ef9a9a;
+    }
+
     .time-slot-card .time-range { font-weight: 700; font-size: 1.05rem; }
     .time-slot-card .sub-label { font-size: 0.75rem; color: var(--text-sub); margin-top: 2px; }
     
@@ -299,6 +322,7 @@
     .time-slot-card .status-tag.fixed { color: #1565c0; }
     .time-slot-card .status-tag.user-res { color: #2e7d32; }
     .time-slot-card .status-tag.transferred { color: #e65100; }
+    .time-slot-card .status-tag.banned { color: #c62828; font-size: 1.0rem; }
     .time-slot-card .status-tag.empty {
       color: #2e7d32;
       font-size: 0.95rem;
@@ -326,7 +350,7 @@
     /* モーダル */
     .modal {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; z-index: 1000;
+      background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 1000;
     }
     .modal-content {
       background: var(--card-bg); padding: 28px; border-radius: 12px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; border: 1px solid var(--card-border);
@@ -342,6 +366,17 @@
     .status-btn { width: auto; margin: 0; padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; }
     .status-btn.active-yes { background: #2e7d32; color: #ffffff; border: none; }
     .status-btn.active-no { background: #c62828; color: #ffffff; border: none; }
+
+    .today-shift-badge {
+      display: inline-block;
+      background: #c62828;
+      color: #ffffff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-right: 6px;
+    }
   </style>
 </head>
 <body>
@@ -353,8 +388,11 @@
       <p>音楽研究部 練習枠予約</p>
     </div>
     <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
-      <div class="user-pill" id="user-info">● 未登録</div>
-      <button class="btn-secondary btn-small" onclick="openProfileModal()">プロフィール編集</button>
+      <div class="user-pill" id="user-info">未ログイン</div>
+      <div style="display:flex; gap:6px;">
+        <button class="btn-secondary btn-small" onclick="openProfileModal('edit')">プロフィール編集</button>
+        <button class="btn-secondary btn-small" onclick="openLoginModal()">ログアウト / 切替</button>
+      </div>
     </div>
   </div>
 
@@ -375,8 +413,15 @@
 
   <!-- 1. 枠表（部室予約）タブ -->
   <div id="tab-reservation" class="tab-content">
+    <!-- お知らせ表示エリア -->
+    <div id="global-notice-area" class="notice-card hidden">
+      <h3>全体お知らせ・連絡事項</h3>
+      <div id="global-notice-list"></div>
+    </div>
+
+    <!-- MYスケジュール -->
     <div class="card" style="background:#f2ede4; border-color:#dcd4c5; margin-bottom:16px;">
-      <h3 style="margin-bottom:8px; font-size:1.05rem;">MYスケジュール（自分の予定）</h3>
+      <h3 style="margin-bottom:8px; font-size:1.05rem;">MYスケジュール（予約・シフト予定）</h3>
       <div id="my-schedule-list">ログインすると表示されます。</div>
     </div>
 
@@ -439,7 +484,7 @@
       </div>
       <div class="card">
         <h3>バンド一覧・加入申請・リーダー設定</h3>
-        <p style="font-size:0.8rem; color:var(--text-sub); margin-top:0;">※バンド名をタップするとメンバー詳細（学年学科・パート）や脱退・削除メニューが開きます。</p>
+        <p style="font-size:0.8rem; color:var(--text-sub); margin-top:0;">バンド名をタップするとメンバー詳細（学年学科・パート）やバンド名変更・脱退・削除メニューが開きます。</p>
         <div id="band-list">読み込み中...</div>
       </div>
     </div>
@@ -448,7 +493,7 @@
     <div id="band-detail-view" class="hidden">
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-          <button class="btn-secondary btn-small" onclick="closeBandDetail()">← バンド一覧へ戻る</button>
+          <button class="btn-secondary btn-small" onclick="closeBandDetail()">バンド一覧へ戻る</button>
         </div>
         <h2 id="detail-band-title" style="margin-bottom:4px;">バンド名</h2>
         <div id="detail-band-leader" style="font-size:0.9rem; color:#d84315; font-weight:700; margin-bottom:16px;"></div>
@@ -565,25 +610,57 @@
       <div id="admin-fixed-schedule-list" style="margin-top:14px;"></div>
 
       <hr style="margin:20px 0; border-color: var(--border-color);">
-      <h4>2. 日別 全バンドシフトの出欠集計</h4>
+      <h4>2. 部室使用禁止期間の設定</h4>
+      <p style="font-size:0.8rem; color:var(--text-sub); margin-top:0;">指定した開始日時から終了日時まで、枠表への予約・譲受を禁止します。</p>
+      <form onsubmit="handleAddBanPeriod(event)">
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:140px;">
+            <label>開始日</label>
+            <input type="date" id="ban-start-date" required>
+          </div>
+          <div style="flex:1; min-width:120px;">
+            <label>開始時刻</label>
+            <input type="time" id="ban-start-time" value="09:00" required>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:140px;">
+            <label>終了日</label>
+            <input type="date" id="ban-end-date" required>
+          </div>
+          <div style="flex:1; min-width:120px;">
+            <label>終了時刻</label>
+            <input type="time" id="ban-end-time" value="20:00" required>
+          </div>
+        </div>
+        <label>理由（例: 定期試験期間、機材メンテナンス、学校行事など）</label>
+        <input type="text" id="ban-reason" placeholder="部室使用禁止" required>
+        <button type="submit">使用禁止期間を登録する</button>
+      </form>
+      <div id="admin-ban-list" style="margin-top:12px;"></div>
+
+      <hr style="margin:20px 0; border-color: var(--border-color);">
+      <h4>3. 日別 全バンドシフトの出欠集計</h4>
       <label>確認したい日付を選択</label>
       <input type="date" id="admin-attendance-date" onchange="loadAdminAttendance()">
       <div id="admin-attendance-list" style="margin-top:12px;"></div>
 
       <hr style="margin:20px 0; border-color: var(--border-color);">
-      <h4>3. 提出されたシフト希望の確認・集計</h4>
+      <h4>4. 提出されたシフト希望の確認・集計</h4>
       <button class="btn-secondary btn-small" onclick="downloadShiftRequestsCSV()">希望一覧をCSVダウンロード</button>
       <div id="admin-shift-requests" style="margin-top:10px;"></div>
 
       <hr style="margin:20px 0; border-color: var(--border-color);">
-      <h4>4. 全体イベント・お知らせ編集</h4>
+      <h4>5. 全体イベント・お知らせ編集</h4>
+      <p style="font-size:0.8rem; color:var(--text-sub); margin-top:0;">投稿したお知らせは枠表タブの最上部に表示されます。</p>
       <form id="form-event" onsubmit="handleAddEvent(event)">
         <input type="text" id="event-title" placeholder="お知らせ内容を入力" required>
         <button type="submit">お知らせを追加投稿する</button>
       </form>
+      <div id="admin-notice-list" style="margin-top:12px;"></div>
 
       <hr style="margin:20px 0; border-color: var(--border-color);">
-      <h4>5. 部員管理（部費納入・アカウント削除）</h4>
+      <h4>6. 部員管理（部費納入・アカウント削除）</h4>
       <div style="display:flex; gap:10px; margin-bottom:12px;">
         <button class="btn-secondary btn-small" onclick="toggleAllFee(true)">全員「納入済み」にする</button>
         <button class="btn-secondary btn-small" onclick="toggleAllFee(false)">全員「未納」にする</button>
@@ -591,18 +668,35 @@
       <div id="fee-management-list"></div>
 
       <hr style="margin:20px 0; border-color: var(--border-color);">
-      <h4>6. 個人情報・個人予約データのリセット</h4>
-      <p style="font-size:0.8rem; color:#c62828; margin-top:0;">※確定シフト枠とバンド名だけを残し、部員名簿・個人予約・出欠等の個人データを一括クリアします。</p>
+      <h4>7. 個人情報・個人予約データのリセット</h4>
+      <p style="font-size:0.8rem; color:#c62828; margin-top:0;">確定シフト枠とバンド名だけを残し、部員名簿・個人予約・出欠等の個人データを一括クリアします。</p>
       <button class="btn-danger btn-small" onclick="resetPersonalData()">名簿・個人データの初期化を実行</button>
     </div>
   </div>
 </div>
 
-<!-- プロフィール登録/編集 モーダル -->
+<!-- ログイン モーダル（PC・スマホ同期用） -->
+<div id="login-modal" class="modal hidden">
+  <div class="modal-content">
+    <h2>ログイン / アカウント同期</h2>
+    <p style="font-size:0.85rem; color:var(--text-sub); margin-top:-4px;">
+      すでに他の端末（PCやスマホ）で登録済みの場合は、登録した名前を入力してログインするとデータが自動で引き継がれます。
+    </p>
+    <form onsubmit="handleLoginByName(event)">
+      <label>名前（フルネーム）</label>
+      <input type="text" id="login-name-input" placeholder="例: 村田柾陽" required>
+      <button type="submit">ログイン</button>
+    </form>
+    <hr style="margin:20px 0; border-color: var(--border-color);">
+    <p style="font-size:0.8rem; color:var(--text-sub); margin:0 0 8px 0;">初めて利用する方はこちら</p>
+    <button type="button" class="btn-secondary" style="margin-top:0;" onclick="switchToRegisterModal()">新規登録</button>
+  </div>
+</div>
+
+<!-- プロフィール新規登録 / 編集 モーダル -->
 <div id="profile-modal" class="modal hidden">
   <div class="modal-content">
-    <h2>プロフィール登録</h2>
-    <p style="font-size:0.8rem; color:var(--text-sub); margin-top:-6px;">※別端末（PC・スマホ）で登録済みの場合は、同じ名前・学年・学科を入力するとデータが自動で引き継がれます。</p>
+    <h2 id="profile-modal-title">プロフィール新規登録</h2>
     <form id="form-profile" onsubmit="handleSaveProfile(event)">
       <label>名前（例: 村田柾陽）</label>
       <input type="text" id="prof-name" placeholder="村田柾陽" required>
@@ -643,7 +737,8 @@
       </select>
       <label>一言コメント</label>
       <textarea id="prof-comment" rows="2" placeholder="よろしくお願いします！"></textarea>
-      <button type="submit">保存して更新する</button>
+      <button type="submit">保存して登録する</button>
+      <button type="button" class="btn-secondary" onclick="cancelProfileModal()">戻る</button>
     </form>
   </div>
 </div>
@@ -744,6 +839,8 @@
   let selectedDateStr = "";
   let cachedAllBands = [];
   let cachedUsersObjMap = {};
+  let cachedBanPeriods = [];
+  let profileModalMode = 'register';
 
   window.addEventListener('DOMContentLoaded', () => {
     const todayStr = getTodayLocalStr();
@@ -752,13 +849,18 @@
     const adminAttDateInput = document.getElementById('admin-attendance-date');
     if (adminAttDateInput) adminAttDateInput.value = todayStr;
 
-    loadFixedScheduleFromDB();
+    loadNotices();
+    loadBanPeriods(() => {
+      loadFixedScheduleFromDB(() => {
+        renderWeekDateButtons();
+      });
+    });
+
     const saved = localStorage.getItem('onken_user');
     if (!saved) {
-      openProfileModal();
+      openLoginModal();
     } else {
       currentUser = JSON.parse(saved);
-      // 起動時にFirestore上の最新ユーザーデータと同期
       db.collection('users').doc(currentUser.id).get().then(doc => {
         if (doc.exists) {
           currentUser = doc.data();
@@ -767,16 +869,303 @@
         renderUI();
       }).catch(() => renderUI());
     }
-
-    renderWeekDateButtons();
   });
 
-  function loadFixedScheduleFromDB() {
+  // --- ログイン・新規登録・プロフィール編集 ---
+  function openLoginModal() {
+    document.getElementById('profile-modal').classList.add('hidden');
+    document.getElementById('login-name-input').value = '';
+    document.getElementById('login-modal').classList.remove('hidden');
+  }
+
+  function handleLoginByName(e) {
+    e.preventDefault();
+    const inputName = document.getElementById('login-name-input').value.trim();
+    if (!inputName) return;
+
+    db.collection('users').where('name', '==', inputName).get().then(snapshot => {
+      if (snapshot.empty) {
+        alert('入力された名前の登録が見つかりませんでした。初めて利用する場合は「新規登録」からプロフィールを作成してください。');
+        return;
+      }
+      let matchedUsers = [];
+      snapshot.forEach(doc => matchedUsers.push(doc.data()));
+
+      // 複数同名がいる場合は最新のものを優先、通常は1件
+      currentUser = matchedUsers[0];
+      localStorage.setItem('onken_user', JSON.stringify(currentUser));
+      document.getElementById('login-modal').classList.add('hidden');
+      alert(`${currentUser.name} としてログインしました。データを同期しました。`);
+      renderUI();
+    });
+  }
+
+  function switchToRegisterModal() {
+    document.getElementById('login-modal').classList.add('hidden');
+    openProfileModal('register');
+  }
+
+  function openProfileModal(mode = 'edit') {
+    profileModalMode = mode;
+    const titleEl = document.getElementById('profile-modal-title');
+    if (mode === 'register') {
+      titleEl.innerText = 'プロフィール新規登録';
+      document.getElementById('prof-name').value = '';
+      document.getElementById('prof-line').value = '';
+      document.getElementById('prof-grade').value = '1年';
+      document.getElementById('prof-dept').value = 'AC';
+      document.getElementById('prof-role').value = '部員';
+      document.getElementById('prof-comment').value = '';
+      document.querySelectorAll('#part-chips .chip').forEach(chip => chip.classList.remove('selected'));
+      toggleDeptSelect();
+    } else {
+      titleEl.innerText = 'プロフィール編集';
+      if (currentUser) {
+        document.getElementById('prof-name').value = currentUser.name || '';
+        document.getElementById('prof-line').value = currentUser.lineName || '';
+        document.getElementById('prof-grade').value = currentUser.grade || '1年';
+        document.getElementById('prof-dept').value = currentUser.dept || 'AC';
+        document.getElementById('prof-role').value = currentUser.role || '部員';
+        document.getElementById('prof-comment').value = currentUser.comment || '';
+
+        document.querySelectorAll('#part-chips .chip').forEach(chip => {
+          if ((currentUser.parts || []).includes(chip.dataset.part)) chip.classList.add('selected');
+          else chip.classList.remove('selected');
+        });
+        toggleDeptSelect();
+      }
+    }
+    document.getElementById('profile-modal').classList.remove('hidden');
+  }
+
+  function cancelProfileModal() {
+    document.getElementById('profile-modal').classList.add('hidden');
+    if (!currentUser) {
+      openLoginModal();
+    }
+  }
+
+  function toggleChip(el) { el.classList.toggle('selected'); }
+
+  function toggleDeptSelect() {
+    const grade = document.getElementById('prof-grade').value;
+    const deptGroup = document.getElementById('dept-group');
+    if (grade.includes('専攻科')) deptGroup.classList.add('hidden');
+    else deptGroup.classList.remove('hidden');
+  }
+
+  function handleSaveProfile(e) {
+    e.preventDefault();
+    const parts = Array.from(document.querySelectorAll('#part-chips .chip.selected')).map(c => c.dataset.part);
+    const nameInput = document.getElementById('prof-name').value.trim();
+    const lineInput = document.getElementById('prof-line').value.trim();
+    const gradeInput = document.getElementById('prof-grade').value;
+    const deptInput = gradeInput.includes('専攻科') ? '-' : document.getElementById('prof-dept').value;
+    const roleInput = document.getElementById('prof-role').value;
+    const commentInput = document.getElementById('prof-comment').value;
+
+    db.collection('users').where('name', '==', nameInput).get().then(snapshot => {
+      let existingSameNameUser = null;
+      snapshot.forEach(doc => {
+        existingSameNameUser = doc.data();
+      });
+
+      if (profileModalMode === 'register' && existingSameNameUser) {
+        // 新規登録時にすでに同名の人が存在した場合は同期して引き継ぐ
+        currentUser = {
+          id: existingSameNameUser.id,
+          name: nameInput,
+          lineName: lineInput,
+          grade: gradeInput,
+          dept: deptInput,
+          parts: parts,
+          role: roleInput,
+          comment: commentInput,
+          feePaid: existingSameNameUser.feePaid || false,
+          bands: existingSameNameUser.bands || [],
+          supportBands: existingSameNameUser.supportBands || []
+        };
+        alert('同じ名前の登録データが既に存在したため、既存データと同期して更新しました。');
+      } else {
+        currentUser = {
+          id: (profileModalMode === 'edit' && currentUser) ? currentUser.id : 'user_' + Date.now(),
+          name: nameInput,
+          lineName: lineInput,
+          grade: gradeInput,
+          dept: deptInput,
+          parts: parts,
+          role: roleInput,
+          comment: commentInput,
+          feePaid: (profileModalMode === 'edit' && currentUser) ? currentUser.feePaid : false,
+          bands: (profileModalMode === 'edit' && currentUser) ? (currentUser.bands || []) : [],
+          supportBands: (profileModalMode === 'edit' && currentUser) ? (currentUser.supportBands || []) : []
+        };
+      }
+
+      localStorage.setItem('onken_user', JSON.stringify(currentUser));
+      return db.collection('users').doc(currentUser.id).set(currentUser);
+    }).then(() => {
+      document.getElementById('profile-modal').classList.add('hidden');
+      renderUI();
+    });
+  }
+
+  // --- 全体お知らせ機能 ---
+  function handleAddEvent(e) {
+    e.preventDefault();
+    const titleInput = document.getElementById('event-title');
+    const text = titleInput.value.trim();
+    if (!text) return;
+
+    const todayStr = getTodayLocalStr();
+    db.collection('notices').add({
+      text: text,
+      date: todayStr,
+      author: currentUser ? currentUser.name : '三役',
+      createdAt: new Date()
+    }).then(() => {
+      titleInput.value = '';
+      alert('お知らせを投稿しました。');
+      loadNotices();
+    });
+  }
+
+  function deleteNotice(noticeId) {
+    if (!confirm('このお知らせを削除しますか？')) return;
+    db.collection('notices').doc(noticeId).delete().then(() => {
+      loadNotices();
+    });
+  }
+
+  function loadNotices() {
+    const globalArea = document.getElementById('global-notice-area');
+    const globalList = document.getElementById('global-notice-list');
+    const adminList = document.getElementById('admin-notice-list');
+
+    db.collection('notices').orderBy('createdAt', 'desc').get().then(snapshot => {
+      if (snapshot.empty) {
+        if (globalArea) globalArea.classList.add('hidden');
+        if (adminList) adminList.innerHTML = '<p style="font-size:0.85rem; color:var(--text-sub);">現在投稿されているお知らせはありません。</p>';
+        return;
+      }
+
+      let publicHtml = '';
+      let adminHtml = '';
+
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        publicHtml += `<div class="notice-item"><strong>[${d.date}]</strong> ${d.text}</div>`;
+        adminHtml += `
+          <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; padding:8px 12px; border-radius:6px; margin-top:6px; border:1px solid var(--border-color); font-size:0.85rem;">
+            <span><strong>[${d.date}]</strong> ${d.text}</span>
+            <button class="btn-small btn-danger" style="margin:0;" onclick="deleteNotice('${doc.id}')">削除</button>
+          </div>
+        `;
+      });
+
+      if (globalList) globalList.innerHTML = publicHtml;
+      if (globalArea) globalArea.classList.remove('hidden');
+      if (adminList) adminList.innerHTML = adminHtml;
+    });
+  }
+
+  // --- 部室使用禁止期間設定 ---
+  function handleAddBanPeriod(e) {
+    e.preventDefault();
+    const sDate = document.getElementById('ban-start-date').value;
+    const sTime = document.getElementById('ban-start-time').value;
+    const eDate = document.getElementById('ban-end-date').value;
+    const eTime = document.getElementById('ban-end-time').value;
+    const reason = document.getElementById('ban-reason').value.trim();
+
+    const startDT = `${sDate}T${sTime}`;
+    const endDT = `${eDate}T${eTime}`;
+
+    if (startDT >= endDT) {
+      alert('終了日時は開始日時より後の時刻を設定してください。');
+      return;
+    }
+
+    db.collection('ban_periods').add({
+      startDate: sDate,
+      startTime: sTime,
+      endDate: eDate,
+      endTime: eTime,
+      startDT: startDT,
+      endDT: endDT,
+      reason: reason || '部室使用禁止',
+      createdAt: new Date()
+    }).then(() => {
+      alert('部室使用禁止期間を登録しました。');
+      document.getElementById('ban-reason').value = '';
+      loadBanPeriods(() => {
+        if (selectedDateStr) loadTimelineForDate(selectedDateStr);
+      });
+    });
+  }
+
+  function deleteBanPeriod(banId) {
+    if (!confirm('この使用禁止期間を削除しますか？')) return;
+    db.collection('ban_periods').doc(banId).delete().then(() => {
+      loadBanPeriods(() => {
+        if (selectedDateStr) loadTimelineForDate(selectedDateStr);
+      });
+    });
+  }
+
+  function loadBanPeriods(callback) {
+    db.collection('ban_periods').orderBy('startDT', 'asc').get().then(snapshot => {
+      cachedBanPeriods = [];
+      snapshot.forEach(doc => {
+        cachedBanPeriods.push({ id: doc.id, ...doc.data() });
+      });
+      renderAdminBanList();
+      if (callback) callback();
+    });
+  }
+
+  function renderAdminBanList() {
+    const container = document.getElementById('admin-ban-list');
+    if (!container) return;
+    if (cachedBanPeriods.length === 0) {
+      container.innerHTML = '<p style="font-size:0.85rem; color:var(--text-sub);">設定されている使用禁止期間はありません。</p>';
+      return;
+    }
+    let html = '';
+    cachedBanPeriods.forEach(b => {
+      html += `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; padding:8px 12px; border-radius:6px; margin-top:6px; border:1px solid var(--border-color); font-size:0.85rem;">
+          <span><strong>${b.startDate} ${b.startTime} 〜 ${b.endDate} ${b.endTime}</strong> (${b.reason})</span>
+          <button class="btn-small btn-danger" style="margin:0;" onclick="deleteBanPeriod('${b.id}')">削除</button>
+        </div>
+      `;
+    });
+    container.innerHTML = html;
+  }
+
+  function checkTimeSlotBanned(dateStr, startTime, endTime) {
+    const slotStartDT = `${dateStr}T${startTime}`;
+    const slotEndDT = `${dateStr}T${endTime}`;
+    for (let b of cachedBanPeriods) {
+      if (slotStartDT < b.endDT && slotEndDT > b.startDT) {
+        return b;
+      }
+    }
+    return null;
+  }
+
+  // --- スケジュール・枠表・MYスケジュール ---
+  function loadFixedScheduleFromDB(callback) {
     db.collection('system').doc('fixed_schedule').get().then(doc => {
       if (doc.exists && doc.data().schedule) {
         FIXED_WEEKLY_SCHEDULE = doc.data().schedule;
       }
       if (selectedDateStr) loadTimelineForDate(selectedDateStr);
+      if (currentUser) {
+        loadMySchedule();
+        loadReminders();
+      }
+      if (callback) callback();
     });
   }
 
@@ -848,15 +1237,20 @@
       let html = '';
       TIME_SLOTS.forEach(slot => {
         const [slotStart, slotEnd] = slot.split('-');
+        const banInfo = checkTimeSlotBanned(dateStr, slotStart, slotEnd);
         const fixed = dayFixedSchedule.find(f => f.start === slotStart);
         const userRes = userResList.find(r => (r.startTime <= slotStart && r.endTime > slotStart) || (r.time === slot));
 
         let statusHtml = '';
         let purposeText = '';
-        let isCardEmpty = false;
+        let cardClass = '';
         let onClickAction = '';
 
-        if (fixed) {
+        if (banInfo) {
+          cardClass = 'is-banned';
+          statusHtml = `<span class="status-tag banned">部室使用禁止 (${banInfo.reason})</span>`;
+          purposeText = '予約・使用不可';
+        } else if (fixed) {
           if (userRes && userRes.isTransfer) {
             statusHtml = `<span class="status-tag transferred">${fixed.band} <small style="font-size:0.85rem; color:#e65100;">(代: ${userRes.purpose} / ${userRes.userName})</small></span>`;
             purposeText = 'シフト譲受練習';
@@ -870,21 +1264,21 @@
           statusHtml = `<span class="status-tag user-res">${userRes.purpose} <small style="font-size:0.85rem; color:var(--text-sub);">(${userRes.userName})</small></span>`;
           purposeText = `部員予約 [${timeRangeStr}]`;
         } else {
-          isCardEmpty = true;
+          cardClass = 'is-empty';
           statusHtml = `<span class="status-tag empty">予約可能 (タップで選択)</span>`;
           purposeText = '空き枠';
           onClickAction = `onclick="fillFormTime('${slotStart}', '${slotEnd}')"`;
         }
 
         html += `
-          <div class="time-slot-card ${isCardEmpty ? 'is-empty' : ''}" ${onClickAction}>
+          <div class="time-slot-card ${cardClass}" ${onClickAction}>
             <div>
               <div class="time-range">${slot}</div>
               <div class="sub-label">${purposeText}</div>
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
               ${statusHtml}
-              ${fixed && !userRes ? `<button class="btn-small btn-secondary" style="margin:0;" onclick="event.stopPropagation(); promptTransfer('${dateStr}', '${slotStart}', '${slotEnd}', '${fixed.band}')">譲受</button>` : ''}
+              ${(!banInfo && fixed && !userRes) ? `<button class="btn-small btn-secondary" style="margin:0;" onclick="event.stopPropagation(); promptTransfer('${dateStr}', '${slotStart}', '${slotEnd}', '${fixed.band}')">譲受</button>` : ''}
             </div>
           </div>
         `;
@@ -902,7 +1296,12 @@
   }
 
   function promptTransfer(date, start, end, fixedBand) {
-    if (!currentUser) return alert('先にプロフィールを登録してください');
+    if (!currentUser) return alert('先にログインしてください');
+    const banInfo = checkTimeSlotBanned(date, start, end);
+    if (banInfo) {
+      return alert(`この時間帯は部室使用禁止期間（${banInfo.reason}）のため譲受できません。`);
+    }
+
     const myBand = prompt(`「${fixedBand}」の枠 (${start}〜${end}) を譲り受けて使用しますか？\n使用するあなたのバンド名を入力してください:`);
     if (!myBand) return;
 
@@ -912,101 +1311,11 @@
       userId: currentUser.id, userName: currentUser.name,
       userGrade: currentUser.grade, userDept: currentUser.dept, createdAt: new Date()
     }).then(() => {
-      alert(`「${fixedBand}」からのシフト譲受枠として予約登録しました！`);
+      alert(`「${fixedBand}」からのシフト譲受枠として予約登録しました。`);
       loadTimelineForDate(date);
+      loadMySchedule();
+      loadReminders();
     });
-  }
-
-  function toggleChip(el) { el.classList.toggle('selected'); }
-
-  function openProfileModal() {
-    if (currentUser) {
-      document.getElementById('prof-name').value = currentUser.name || '';
-      document.getElementById('prof-line').value = currentUser.lineName || '';
-      document.getElementById('prof-grade').value = currentUser.grade || '1年';
-      document.getElementById('prof-dept').value = currentUser.dept || 'AC';
-      document.getElementById('prof-role').value = currentUser.role || '部員';
-      document.getElementById('prof-comment').value = currentUser.comment || '';
-
-      document.querySelectorAll('#part-chips .chip').forEach(chip => {
-        if ((currentUser.parts || []).includes(chip.dataset.part)) chip.classList.add('selected');
-        else chip.classList.remove('selected');
-      });
-      toggleDeptSelect();
-    }
-    document.getElementById('profile-modal').classList.remove('hidden');
-  }
-
-  function toggleDeptSelect() {
-    const grade = document.getElementById('prof-grade').value;
-    const deptGroup = document.getElementById('dept-group');
-    if (grade.includes('専攻科')) deptGroup.classList.add('hidden');
-    else deptGroup.classList.remove('hidden');
-  }
-
-  // PC・スマホ間で同一アカウントを引き継ぐプロフィール保存処理
-  function handleSaveProfile(e) {
-    e.preventDefault();
-    const parts = Array.from(document.querySelectorAll('#part-chips .chip.selected')).map(c => c.dataset.part);
-    const nameInput = document.getElementById('prof-name').value.trim();
-    const lineInput = document.getElementById('prof-line').value.trim();
-    const gradeInput = document.getElementById('prof-grade').value;
-    const deptInput = gradeInput.includes('専攻科') ? '-' : document.getElementById('prof-dept').value;
-    const roleInput = document.getElementById('prof-role').value;
-    const commentInput = document.getElementById('prof-comment').value;
-
-    // 同じ「名前・学年・学科」がすでにFirestoreにあるか検索して同一アカウントに統合
-    db.collection('users')
-      .where('name', '==', nameInput)
-      .where('grade', '==', gradeInput)
-      .where('dept', '==', deptInput)
-      .get()
-      .then(snapshot => {
-        let matchedUser = null;
-        snapshot.forEach(doc => {
-          matchedUser = doc.data();
-        });
-
-        if (matchedUser) {
-          // 既存の別端末データが見つかった場合はIDと所属バンド・部費情報を引き継ぐ
-          currentUser = {
-            id: matchedUser.id,
-            name: nameInput,
-            lineName: lineInput,
-            grade: gradeInput,
-            dept: deptInput,
-            parts: parts,
-            role: roleInput,
-            comment: commentInput,
-            feePaid: matchedUser.feePaid || false,
-            bands: matchedUser.bands || [],
-            supportBands: matchedUser.supportBands || []
-          };
-          alert('別端末で登録済みのアカウントデータが見つかったため、所属バンドや予約データを引き継ぎました！');
-        } else {
-          // 新規または同一端末からの更新
-          currentUser = {
-            id: currentUser ? currentUser.id : 'user_' + Date.now(),
-            name: nameInput,
-            lineName: lineInput,
-            grade: gradeInput,
-            dept: deptInput,
-            parts: parts,
-            role: roleInput,
-            comment: commentInput,
-            feePaid: currentUser ? currentUser.feePaid : false,
-            bands: currentUser ? (currentUser.bands || []) : [],
-            supportBands: currentUser ? (currentUser.supportBands || []) : []
-          };
-        }
-
-        localStorage.setItem('onken_user', JSON.stringify(currentUser));
-        return db.collection('users').doc(currentUser.id).set(currentUser);
-      })
-      .then(() => {
-        document.getElementById('profile-modal').classList.add('hidden');
-        renderUI();
-      });
   }
 
   function renderUI() {
@@ -1014,13 +1323,15 @@
     const isExec = ['部長', '副部長', '会計'].includes(currentUser.role);
     const partsText = (currentUser.parts || []).join('/');
     const userTag = formatUserTag(currentUser.grade, currentUser.dept);
-    document.getElementById('user-info').innerHTML = `● ${userTag}${currentUser.name} ・ ${partsText || '未設定'}`;
+    document.getElementById('user-info').innerText = `${userTag}${currentUser.name} / ${partsText || 'パート未設定'}`;
 
     if (isExec) {
       document.getElementById('admin-tab-btn').classList.remove('hidden');
       loadAdminShiftRequests();
       loadAdminAttendance();
       renderAdminFixedScheduleList();
+      renderAdminBanList();
+      loadNotices();
     } else {
       document.getElementById('admin-tab-btn').classList.add('hidden');
     }
@@ -1053,7 +1364,45 @@
       document.getElementById('admin-attendance-date').value = getTodayLocalStr();
       loadAdminAttendance();
       renderAdminFixedScheduleList();
+      renderAdminBanList();
+      loadNotices();
     }
+  }
+
+  // 自分の所属バンド・サポートバンドの今後7日間のシフトを取得するヘルパー
+  function getMyUpcomingShifts() {
+    if (!currentUser) return [];
+    const myBands = [...(currentUser.bands || []), ...(currentUser.supportBands || [])];
+    if (myBands.length === 0) return [];
+
+    const daysJP = ['日', '月', '火', '水', '木', '金', '土'];
+    const today = new Date();
+    let results = [];
+
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(today);
+      d.setDate(d.getDate() + i);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const dateStr = `${y}-${m}-${day}`;
+      const dayJP = daysJP[d.getDay()];
+
+      const daySchedule = FIXED_WEEKLY_SCHEDULE[dayJP] || [];
+      daySchedule.forEach(s => {
+        if (myBands.includes(s.band)) {
+          results.push({
+            date: dateStr,
+            dayJP: dayJP,
+            start: s.start,
+            end: s.end,
+            band: s.band,
+            isToday: (i === 0)
+          });
+        }
+      });
+    }
+    return results;
   }
 
   function loadReminders() {
@@ -1061,13 +1410,22 @@
     const remindBox = document.getElementById('remind-area');
     let messages = [];
 
+    // 今日の確定シフトチェック
+    const myShifts = getMyUpcomingShifts();
+    myShifts.forEach(s => {
+      if (s.isToday) {
+        messages.push(`[今日シフト] 本日 ${s.start}〜${s.end} にバンド「${s.band}」のシフトがあります。`);
+      }
+    });
+
+    // 今日の個人予約チェック
     const today = getTodayLocalStr();
     db.collection('reservations').where('date', '==', today).get().then(snapshot => {
       snapshot.forEach(doc => {
         const d = doc.data();
         if (d.userId === currentUser.id) {
           const tDisplay = d.startTime ? `${d.startTime}〜${d.endTime}` : d.time;
-          messages.push(`🔔 本日 【${tDisplay}】 に部室予約があります (${d.purpose})`);
+          messages.push(`[本日予約] 本日 ${tDisplay} に部室予約があります (${d.purpose})`);
         }
       });
       if (messages.length > 0) {
@@ -1083,23 +1441,48 @@
     if (!currentUser) return;
     const container = document.getElementById('my-schedule-list');
     const today = getTodayLocalStr();
+    const myShifts = getMyUpcomingShifts();
 
     db.collection('reservations').where('userId', '==', currentUser.id).get().then(snapshot => {
-      let myRes = [];
+      let combinedItems = [];
+
+      // 1. 個人予約データ
       snapshot.forEach(doc => {
         const d = doc.data();
-        if (d.date >= today) myRes.push(d);
+        if (d.date >= today) {
+          const tDisplay = d.startTime ? `${d.startTime}〜${d.endTime}` : d.time;
+          combinedItems.push({
+            sortKey: `${d.date}_${d.startTime || '00:00'}`,
+            date: d.date,
+            time: tDisplay,
+            label: `${d.purpose} ${d.isTransfer ? '(譲受枠)' : '(個人予約)'}`,
+            isTodayShift: false
+          });
+        }
       });
-      myRes.sort((a, b) => (a.date > b.date ? 1 : -1));
 
-      if (myRes.length === 0) {
-        container.innerHTML = '<p style="margin:0; font-size:0.85rem; color:var(--text-sub);">今後の予約予定はありません。</p>';
+      // 2. 所属バンドのシフトデータ
+      myShifts.forEach(s => {
+        combinedItems.push({
+          sortKey: `${s.date}_${s.start}`,
+          date: s.date,
+          time: `${s.start}〜${s.end}`,
+          label: `${s.band} (確定シフト)`,
+          isTodayShift: s.isToday
+        });
+      });
+
+      combinedItems.sort((a, b) => (a.sortKey > b.sortKey ? 1 : -1));
+
+      if (combinedItems.length === 0) {
+        container.innerHTML = '<p style="margin:0; font-size:0.85rem; color:var(--text-sub);">今後の予約・シフト予定はありません。</p>';
         return;
       }
+
       let html = '<ul style="margin:0; padding-left:20px; font-size:0.9rem;">';
-      myRes.forEach(r => {
-        const tDisplay = r.startTime ? `${r.startTime}〜${r.endTime}` : r.time;
-        html += `<li><strong>${r.date} ${tDisplay}:</strong> ${r.purpose} ${r.isTransfer ? '(譲受枠)' : ''}</li>`;
+      combinedItems.forEach(item => {
+        const todayBadge = item.isTodayShift ? '<span class="today-shift-badge">今日シフト</span>' : '';
+        html += `<li style="margin-bottom:4px;">${todayBadge}<strong>${item.date} ${item.time}:</strong> ${item.label}</li>`;
       });
       html += '</ul>';
       container.innerHTML = html;
@@ -1108,14 +1491,19 @@
 
   function handleReservation(e) {
     e.preventDefault();
-    if (!currentUser) return alert('先にプロフィールを登録してください');
+    if (!currentUser) return alert('先にログインしてください');
     const date = document.getElementById('res-date').value || selectedDateStr;
     const startTime = document.getElementById('res-start-time').value;
     const endTime = document.getElementById('res-end-time').value;
     const purpose = document.getElementById('res-purpose').value;
 
     if (startTime >= endTime) {
-      return alert('❌ 終了時刻は開始時刻より後の時間を指定してください。');
+      return alert('終了時刻は開始時刻より後の時間を指定してください。');
+    }
+
+    const banInfo = checkTimeSlotBanned(date, startTime, endTime);
+    if (banInfo) {
+      return alert(`指定時間帯は部室使用禁止期間（${banInfo.startDate} ${banInfo.startTime} 〜 ${banInfo.endDate} ${banInfo.endTime} / 理由: ${banInfo.reason}）と重なっているため予約できません。`);
     }
 
     const d = new Date(date);
@@ -1125,7 +1513,7 @@
 
     for (let f of dayFixedSchedule) {
       if (startTime < f.end && endTime > f.start) {
-        return alert(`❌ 指定時間枠は固定シフト「${f.band} (${f.start}〜${f.end})」と重なっているため予約できません。`);
+        return alert(`指定時間枠は固定シフト「${f.band} (${f.start}〜${f.end})」と重なっているため予約できません。`);
       }
     }
 
@@ -1141,14 +1529,14 @@
       });
 
       if (isOverlap) {
-        return alert('❌ 指定された時間帯には既に別の部室予約が入っています。');
+        return alert('指定された時間帯には既に別の部室予約が入っています。');
       }
 
       db.collection('reservations').add({
         date, startTime, endTime, time: `${startTime}-${endTime}`, purpose,
         userId: currentUser.id, userName: currentUser.name, userGrade: currentUser.grade, userDept: currentUser.dept, createdAt: new Date()
       }).then(() => {
-        alert(`予約が完了しました！（${startTime} 〜 ${endTime}）`);
+        alert(`予約が完了しました（${startTime} 〜 ${endTime}）`);
         document.getElementById('res-purpose').value = '';
         loadTimelineForDate(date);
         loadMySchedule();
@@ -1157,6 +1545,7 @@
     });
   }
 
+  // --- 出欠確認 ---
   function loadAttendance() {
     let dateInput = document.getElementById('attendance-date');
     if (!dateInput.value) dateInput.value = getTodayLocalStr();
@@ -1207,7 +1596,7 @@
               const att = attMap[k];
               if (att.status === '参加') yesCount++;
               if (att.status === '欠席') noCount++;
-              memberListHtml += `<li>${att.userName}: ${att.status === '参加' ? '⭕ 参加' : '❌ 欠席'}</li>`;
+              memberListHtml += `<li>${att.userName}: ${att.status}</li>`;
             }
           });
           memberListHtml += '</ul>';
@@ -1218,8 +1607,8 @@
               <div style="margin-top:10px; display:flex; align-items:center; justify-content:space-between;">
                 <div>
                   <small style="color:var(--text-sub);">あなたの回答: </small>
-                  <button class="status-btn ${currentStatus === '参加' ? 'active-yes' : 'btn-secondary'}" onclick="submitShiftAttendance('${shift.id}', '${date}', '参加')">⭕ 参加</button>
-                  <button class="status-btn ${currentStatus === '欠席' ? 'active-no' : 'btn-secondary'}" onclick="submitShiftAttendance('${shift.id}', '${date}', '欠席')">❌ 欠席</button>
+                  <button class="status-btn ${currentStatus === '参加' ? 'active-yes' : 'btn-secondary'}" onclick="submitShiftAttendance('${shift.id}', '${date}', '参加')">参加</button>
+                  <button class="status-btn ${currentStatus === '欠席' ? 'active-no' : 'btn-secondary'}" onclick="submitShiftAttendance('${shift.id}', '${date}', '欠席')">欠席</button>
                 </div>
                 <div style="font-size:0.85rem; color:var(--text-sub);">参加: ${yesCount}名 / 欠席: ${noCount}名</div>
               </div>
@@ -1233,7 +1622,7 @@
   }
 
   function submitShiftAttendance(shiftId, date, status) {
-    if (!currentUser) return alert('先にプロフィールを登録してください');
+    if (!currentUser) return alert('先にログインしてください');
     const docId = `${date}_${shiftId}_${currentUser.id}`;
     db.collection('attendance').doc(docId).set({
       shiftId, date, userId: currentUser.id, userName: currentUser.name, userGrade: currentUser.grade, userDept: currentUser.dept, status, updatedAt: new Date()
@@ -1293,10 +1682,10 @@
             <div style="background:#ffffff; padding:12px; border-radius:8px; margin-bottom:10px; border:1px solid var(--border-color);">
               <strong style="color:var(--accent-dark); font-size:0.95rem;">${shiftTitle}</strong>
               <div style="font-size:0.85rem; margin-top:6px;">
-                <span style="color:#2e7d32; font-weight:700;">⭕ 参加 (${yesMembers.length}名):</span> ${yesMembers.join(', ') || 'なし'}
+                <span style="color:#2e7d32; font-weight:700;">参加 (${yesMembers.length}名):</span> ${yesMembers.join(', ') || 'なし'}
               </div>
               <div style="font-size:0.85rem; margin-top:3px;">
-                <span style="color:#c62828; font-weight:700;">❌ 欠席 (${noMembers.length}名):</span> ${noMembers.join(', ') || 'なし'}
+                <span style="color:#c62828; font-weight:700;">欠席 (${noMembers.length}名):</span> ${noMembers.join(', ') || 'なし'}
               </div>
             </div>
           `;
@@ -1306,9 +1695,10 @@
     });
   }
 
+  // --- バンド管理・バンド名変更 ---
   function handleCreateBand(e) {
     e.preventDefault();
-    if (!currentUser) return alert('先にプロフィールを登録してください');
+    if (!currentUser) return alert('先にログインしてください');
     const name = document.getElementById('new-band-name').value.trim();
     if (!name) return;
 
@@ -1322,7 +1712,8 @@
       db.collection('users').doc(currentUser.id).update({ bands: currentUser.bands });
       document.getElementById('new-band-name').value = '';
       loadBands();
-      alert(`バンド「${name}」を作成しました！`);
+      loadMySchedule();
+      alert(`バンド「${name}」を作成しました。`);
     });
   }
 
@@ -1393,7 +1784,7 @@
           }
           if (supportNames.length > 0) {
             if (memberDisplay) memberDisplay += ' / ';
-            memberDisplay += `【サポート】${supportNames.join(', ')}`;
+            memberDisplay += `[サポート] ${supportNames.join(', ')}`;
           }
           if (!memberDisplay) memberDisplay = 'メンバー未登録';
 
@@ -1491,6 +1882,7 @@
     );
 
     let actionBtnsHtml = '';
+    actionBtnsHtml += `<button class="btn-secondary btn-small" onclick="renameBand('${band.id || ''}', '${band.name.replace(/'/g, "\\'")}')">バンド名を変更する</button>`;
     if (isJoined) {
       actionBtnsHtml += `<button class="btn-secondary btn-small" onclick="leaveBand('${band.id || ''}', '${band.name.replace(/'/g, "\\'")}')">バンドを脱退する</button>`;
     }
@@ -1504,8 +1896,94 @@
     document.getElementById('band-list-view').classList.remove('hidden');
   }
 
+  function renameBand(bandId, oldName) {
+    if (!currentUser) return alert('先にログインしてください');
+    const newName = prompt(`「${oldName}」の新しいバンド名を入力してください:`, oldName);
+    if (!newName || newName.trim() === '' || newName.trim() === oldName) return;
+    const trimmedNewName = newName.trim();
+
+    if (cachedAllBands.some(b => b.name === trimmedNewName)) {
+      return alert('同じ名前のバンドが既に存在します。別の名前を入力してください。');
+    }
+
+    const promises = [];
+
+    // 1. bandsコレクションの更新
+    const targetBand = cachedAllBands.find(b => b.name === oldName);
+    if (bandId) {
+      promises.push(db.collection('bands').doc(bandId).update({ name: trimmedNewName }));
+    } else {
+      promises.push(db.collection('bands').add({ name: oldName, isDeleted: true }));
+      promises.push(db.collection('bands').add({
+        name: trimmedNewName,
+        leaderId: targetBand ? (targetBand.leaderId || null) : null,
+        leaderName: targetBand ? (targetBand.leaderName || null) : null,
+        members: targetBand ? (targetBand.members || []) : [],
+        supportMembers: targetBand ? (targetBand.supportMembers || []) : [],
+        createdAt: new Date()
+      }));
+    }
+
+    // 2. 全ユーザーの所属バンド配列の更新
+    promises.push(
+      db.collection('users').get().then(snap => {
+        const batch = db.batch();
+        snap.forEach(doc => {
+          const u = doc.data();
+          let updated = false;
+          let newBands = u.bands || [];
+          let newSupport = u.supportBands || [];
+          if (newBands.includes(oldName)) {
+            newBands = newBands.map(b => b === oldName ? trimmedNewName : b);
+            updated = true;
+          }
+          if (newSupport.includes(oldName)) {
+            newSupport = newSupport.map(b => b === oldName ? trimmedNewName : b);
+            updated = true;
+          }
+          if (updated) {
+            batch.update(doc.ref, { bands: newBands, supportBands: newSupport });
+          }
+        });
+        return batch.commit();
+      })
+    );
+
+    // 3. 固定シフト表のバンド名も連動更新
+    let scheduleChanged = false;
+    Object.keys(FIXED_WEEKLY_SCHEDULE).forEach(day => {
+      FIXED_WEEKLY_SCHEDULE[day].forEach(slot => {
+        if (slot.band === oldName) {
+          slot.band = trimmedNewName;
+          scheduleChanged = true;
+        }
+      });
+    });
+    if (scheduleChanged) {
+      promises.push(db.collection('system').doc('fixed_schedule').set({ schedule: FIXED_WEEKLY_SCHEDULE }));
+    }
+
+    // 4. 現在のログインユーザー自身のローカル情報更新
+    if (currentUser.bands && currentUser.bands.includes(oldName)) {
+      currentUser.bands = currentUser.bands.map(b => b === oldName ? trimmedNewName : b);
+    }
+    if (currentUser.supportBands && currentUser.supportBands.includes(oldName)) {
+      currentUser.supportBands = currentUser.supportBands.map(b => b === oldName ? trimmedNewName : b);
+    }
+    localStorage.setItem('onken_user', JSON.stringify(currentUser));
+
+    Promise.all(promises).then(() => {
+      alert(`バンド名を「${oldName}」から「${trimmedNewName}」に変更しました。`);
+      closeBandDetail();
+      loadBands();
+      loadMySchedule();
+      loadReminders();
+      if (selectedDateStr) loadTimelineForDate(selectedDateStr);
+    });
+  }
+
   function leaveBand(bandId, bandName) {
-    if (!currentUser) return alert('先にプロフィールを登録してください');
+    if (!currentUser) return alert('先にログインしてください');
     if (!confirm(`バンド「${bandName}」から脱退しますか？`)) return;
 
     if (currentUser.bands) currentUser.bands = currentUser.bands.filter(b => b !== bandName);
@@ -1530,17 +2008,21 @@
         alert(`「${bandName}」から脱退しました。`);
         closeBandDetail();
         loadBands();
+        loadMySchedule();
+        loadReminders();
       });
     } else {
       alert(`「${bandName}」から脱退しました。`);
       closeBandDetail();
       loadBands();
+      loadMySchedule();
+      loadReminders();
     }
   }
 
   function deleteBand(bandId, bandName) {
-    if (!currentUser) return alert('先にプロフィールを登録してください');
-    if (!confirm(`⚠️ 本当にバンド「${bandName}」を削除しますか？\nこの操作は取り消せません。`)) return;
+    if (!currentUser) return alert('先にログインしてください');
+    if (!confirm(`本当にバンド「${bandName}」を削除しますか？この操作は取り消せません。`)) return;
 
     if (currentUser.bands) currentUser.bands = currentUser.bands.filter(b => b !== bandName);
     if (currentUser.supportBands) currentUser.supportBands = currentUser.supportBands.filter(b => b !== bandName);
@@ -1554,6 +2036,8 @@
       alert(`バンド「${bandName}」を削除しました。`);
       closeBandDetail();
       loadBands();
+      loadMySchedule();
+      loadReminders();
     };
 
     if (bandId) {
@@ -1564,7 +2048,7 @@
   }
 
   function becomeLeader(bandId, bandName) {
-    if (!currentUser) return alert('先にプロフィールを登録してください');
+    if (!currentUser) return alert('先にログインしてください');
     const leaderDisplayName = `${currentUser.name}`;
 
     if (!confirm(`バンド「${bandName}」のリーダーに登録・設定しますか？`)) return;
@@ -1580,8 +2064,10 @@
         leaderName: leaderDisplayName,
         members: firebase.firestore.FieldValue.arrayUnion(currentUser.id)
       }).then(() => {
-        alert(`「${bandName}」のリーダーとして設定しました！`);
+        alert(`「${bandName}」のリーダーとして設定しました。`);
         loadBands();
+        loadMySchedule();
+        loadReminders();
       });
     } else {
       db.collection('bands').add({
@@ -1592,14 +2078,16 @@
         supportMembers: [],
         createdAt: new Date()
       }).then(() => {
-        alert(`「${bandName}」のリーダーとして設定しました！`);
+        alert(`「${bandName}」のリーダーとして設定しました。`);
         loadBands();
+        loadMySchedule();
+        loadReminders();
       });
     }
   }
 
   function joinBandByName(bandId, bandName, type) {
-    if (!currentUser) return alert('先にプロフィールを登録してください');
+    if (!currentUser) return alert('先にログインしてください');
     
     if (bandId) {
       const updateField = type === 'regular' ? 'members' : 'supportMembers';
@@ -1626,9 +2114,12 @@
       bands: currentUser.bands || [],
       supportBands: currentUser.supportBands || []
     });
-    alert(`「${bandName}」に${type === 'regular' ? 'メンバー' : 'サポートメンバー'}として加入しました！`);
+    loadMySchedule();
+    loadReminders();
+    alert(`「${bandName}」に${type === 'regular' ? 'メンバー' : 'サポートメンバー'}として加入しました。`);
   }
 
+  // --- パート検索・名簿・チャット・シフト希望 ---
   function loadPartMembers() {
     const part = document.getElementById('part-search-select').value;
     const title = document.getElementById('part-search-title');
@@ -1711,7 +2202,7 @@
 
   function handleSendChat(e) {
     e.preventDefault();
-    if (!currentUser) return alert('先にプロフィールを登録してください');
+    if (!currentUser) return alert('先にログインしてください');
     const band = document.getElementById('chat-band-select').value;
     const input = document.getElementById('chat-input');
     if (!band) return;
@@ -1723,7 +2214,7 @@
 
   function handleShiftRequest(e) {
     e.preventDefault();
-    if (!currentUser) return alert('先にプロフィールを登録してください');
+    if (!currentUser) return alert('先にログインしてください');
     const bandSelect = document.getElementById('req-band-select').value;
 
     db.collection('shift_requests').add({
@@ -1733,7 +2224,7 @@
       choice3: document.getElementById('req-choice3').value,
       submittedBy: `${currentUser.name}`, createdAt: new Date()
     }).then(() => {
-      alert('シフト希望を提出しました！');
+      alert('シフト希望を提出しました。');
       if (['部長', '副部長', '会計'].includes(currentUser.role)) loadAdminShiftRequests();
     });
   }
@@ -1783,25 +2274,29 @@
     const start = document.getElementById('admin-shift-start').value;
     const end = document.getElementById('admin-shift-end').value;
 
-    if (start >= end) return alert('❌ 終了時刻は開始時刻より後の時間を指定してください。');
+    if (start >= end) return alert('終了時刻は開始時刻より後の時間を指定してください。');
 
     if (!FIXED_WEEKLY_SCHEDULE[day]) FIXED_WEEKLY_SCHEDULE[day] = [];
     FIXED_WEEKLY_SCHEDULE[day].push({ start, end, band });
     FIXED_WEEKLY_SCHEDULE[day].sort((a, b) => (a.start > b.start ? 1 : -1));
 
     db.collection('system').doc('fixed_schedule').set({ schedule: FIXED_WEEKLY_SCHEDULE }).then(() => {
-      alert(`【${day}曜】 ${start}〜${end} に ${band} を登録しました！`);
+      alert(`[${day}曜] ${start}〜${end} に ${band} を登録しました。`);
       renderAdminFixedScheduleList();
       if (selectedDateStr) loadTimelineForDate(selectedDateStr);
+      loadMySchedule();
+      loadReminders();
     });
   }
 
   function deleteFixedShift(day, index) {
-    if (!confirm(`【${day}曜】のこのシフト枠を削除しますか？`)) return;
+    if (!confirm(`[${day}曜] のこのシフト枠を削除しますか？`)) return;
     FIXED_WEEKLY_SCHEDULE[day].splice(index, 1);
     db.collection('system').doc('fixed_schedule').set({ schedule: FIXED_WEEKLY_SCHEDULE }).then(() => {
       renderAdminFixedScheduleList();
       if (selectedDateStr) loadTimelineForDate(selectedDateStr);
+      loadMySchedule();
+      loadReminders();
     });
   }
 
@@ -1834,7 +2329,7 @@
         const u = doc.data();
         const uTag = formatUserTag(u.grade, u.dept);
         html += `<li style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:5px;">
-          <span>${uTag}${u.name}: ${u.feePaid ? '✅ 納入済み' : '❌ 未納'}</span>
+          <span>${uTag}${u.name}: ${u.feePaid ? '納入済み' : '未納'}</span>
           <div>
             <button class="btn-small btn-secondary" style="margin:0 4px;" onclick="toggleFee('${doc.id}', ${!u.feePaid})">切替</button>
             <button class="btn-small btn-danger" style="margin:0;" onclick="deleteMember('${doc.id}', '${u.name}')">削除</button>
@@ -1859,7 +2354,7 @@
       snapshot.forEach(doc => batch.update(doc.ref, { feePaid: status }));
       return batch.commit();
     }).then(() => {
-      alert(`${actionText}へ変更しました！`);
+      alert(`${actionText}へ変更しました。`);
       loadFeeManagement();
     });
   }
@@ -1875,9 +2370,9 @@
   }
 
   function resetPersonalData() {
-    if (!confirm("⚠️ 本当に名簿・部員プロフィールや予約・出欠などの個人データをリセットしますか？\n※確定シフト枠とバンド名一覧は保持されます。")) return;
+    if (!confirm("本当に名簿・部員プロフィールや予約・出欠などの個人データをリセットしますか？確定シフト枠とバンド名一覧は保持されます。")) return;
 
-    const collectionsToDelete = ['users', 'reservations', 'attendance', 'shift_requests'];
+    const collectionsToDelete = ['users', 'reservations', 'attendance', 'shift_requests', 'notices', 'ban_periods'];
     
     let promises = collectionsToDelete.map(colName => {
       return db.collection(colName).get().then(snapshot => {

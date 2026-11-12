@@ -690,6 +690,7 @@
     <hr style="margin:20px 0; border-color: var(--border-color);">
     <p style="font-size:0.8rem; color:var(--text-sub); margin:0 0 8px 0;">初めて利用する方はこちら</p>
     <button type="button" class="btn-secondary" style="margin-top:0;" onclick="switchToRegisterModal()">新規登録</button>
+    <button type="button" id="login-cancel-btn" class="btn-secondary hidden" style="margin-top:10px;" onclick="closeLoginModal()">戻る</button>
   </div>
 </div>
 
@@ -875,7 +876,19 @@
   function openLoginModal() {
     document.getElementById('profile-modal').classList.add('hidden');
     document.getElementById('login-name-input').value = '';
+    const cancelBtn = document.getElementById('login-cancel-btn');
+    if (currentUser) {
+      cancelBtn.classList.remove('hidden');
+    } else {
+      cancelBtn.classList.add('hidden');
+    }
     document.getElementById('login-modal').classList.remove('hidden');
+  }
+
+  function closeLoginModal() {
+    if (currentUser) {
+      document.getElementById('login-modal').classList.add('hidden');
+    }
   }
 
   function handleLoginByName(e) {
@@ -891,7 +904,6 @@
       let matchedUsers = [];
       snapshot.forEach(doc => matchedUsers.push(doc.data()));
 
-      // 複数同名がいる場合は最新のものを優先、通常は1件
       currentUser = matchedUsers[0];
       localStorage.setItem('onken_user', JSON.stringify(currentUser));
       document.getElementById('login-modal').classList.add('hidden');
@@ -940,7 +952,7 @@
 
   function cancelProfileModal() {
     document.getElementById('profile-modal').classList.add('hidden');
-    if (!currentUser) {
+    if (profileModalMode === 'register' || !currentUser) {
       openLoginModal();
     }
   }
@@ -971,7 +983,6 @@
       });
 
       if (profileModalMode === 'register' && existingSameNameUser) {
-        // 新規登録時にすでに同名の人が存在した場合は同期して引き継ぐ
         currentUser = {
           id: existingSameNameUser.id,
           name: nameInput,
@@ -1414,7 +1425,7 @@
     const myShifts = getMyUpcomingShifts();
     myShifts.forEach(s => {
       if (s.isToday) {
-        messages.push(`[今日シフト] 本日 ${s.start}〜${s.end} にバンド「${s.band}」のシフトがあります。`);
+        messages.push(`[シフト] 本日 ${s.start}〜${s.end} にバンド「${s.band}」のシフトがあります。`);
       }
     });
 
@@ -1481,7 +1492,7 @@
 
       let html = '<ul style="margin:0; padding-left:20px; font-size:0.9rem;">';
       combinedItems.forEach(item => {
-        const todayBadge = item.isTodayShift ? '<span class="today-shift-badge">今日シフト</span>' : '';
+        const todayBadge = item.isTodayShift ? '<span class="today-shift-badge">シフト</span>' : '';
         html += `<li style="margin-bottom:4px;">${todayBadge}<strong>${item.date} ${item.time}:</strong> ${item.label}</li>`;
       });
       html += '</ul>';
@@ -1908,7 +1919,6 @@
 
     const promises = [];
 
-    // 1. bandsコレクションの更新
     const targetBand = cachedAllBands.find(b => b.name === oldName);
     if (bandId) {
       promises.push(db.collection('bands').doc(bandId).update({ name: trimmedNewName }));
@@ -1924,7 +1934,6 @@
       }));
     }
 
-    // 2. 全ユーザーの所属バンド配列の更新
     promises.push(
       db.collection('users').get().then(snap => {
         const batch = db.batch();
@@ -1949,7 +1958,6 @@
       })
     );
 
-    // 3. 固定シフト表のバンド名も連動更新
     let scheduleChanged = false;
     Object.keys(FIXED_WEEKLY_SCHEDULE).forEach(day => {
       FIXED_WEEKLY_SCHEDULE[day].forEach(slot => {
@@ -1963,7 +1971,6 @@
       promises.push(db.collection('system').doc('fixed_schedule').set({ schedule: FIXED_WEEKLY_SCHEDULE }));
     }
 
-    // 4. 現在のログインユーザー自身のローカル情報更新
     if (currentUser.bands && currentUser.bands.includes(oldName)) {
       currentUser.bands = currentUser.bands.map(b => b === oldName ? trimmedNewName : b);
     }

@@ -61,7 +61,7 @@
       background-color: var(--bg-color);
       color: var(--text-main);
       margin: 0;
-      padding: 24px 16px;
+      padding: 20px 14px;
     }
 
     .container {
@@ -69,34 +69,72 @@
       margin: 0 auto;
     }
 
-    /* ヘッダーデザイン */
+    /* ヘッダーデザイン（スマホでも1行で収まるよう調整） */
     .header-area {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 20px;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .title-group {
+      flex-shrink: 0;
     }
     .title-group h1 {
-      font-size: 2.0rem;
+      font-size: 1.55rem;
       font-weight: 700;
       margin: 0;
       color: var(--accent-dark);
       letter-spacing: -0.02em;
+      white-space: nowrap;
+      line-height: 1.2;
     }
     .title-group p {
       margin: 4px 0 0 0;
-      font-size: 0.85rem;
+      font-size: 0.75rem;
       color: var(--text-sub);
+      white-space: nowrap;
+    }
+
+    .header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      min-width: 0;
     }
 
     .user-pill {
       background: #ede8df;
-      padding: 6px 14px;
+      padding: 5px 10px;
       border-radius: 20px;
-      font-size: 0.85rem;
+      font-size: 0.75rem;
       color: var(--text-main);
       border: 1px solid var(--border-color);
       font-weight: 500;
+      white-space: nowrap;
+      max-width: 195px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .header-btn-group {
+      display: flex;
+      gap: 4px;
+    }
+    .header-btn-group .btn-small {
+      padding: 5px 8px;
+      font-size: 0.7rem;
+      white-space: nowrap;
+    }
+
+    @media (min-width: 600px) {
+      body { padding: 24px 16px; }
+      .title-group h1 { font-size: 2.0rem; }
+      .title-group p { font-size: 0.85rem; }
+      .user-pill { font-size: 0.85rem; padding: 6px 14px; max-width: none; }
+      .header-btn-group { gap: 6px; }
+      .header-btn-group .btn-small { padding: 6px 12px; font-size: 0.8rem; }
     }
 
     .remind-bar {
@@ -104,10 +142,11 @@
       border: 1px solid #ffe0b2;
       border-radius: 8px;
       padding: 10px 14px;
-      margin-bottom: 20px;
-      font-size: 0.9rem;
+      margin-bottom: 18px;
+      font-size: 0.85rem;
       color: #8c6d1f;
       font-weight: 500;
+      line-height: 1.5;
     }
 
     /* お知らせバナー */
@@ -116,19 +155,20 @@
       border: 1px solid #bbdefb;
       border-left: 4px solid #1976d2;
       border-radius: 10px;
-      padding: 16px 20px;
+      padding: 14px 18px;
       margin-bottom: 16px;
     }
     .notice-card h3 {
       margin: 0 0 8px 0;
-      font-size: 1.0rem;
+      font-size: 0.95rem;
       color: #0d47a1;
     }
     .notice-item {
       padding: 6px 0;
       border-bottom: 1px dashed #bbdefb;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: var(--text-main);
+      line-height: 1.4;
     }
     .notice-item:last-child {
       border-bottom: none;
@@ -138,14 +178,14 @@
     /* メニュータブ */
     .nav-tabs {
       display: flex;
-      gap: 24px;
+      gap: 20px;
       border-bottom: 1px solid var(--border-color);
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       padding-bottom: 8px;
       overflow-x: auto;
     }
     .nav-tab {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 500;
       color: var(--text-sub);
       cursor: pointer;
@@ -172,7 +212,7 @@
     .card {
       background: var(--card-bg);
       border-radius: 12px;
-      padding: 24px;
+      padding: 20px;
       margin-bottom: 16px;
       border: 1px solid var(--card-border);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
@@ -248,14 +288,14 @@
     /* 日付セレクター */
     .date-selector-bar {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       overflow-x: auto;
       padding-bottom: 8px;
       margin-bottom: 16px;
     }
     .date-btn {
-      flex: 0 0 calc(100% / 8 - 7px);
-      min-width: 55px;
+      flex: 0 0 calc(100% / 8 - 6px);
+      min-width: 48px;
       background: #ffffff;
       border: 1px solid var(--card-border);
       border-radius: 10px;
@@ -269,8 +309,8 @@
       margin-top: 0;
       transition: all 0.2s;
     }
-    .date-btn .sub { font-size: 0.75rem; color: var(--text-sub); }
-    .date-btn .day { font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-top: 2px; }
+    .date-btn .sub { font-size: 0.72rem; color: var(--text-sub); }
+    .date-btn .day { font-size: 1.05rem; font-weight: 700; color: var(--text-main); margin-top: 2px; }
     .date-btn.active {
       background: var(--accent-dark);
       color: #ffffff;
@@ -288,11 +328,12 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 16px 18px;
+      gap: 10px;
+      padding: 14px 14px;
       border-radius: 10px;
       background: var(--input-bg);
       border: 1px solid var(--border-color);
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       transition: all 0.2s;
     }
     
@@ -311,28 +352,74 @@
       border: 1px solid #ef9a9a;
     }
 
-    .time-slot-card .time-range { font-weight: 700; font-size: 1.05rem; }
-    .time-slot-card .sub-label { font-size: 0.75rem; color: var(--text-sub); margin-top: 2px; }
+    .time-slot-left {
+      flex-shrink: 0;
+    }
+    .time-slot-card .time-range {
+      font-weight: 700;
+      font-size: 0.98rem;
+      white-space: nowrap;
+    }
+    .time-slot-card .sub-label {
+      font-size: 0.72rem;
+      color: var(--text-sub);
+      margin-top: 2px;
+      white-space: nowrap;
+    }
+
+    .time-slot-right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      text-align: right;
+      min-width: 0;
+    }
     
     .time-slot-card .status-tag { 
-      font-size: 1.15rem; 
+      font-size: 1.0rem; 
       font-weight: 700; 
       letter-spacing: -0.01em;
+      line-height: 1.35;
+      word-break: keep-all;
+      overflow-wrap: break-word;
     }
     .time-slot-card .status-tag.fixed { color: #1565c0; }
     .time-slot-card .status-tag.user-res { color: #2e7d32; }
     .time-slot-card .status-tag.transferred { color: #e65100; }
-    .time-slot-card .status-tag.banned { color: #c62828; font-size: 1.0rem; }
+    .time-slot-card .status-tag.banned { color: #c62828; font-size: 0.88rem; }
     .time-slot-card .status-tag.empty {
+      display: inline-block;
       color: #2e7d32;
-      font-size: 0.95rem;
+      font-size: 0.82rem;
+      line-height: 1.3;
       background: #e8f5e9;
       padding: 6px 12px;
-      border-radius: 20px;
+      border-radius: 12px;
       border: 1px solid #a5d6a7;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .time-slot-card .status-tag.empty small {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 500;
+      margin-top: 1px;
     }
 
-    /* バンド名リンクスタイル */
+    /* バンド一覧レイアウト（スマホ対応） */
+    .band-row {
+      border-bottom: 1px solid var(--border-color);
+      padding: 14px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .band-info-col {
+      flex: 1;
+      min-width: 0;
+    }
     .band-name-link {
       font-size: 1.05rem;
       font-weight: 700;
@@ -342,9 +429,40 @@
       text-decoration-color: #c2b8a8;
       text-underline-offset: 3px;
       transition: color 0.15s;
+      display: inline-block;
+      word-break: break-word;
     }
     .band-name-link:hover {
       color: #1565c0;
+    }
+    .band-member-sub {
+      font-size: 0.78rem;
+      color: var(--text-sub);
+      margin-top: 4px;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    .band-actions-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .band-actions-row1 {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .band-actions-row2 {
+      display: flex;
+      justify-content: flex-end;
+    }
+    .band-actions-col .btn-small {
+      padding: 5px 10px;
+      font-size: 0.76rem;
+      white-space: nowrap;
     }
 
     /* モーダル */
@@ -353,7 +471,7 @@
       background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 1000;
     }
     .modal-content {
-      background: var(--card-bg); padding: 28px; border-radius: 12px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; border: 1px solid var(--card-border);
+      background: var(--card-bg); padding: 24px; border-radius: 12px; max-width: 500px; width: 92%; max-height: 90vh; overflow-y: auto; border: 1px solid var(--card-border);
     }
 
     .hidden { display: none !important; }
@@ -363,7 +481,7 @@
     .admin-card { border: 1px solid #d4cbbd; background: #fdfbf7; }
 
     /* 出欠表スタイル */
-    .status-btn { width: auto; margin: 0; padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; }
+    .status-btn { width: auto; margin: 0; padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; white-space: nowrap; }
     .status-btn.active-yes { background: #2e7d32; color: #ffffff; border: none; }
     .status-btn.active-no { background: #c62828; color: #ffffff; border: none; }
 
@@ -371,11 +489,12 @@
       display: inline-block;
       background: #c62828;
       color: #ffffff;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 700;
-      padding: 2px 8px;
+      padding: 2px 7px;
       border-radius: 4px;
       margin-right: 6px;
+      vertical-align: middle;
     }
   </style>
 </head>
@@ -387,9 +506,9 @@
       <h1>音楽研究部</h1>
       <p>音楽研究部 練習枠予約</p>
     </div>
-    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+    <div class="header-right">
       <div class="user-pill" id="user-info">未ログイン</div>
-      <div style="display:flex; gap:6px;">
+      <div class="header-btn-group">
         <button class="btn-secondary btn-small" onclick="openProfileModal('edit')">プロフィール編集</button>
         <button class="btn-secondary btn-small" onclick="openLoginModal()">ログアウト / 切替</button>
       </div>
@@ -428,9 +547,9 @@
     <div class="date-selector-bar" id="week-date-buttons"></div>
 
     <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h3 id="selected-date-header" style="margin:0; font-size:1.2rem;">----</h3>
-        <span style="font-size:0.8rem; color:var(--text-sub);">平日・土 9:00〜20:00 (シフト制)</span>
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:14px;">
+        <h3 id="selected-date-header" style="margin:0; font-size:1.1rem; white-space:nowrap;">----</h3>
+        <span style="font-size:0.75rem; color:var(--text-sub); white-space:nowrap;">平日・土 9:00〜20:00</span>
       </div>
 
       <div id="timeline-list">読み込み中...</div>
@@ -444,12 +563,12 @@
         
         <div style="display:flex; gap:12px;">
           <div style="flex:1;">
-            <label>開始時刻 (10分刻み)</label>
-            <input type="time" id="res-start-time" min="09:00" max="20:00" step="600" value="12:00" required>
+            <label>開始時刻</label>
+            <select id="res-start-time" required></select>
           </div>
           <div style="flex:1;">
-            <label>終了時刻 (10分刻み)</label>
-            <input type="time" id="res-end-time" min="09:00" max="20:00" step="600" value="13:00" required>
+            <label>終了時刻</label>
+            <select id="res-end-time" required></select>
           </div>
         </div>
 
@@ -483,8 +602,8 @@
         </form>
       </div>
       <div class="card">
-        <h3>バンド一覧・加入申請・リーダー設定</h3>
-        <p style="font-size:0.8rem; color:var(--text-sub); margin-top:0;">バンド名をタップするとメンバー詳細（学年学科・パート）やバンド名変更・脱退・削除メニューが開きます。</p>
+        <h3>バンド一覧・加入・リーダー設定</h3>
+        <p style="font-size:0.8rem; color:var(--text-sub); margin-top:0; line-height:1.45;">バンド名をタップするとメンバー詳細（学年学科・パート）やバンド名変更・脱退・削除メニューが開きます。</p>
         <div id="band-list">読み込み中...</div>
       </div>
     </div>
@@ -554,17 +673,18 @@
   <!-- 7. シフト希望 -->
   <div id="tab-shift-req" class="tab-content hidden">
     <div class="card">
-      <h3>バンドシフト希望申請（バンドリーダー専用）</h3>
+      <h3 style="margin-bottom:6px;">バンドシフト希望申請</h3>
+      <p style="color:#c62828; font-weight:700; font-size:0.9rem; margin-top:0; margin-bottom:14px;">バンドリーダー専用</p>
       <form id="form-shift-req" onsubmit="handleShiftRequest(event)">
         <label>対象バンド選択</label>
         <select id="req-band-select" required></select>
 
-        <label>第1希望（日時・時間帯）</label>
-        <input type="text" id="req-choice1" required placeholder="例: 月曜 16:00-17:00">
+        <label>第1希望</label>
+        <input type="text" id="req-choice1" required placeholder="例: 月16">
         <label>第2希望</label>
-        <input type="text" id="req-choice2" placeholder="例: 水曜 15:00-16:00">
+        <input type="text" id="req-choice2" placeholder="例: 水15">
         <label>第3希望</label>
-        <input type="text" id="req-choice3" placeholder="例: 金曜 17:00-18:00">
+        <input type="text" id="req-choice3" placeholder="例: 金17">
         <button type="submit">希望を提出する</button>
       </form>
     </div>
@@ -598,11 +718,11 @@
         <div style="display:flex; gap:10px;">
           <div style="flex:1;">
             <label>開始時刻</label>
-            <input type="time" id="admin-shift-start" step="600" required>
+            <select id="admin-shift-start" required></select>
           </div>
           <div style="flex:1;">
             <label>終了時刻</label>
-            <input type="time" id="admin-shift-end" step="600" required>
+            <select id="admin-shift-end" required></select>
           </div>
         </div>
         <button type="submit">シフト枠を追加・更新する</button>
@@ -620,7 +740,7 @@
           </div>
           <div style="flex:1; min-width:120px;">
             <label>開始時刻</label>
-            <input type="time" id="ban-start-time" value="09:00" required>
+            <select id="ban-start-time" required></select>
           </div>
         </div>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -630,7 +750,7 @@
           </div>
           <div style="flex:1; min-width:120px;">
             <label>終了時刻</label>
-            <input type="time" id="ban-end-time" value="20:00" required>
+            <select id="ban-end-time" required></select>
           </div>
         </div>
         <label>理由（例: 定期試験期間、機材メンテナンス、学校行事など）</label>
@@ -679,7 +799,7 @@
 <div id="login-modal" class="modal hidden">
   <div class="modal-content">
     <h2>ログイン / アカウント同期</h2>
-    <p style="font-size:0.85rem; color:var(--text-sub); margin-top:-4px;">
+    <p style="font-size:0.85rem; color:var(--text-sub); margin-top:-4px; line-height:1.5;">
       すでに他の端末（PCやスマホ）で登録済みの場合は、登録した名前を入力してログインするとデータが自動で引き継がれます。
     </p>
     <form onsubmit="handleLoginByName(event)">
@@ -764,6 +884,20 @@
     return `${y}-${m}-${day}`;
   }
 
+  // YYYY-MM-DD を 11/13(金) の形式に変換
+  function formatMonthDayWithWeek(dateStr) {
+    if (!dateStr) return '';
+    const parts = dateStr.split('-');
+    if (parts.length !== 3) return dateStr;
+    const y = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10);
+    const day = parseInt(parts[2], 10);
+    const d = new Date(y, m - 1, day);
+    const daysJP = ['日', '月', '火', '水', '木', '金', '土'];
+    const dayJP = daysJP[d.getDay()];
+    return `${m}/${day}(${dayJP})`;
+  }
+
   function formatUserTag(grade, dept) {
     if (!grade) return '';
     if (grade.includes('専攻科')) {
@@ -772,6 +906,57 @@
     }
     const num = grade.replace(/[^0-9]/g, '');
     return `${num}${dept || ''}`;
+  }
+
+  // 10分刻みの時刻オプション（09:00〜20:00）を生成してselect要素へセット
+  function populateTenMinuteTimeSelects() {
+    const times = [];
+    for (let h = 9; h <= 20; h++) {
+      for (let m = 0; m < 60; m += 10) {
+        if (h === 20 && m > 0) break;
+        const hh = String(h).padStart(2, '0');
+        const mm = String(m).padStart(2, '0');
+        times.push(`${hh}:${mm}`);
+      }
+    }
+
+    const selectConfigs = [
+      { id: 'res-start-time', defaultVal: '12:00' },
+      { id: 'res-end-time', defaultVal: '13:00' },
+      { id: 'admin-shift-start', defaultVal: '15:00' },
+      { id: 'admin-shift-end', defaultVal: '16:00' },
+      { id: 'ban-start-time', defaultVal: '09:00' },
+      { id: 'ban-end-time', defaultVal: '20:00' }
+    ];
+
+    selectConfigs.forEach(cfg => {
+      const el = document.getElementById(cfg.id);
+      if (!el) return;
+      el.innerHTML = times.map(t => `<option value="${t}" ${t === cfg.defaultVal ? 'selected' : ''}>${t}</option>`).join('');
+    });
+  }
+
+  // プルダウンに最も近い選択肢をセット（12:55などの枠タップ時にも対応）
+  function setSelectTimeClosest(selectId, targetTime) {
+    const el = document.getElementById(selectId);
+    if (!el) return;
+    const options = Array.from(el.options).map(o => o.value);
+    if (options.includes(targetTime)) {
+      el.value = targetTime;
+      return;
+    }
+    // 10分刻みに切り上げ調整（例: 12:55 -> 13:00）
+    const [hhStr, mmStr] = targetTime.split(':');
+    let h = parseInt(hhStr, 10);
+    let m = Math.ceil(parseInt(mmStr, 10) / 10) * 10;
+    if (m === 60) {
+      h += 1;
+      m = 0;
+    }
+    const rounded = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    if (options.includes(rounded)) {
+      el.value = rounded;
+    }
   }
 
   let FIXED_WEEKLY_SCHEDULE = {
@@ -844,6 +1029,8 @@
   let profileModalMode = 'register';
 
   window.addEventListener('DOMContentLoaded', () => {
+    populateTenMinuteTimeSelects();
+
     const todayStr = getTodayLocalStr();
     const attDateInput = document.getElementById('attendance-date');
     if (attDateInput) attDateInput.value = todayStr;
@@ -1065,11 +1252,12 @@
 
       snapshot.forEach(doc => {
         const d = doc.data();
-        publicHtml += `<div class="notice-item"><strong>[${d.date}]</strong> ${d.text}</div>`;
+        const dateLabel = formatMonthDayWithWeek(d.date);
+        publicHtml += `<div class="notice-item"><strong>[${dateLabel}]</strong> ${d.text}</div>`;
         adminHtml += `
-          <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; padding:8px 12px; border-radius:6px; margin-top:6px; border:1px solid var(--border-color); font-size:0.85rem;">
-            <span><strong>[${d.date}]</strong> ${d.text}</span>
-            <button class="btn-small btn-danger" style="margin:0;" onclick="deleteNotice('${doc.id}')">削除</button>
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; background:#ffffff; padding:8px 12px; border-radius:6px; margin-top:6px; border:1px solid var(--border-color); font-size:0.85rem;">
+            <span><strong>[${dateLabel}]</strong> ${d.text}</span>
+            <button class="btn-small btn-danger" style="margin:0; flex-shrink:0;" onclick="deleteNotice('${doc.id}')">削除</button>
           </div>
         `;
       });
@@ -1145,9 +1333,9 @@
     let html = '';
     cachedBanPeriods.forEach(b => {
       html += `
-        <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; padding:8px 12px; border-radius:6px; margin-top:6px; border:1px solid var(--border-color); font-size:0.85rem;">
-          <span><strong>${b.startDate} ${b.startTime} 〜 ${b.endDate} ${b.endTime}</strong> (${b.reason})</span>
-          <button class="btn-small btn-danger" style="margin:0;" onclick="deleteBanPeriod('${b.id}')">削除</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; background:#ffffff; padding:8px 12px; border-radius:6px; margin-top:6px; border:1px solid var(--border-color); font-size:0.85rem;">
+          <span><strong>${formatMonthDayWithWeek(b.startDate)} ${b.startTime} 〜 ${formatMonthDayWithWeek(b.endDate)} ${b.endTime}</strong> (${b.reason})</span>
+          <button class="btn-small btn-danger" style="margin:0; flex-shrink:0;" onclick="deleteBanPeriod('${b.id}')">削除</button>
         </div>
       `;
     });
@@ -1230,7 +1418,8 @@
   function loadTimelineForDate(dateStr) {
     document.getElementById('res-date').value = dateStr;
 
-    const d = new Date(dateStr);
+    const parts = dateStr.split('-');
+    const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
     const daysJP = ['日', '月', '火', '水', '木', '金', '土'];
     const dayJP = daysJP[d.getDay()];
     const m = d.getMonth() + 1;
@@ -1249,7 +1438,7 @@
       TIME_SLOTS.forEach(slot => {
         const [slotStart, slotEnd] = slot.split('-');
         const banInfo = checkTimeSlotBanned(dateStr, slotStart, slotEnd);
-        const fixed = dayFixedSchedule.find(f => f.start === slotStart);
+        const fixed = dayFixedSchedule.find(f => f.start <= slotStart && f.end > slotStart);
         const userRes = userResList.find(r => (r.startTime <= slotStart && r.endTime > slotStart) || (r.time === slot));
 
         let statusHtml = '';
@@ -1259,11 +1448,11 @@
 
         if (banInfo) {
           cardClass = 'is-banned';
-          statusHtml = `<span class="status-tag banned">部室使用禁止 (${banInfo.reason})</span>`;
+          statusHtml = `<span class="status-tag banned">部室使用禁止<br><small style="font-weight:500;">(${banInfo.reason})</small></span>`;
           purposeText = '予約・使用不可';
         } else if (fixed) {
           if (userRes && userRes.isTransfer) {
-            statusHtml = `<span class="status-tag transferred">${fixed.band} <small style="font-size:0.85rem; color:#e65100;">(代: ${userRes.purpose} / ${userRes.userName})</small></span>`;
+            statusHtml = `<span class="status-tag transferred">${fixed.band}<br><small style="font-size:0.78rem; color:#e65100; font-weight:500;">代: ${userRes.purpose} (${userRes.userName})</small></span>`;
             purposeText = 'シフト譲受練習';
           } else {
             statusHtml = `<span class="status-tag fixed">${fixed.band}</span>`;
@@ -1272,24 +1461,24 @@
           }
         } else if (userRes) {
           const timeRangeStr = userRes.startTime ? `${userRes.startTime}〜${userRes.endTime}` : slot;
-          statusHtml = `<span class="status-tag user-res">${userRes.purpose} <small style="font-size:0.85rem; color:var(--text-sub);">(${userRes.userName})</small></span>`;
+          statusHtml = `<span class="status-tag user-res">${userRes.purpose}<br><small style="font-size:0.78rem; color:var(--text-sub); font-weight:500;">(${userRes.userName})</small></span>`;
           purposeText = `部員予約 [${timeRangeStr}]`;
         } else {
           cardClass = 'is-empty';
-          statusHtml = `<span class="status-tag empty">予約可能 (タップで選択)</span>`;
+          statusHtml = `<span class="status-tag empty">予約可能<small>(タップで選択)</small></span>`;
           purposeText = '空き枠';
           onClickAction = `onclick="fillFormTime('${slotStart}', '${slotEnd}')"`;
         }
 
         html += `
           <div class="time-slot-card ${cardClass}" ${onClickAction}>
-            <div>
+            <div class="time-slot-left">
               <div class="time-range">${slot}</div>
               <div class="sub-label">${purposeText}</div>
             </div>
-            <div style="display:flex; align-items:center; gap:8px;">
+            <div class="time-slot-right">
               ${statusHtml}
-              ${(!banInfo && fixed && !userRes) ? `<button class="btn-small btn-secondary" style="margin:0;" onclick="event.stopPropagation(); promptTransfer('${dateStr}', '${slotStart}', '${slotEnd}', '${fixed.band}')">譲受</button>` : ''}
+              ${(!banInfo && fixed && !userRes) ? `<button class="btn-small btn-secondary" style="margin:0; flex-shrink:0;" onclick="event.stopPropagation(); promptTransfer('${dateStr}', '${slotStart}', '${slotEnd}', '${fixed.band}')">譲受</button>` : ''}
             </div>
           </div>
         `;
@@ -1300,8 +1489,8 @@
   }
 
   function fillFormTime(start, end) {
-    document.getElementById('res-start-time').value = start;
-    document.getElementById('res-end-time').value = end;
+    setSelectTimeClosest('res-start-time', start);
+    setSelectTimeClosest('res-end-time', end);
     document.getElementById('res-purpose').focus();
     document.getElementById('reservation-form-card').scrollIntoView({ behavior: 'smooth' });
   }
@@ -1380,7 +1569,6 @@
     }
   }
 
-  // 自分の所属バンド・サポートバンドの今後7日間のシフトを取得するヘルパー
   function getMyUpcomingShifts() {
     if (!currentUser) return [];
     const myBands = [...(currentUser.bands || []), ...(currentUser.supportBands || [])];
@@ -1421,22 +1609,20 @@
     const remindBox = document.getElementById('remind-area');
     let messages = [];
 
-    // 今日の確定シフトチェック
     const myShifts = getMyUpcomingShifts();
     myShifts.forEach(s => {
       if (s.isToday) {
-        messages.push(`[シフト] 本日 ${s.start}〜${s.end} にバンド「${s.band}」のシフトがあります。`);
+        messages.push(`[シフト] ${formatMonthDayWithWeek(s.date)} ${s.start}〜${s.end} にバンド「${s.band}」のシフトがあります。`);
       }
     });
 
-    // 今日の個人予約チェック
     const today = getTodayLocalStr();
     db.collection('reservations').where('date', '==', today).get().then(snapshot => {
       snapshot.forEach(doc => {
         const d = doc.data();
         if (d.userId === currentUser.id) {
           const tDisplay = d.startTime ? `${d.startTime}〜${d.endTime}` : d.time;
-          messages.push(`[本日予約] 本日 ${tDisplay} に部室予約があります (${d.purpose})`);
+          messages.push(`[本日予約] ${formatMonthDayWithWeek(d.date)} ${tDisplay} に部室予約があります (${d.purpose})`);
         }
       });
       if (messages.length > 0) {
@@ -1464,7 +1650,7 @@
           const tDisplay = d.startTime ? `${d.startTime}〜${d.endTime}` : d.time;
           combinedItems.push({
             sortKey: `${d.date}_${d.startTime || '00:00'}`,
-            date: d.date,
+            dateDisplay: formatMonthDayWithWeek(d.date),
             time: tDisplay,
             label: `${d.purpose} ${d.isTransfer ? '(譲受枠)' : '(個人予約)'}`,
             isTodayShift: false
@@ -1476,7 +1662,7 @@
       myShifts.forEach(s => {
         combinedItems.push({
           sortKey: `${s.date}_${s.start}`,
-          date: s.date,
+          dateDisplay: formatMonthDayWithWeek(s.date),
           time: `${s.start}〜${s.end}`,
           label: `${s.band} (確定シフト)`,
           isTodayShift: s.isToday
@@ -1490,10 +1676,10 @@
         return;
       }
 
-      let html = '<ul style="margin:0; padding-left:20px; font-size:0.9rem;">';
+      let html = '<ul style="margin:0; padding-left:18px; font-size:0.88rem; line-height:1.55;">';
       combinedItems.forEach(item => {
         const todayBadge = item.isTodayShift ? '<span class="today-shift-badge">シフト</span>' : '';
-        html += `<li style="margin-bottom:4px;">${todayBadge}<strong>${item.date} ${item.time}:</strong> ${item.label}</li>`;
+        html += `<li style="margin-bottom:4px;">${todayBadge}<strong>${item.dateDisplay} ${item.time}:</strong> ${item.label}</li>`;
       });
       html += '</ul>';
       container.innerHTML = html;
@@ -1514,10 +1700,11 @@
 
     const banInfo = checkTimeSlotBanned(date, startTime, endTime);
     if (banInfo) {
-      return alert(`指定時間帯は部室使用禁止期間（${banInfo.startDate} ${banInfo.startTime} 〜 ${banInfo.endDate} ${banInfo.endTime} / 理由: ${banInfo.reason}）と重なっているため予約できません。`);
+      return alert(`指定時間帯は部室使用禁止期間（${formatMonthDayWithWeek(banInfo.startDate)} ${banInfo.startTime} 〜 ${formatMonthDayWithWeek(banInfo.endDate)} ${banInfo.endTime} / 理由: ${banInfo.reason}）と重なっているため予約できません。`);
     }
 
-    const d = new Date(date);
+    const parts = date.split('-');
+    const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
     const daysJP = ['日', '月', '火', '水', '木', '金', '土'];
     const dayJP = daysJP[d.getDay()];
     const dayFixedSchedule = FIXED_WEEKLY_SCHEDULE[dayJP] || [];
@@ -1566,7 +1753,8 @@
 
     const myBandsList = currentUser ? [...(currentUser.bands || []), ...(currentUser.supportBands || [])] : [];
 
-    const d = new Date(date);
+    const parts = date.split('-');
+    const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
     const daysJP = ['日', '月', '火', '水', '木', '金', '土'];
     const dayJP = daysJP[d.getDay()];
     const dayFixedSchedule = FIXED_WEEKLY_SCHEDULE[dayJP] || [];
@@ -1596,7 +1784,7 @@
 
         let html = '';
         myShifts.forEach(shift => {
-          const shiftTitle = `${date} ${shift.purpose} (${shift.time})`;
+          const shiftTitle = `${formatMonthDayWithWeek(date)} ${shift.purpose} (${shift.time})`;
           const docId = currentUser ? `${date}_${shift.id}_${currentUser.id}` : null;
           const currentStatus = (docId && attMap[docId]) ? attMap[docId].status : null;
 
@@ -1614,10 +1802,10 @@
 
           html += `
             <div style="background:var(--input-bg); padding:14px; border-radius:8px; margin-bottom:12px; border:1px solid var(--border-color);">
-              <strong style="color:var(--accent-dark); font-size:1.05rem;">${shiftTitle}</strong>
-              <div style="margin-top:10px; display:flex; align-items:center; justify-content:space-between;">
-                <div>
-                  <small style="color:var(--text-sub);">あなたの回答: </small>
+              <strong style="color:var(--accent-dark); font-size:1.0rem;">${shiftTitle}</strong>
+              <div style="margin-top:10px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <small style="color:var(--text-sub);">回答: </small>
                   <button class="status-btn ${currentStatus === '参加' ? 'active-yes' : 'btn-secondary'}" onclick="submitShiftAttendance('${shift.id}', '${date}', '参加')">参加</button>
                   <button class="status-btn ${currentStatus === '欠席' ? 'active-no' : 'btn-secondary'}" onclick="submitShiftAttendance('${shift.id}', '${date}', '欠席')">欠席</button>
                 </div>
@@ -1648,7 +1836,8 @@
     if (!container) return;
     container.innerHTML = '読み込み中...';
 
-    const d = new Date(date);
+    const parts = date.split('-');
+    const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
     const daysJP = ['日', '月', '火', '水', '木', '金', '土'];
     const dayJP = daysJP[d.getDay()];
     const dayFixedSchedule = FIXED_WEEKLY_SCHEDULE[dayJP] || [];
@@ -1676,7 +1865,7 @@
 
         let html = '';
         combinedShifts.forEach(shift => {
-          const shiftTitle = `${date} ${shift.purpose} (${shift.time})`;
+          const shiftTitle = `${formatMonthDayWithWeek(date)} ${shift.purpose} (${shift.time})`;
           let yesMembers = [];
           let noMembers = [];
 
@@ -1799,25 +1988,37 @@
           }
           if (!memberDisplay) memberDisplay = 'メンバー未登録';
 
-          html += `<div style="border-bottom:1px solid var(--border-color); padding:12px 0; display:flex; justify-content:space-between; align-items:center;">
-            <div>
-              <span class="band-name-link" onclick="openBandDetail('${b.name.replace(/'/g, "\\'")}')">${b.name}</span>
-              <div style="font-size:0.8rem; color:var(--text-sub); margin-top:3px;">${memberDisplay}</div>
-            </div>
-            <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
-              ${isLeader 
-                ? '<span style="font-size:0.8rem; background:#ede8df; color:var(--text-main); padding:4px 8px; border-radius:12px; font-weight:700;">リーダー</span>' 
-                : `<button class="btn-small btn-secondary" onclick="becomeLeader('${b.id || ''}', '${b.name.replace(/'/g, "\\'")}')">リーダーになる</button>`}
+          // 1行目: 加入・サポート（同じ濃い色）、2行目: リーダーになる（別色・サブカラー）
+          const escapedName = b.name.replace(/'/g, "\\'");
+          const joinBtnHtml = isMember
+            ? '<span style="font-size:0.8rem; color:#2e7d32; font-weight:700; padding:4px 6px; white-space:nowrap;">加入中</span>'
+            : `<button class="btn-small" onclick="joinBandByName('${b.id || ''}', '${escapedName}', 'regular')">加入</button>`;
 
-              ${isMember 
-                ? '<span style="font-size:0.85rem; color:#2e7d32; font-weight:500; align-self:center;">加入中</span>' 
-                : `<button class="btn-small" onclick="joinBandByName('${b.id || ''}', '${b.name.replace(/'/g, "\\'")}', 'regular')">加入</button>`}
-              
-              ${isSupport 
-                ? '<span style="font-size:0.85rem; color:#1976d2; font-weight:500; align-self:center;">サポート中</span>' 
-                : (isMember ? '' : `<button class="btn-small btn-secondary" onclick="joinBandByName('${b.id || ''}', '${b.name.replace(/'/g, "\\'")}', 'support')">サポート加入</button>`)}
+          const supportBtnHtml = isSupport
+            ? '<span style="font-size:0.8rem; color:#1976d2; font-weight:700; padding:4px 6px; white-space:nowrap;">サポート中</span>'
+            : (isMember ? '' : `<button class="btn-small" onclick="joinBandByName('${b.id || ''}', '${escapedName}', 'support')">サポート</button>`);
+
+          const leaderBtnHtml = isLeader
+            ? '<span style="font-size:0.78rem; background:#ede8df; color:#d84315; padding:4px 10px; border-radius:12px; font-weight:700; white-space:nowrap;">リーダー</span>'
+            : `<button class="btn-small btn-secondary" onclick="becomeLeader('${b.id || ''}', '${escapedName}')">リーダーになる</button>`;
+
+          html += `
+            <div class="band-row">
+              <div class="band-info-col">
+                <span class="band-name-link" onclick="openBandDetail('${escapedName}')">${b.name}</span>
+                <div class="band-member-sub">${memberDisplay}</div>
+              </div>
+              <div class="band-actions-col">
+                <div class="band-actions-row1">
+                  ${joinBtnHtml}
+                  ${supportBtnHtml}
+                </div>
+                <div class="band-actions-row2">
+                  ${leaderBtnHtml}
+                </div>
+              </div>
             </div>
-          </div>`;
+          `;
         });
 
         container.innerHTML = html || 'バンドの読み込みに失敗しました。';
@@ -2058,7 +2259,7 @@
     if (!currentUser) return alert('先にログインしてください');
     const leaderDisplayName = `${currentUser.name}`;
 
-    if (!confirm(`バンド「${bandName}」のリーダーに登録・設定しますか？`)) return;
+    if (!confirm(`「${bandName}」のリーダーになりますか？`)) return;
 
     if (!currentUser.bands) currentUser.bands = [];
     if (!currentUser.bands.includes(bandName)) currentUser.bands.push(bandName);
@@ -2095,6 +2296,11 @@
 
   function joinBandByName(bandId, bandName, type) {
     if (!currentUser) return alert('先にログインしてください');
+
+    const confirmMsg = type === 'regular'
+      ? `「${bandName}」に加入しますか？`
+      : `「${bandName}」にサポートとして加入しますか？`;
+    if (!confirm(confirmMsg)) return;
     
     if (bandId) {
       const updateField = type === 'regular' ? 'members' : 'supportMembers';
@@ -2174,14 +2380,14 @@
       snapshot.forEach(doc => users.push(doc.data()));
       users.sort((a, b) => (a[sortBy] > b[sortBy]) ? 1 : -1);
 
-      let html = '<table style="width:100%; text-align:left; border-collapse:collapse;"><tr><th>学年/学科</th><th>名前 (LINE)</th><th>パート</th><th>役職</th></tr>';
+      let html = '<table style="width:100%; text-align:left; border-collapse:collapse; font-size:0.88rem;"><tr><th>学年/学科</th><th>名前 (LINE)</th><th>パート</th><th>役職</th></tr>';
       users.forEach(u => {
         const uTag = formatUserTag(u.grade, u.dept);
         html += `<tr style="border-bottom:1px solid var(--border-color);">
-          <td style="padding:10px 0;"><strong>${uTag}</strong></td>
-          <td>${u.name} (${u.lineName})</td>
-          <td>${u.parts ? u.parts.join(',') : ''}</td>
-          <td>${u.role}</td>
+          <td style="padding:10px 4px 10px 0; white-space:nowrap;"><strong>${uTag}</strong></td>
+          <td style="padding:10px 4px;">${u.name}<br><small style="color:var(--text-sub);">(${u.lineName})</small></td>
+          <td style="padding:10px 4px;">${u.parts ? u.parts.join(',') : ''}</td>
+          <td style="padding:10px 0; white-space:nowrap;">${u.role}</td>
         </tr>`;
       });
       html += '</table>';
@@ -2317,9 +2523,9 @@
       if (slots.length > 0) {
         html += `<strong style="display:block; margin-top:8px; color:var(--accent-dark);">${day}曜日:</strong>`;
         slots.forEach((s, idx) => {
-          html += `<div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; padding:6px 10px; border-radius:6px; margin-top:4px; border:1px solid var(--border-color);">
+          html += `<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; background:#ffffff; padding:6px 10px; border-radius:6px; margin-top:4px; border:1px solid var(--border-color);">
             <span>${s.start}〜${s.end} : <strong>${s.band}</strong></span>
-            <button class="btn-small btn-danger" style="margin:0;" onclick="deleteFixedShift('${day}', ${idx})">削除</button>
+            <button class="btn-small btn-danger" style="margin:0; flex-shrink:0;" onclick="deleteFixedShift('${day}', ${idx})">削除</button>
           </div>`;
         });
       }
@@ -2335,10 +2541,10 @@
       snapshot.forEach(doc => {
         const u = doc.data();
         const uTag = formatUserTag(u.grade, u.dept);
-        html += `<li style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:5px;">
+        html += `<li style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; gap:8px; border-bottom:1px solid var(--border-color); padding-bottom:5px; font-size:0.88rem;">
           <span>${uTag}${u.name}: ${u.feePaid ? '納入済み' : '未納'}</span>
-          <div>
-            <button class="btn-small btn-secondary" style="margin:0 4px;" onclick="toggleFee('${doc.id}', ${!u.feePaid})">切替</button>
+          <div style="display:flex; gap:4px; flex-shrink:0;">
+            <button class="btn-small btn-secondary" style="margin:0;" onclick="toggleFee('${doc.id}', ${!u.feePaid})">切替</button>
             <button class="btn-small btn-danger" style="margin:0;" onclick="deleteMember('${doc.id}', '${u.name}')">削除</button>
           </div>
         </li>`;
